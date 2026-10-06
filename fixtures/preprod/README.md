@@ -30,6 +30,19 @@ One JSON array per run, one entry per (step, transaction), updated in place from
 
 An HTTP error or a timeout is a hole, never a refusal: it is recorded as one (`error: "hole: …"`) and counted, never presented as an answer.
 
+## 0. Run it yourself: `pnpm demo:preprod`
+
+```
+pnpm demo:preprod --keygen    # once: two fresh preprod root keys into .env; only the addresses are printed
+                              # then fund the buyer address with ≥ 80 tADA from the preprod faucet
+                              # (https://docs.cardano.org/cardano-testnets/tools/faucet) and set BLOCKFROST_PREPROD_PROJECT_ID
+pnpm demo:preprod             # [--ada 10] [--share 0.4]
+```
+
+Each step is confirmed on chain before the next: the separate UTxOs D13 needs (paid by the buyer, so the seller needs no funding) → lock one escrow → the buyer's dispute → the engine's grid → try anyway (the buyer's `WithdrawRefund`, predicted refused) → the seller-first settlement, the replay, the read-back. Exit code 0 only if every step did what the engine predicted.
+
+First run, 6 Oct, our keys (`txlog-824bbdd3…_0.json`): wallet tx in block 5260093, lock 5260096, dispute 5260099, try anyway refused in phase 2, both legs in block 5260101, replay refused in phase 1, read back on Koios: buyer 6, seller 4 tADA, the agreed split. 241 s from the first send to leg 2's block, exit code 0.
+
 ## 1. Settlements (path B, seller first)
 
 The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, result hash emptied); leg 2 (`WithdrawRefund`, buyer's required signature) was signed by the buyer **against leg 1's output before leg 1 existed**, and pays the agreed split with no fee output and no collateral output. Both legs landed in the same block every time. Leg 2 replayed byte for byte is refused by the ledger (phase 1, inputs spent), not by the validator.
@@ -41,8 +54,9 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-b475bad5…_0.json` | settle, ADA-only pot | 5259631 | 14 / 6 tADA |
 | `txlog-9054b1d8…_6.json` | stream B's UI rehearsal through the agent (B's machine) | 5259766 | 5 tADA + 2.5 tUSDM / 15 tADA + 7.5 tUSDM |
 | `txlog-9e7c0991…_0.json` | Integration 1 dry run through stream B's agent API (A's machine) | 5259954 | 12 tADA + 1.2 tUSDM / 8 tADA + 0.8 tUSDM |
+| `txlog-824bbdd3…_0.json` | `pnpm demo:preprod`, from nothing in one command | 5260101 | 6 / 4 tADA |
 
-On our three logged settles (`7a37751b`, `b475bad5`, `9e7c0991`) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
+On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and `824bbdd3`, where the demo checks it itself) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
 Rerun (needs `PREPROD_BUYER_SKEY`, `PREPROD_SELLER_SKEY` and a Disputed escrow of yours): `pnpm sign --prepare <ref> --share 0.4`, then `pnpm sign --role buyer <file>`, then `pnpm sign --role seller <file>`. Readback of a settled log: `node src/preprod/readback.ts <ref>`.
 
@@ -105,7 +119,6 @@ Rerun: `node src/preprod/race.ts <Disputed ref of yours> --share 0.4 --run k`.
 ## Not here yet
 
 - **Path A settlement** (buyer first): priced by the solver, shown in the UI's solver panel, not built in `src/preprod`, never run (PLAN M-5).
-- **`pnpm demo:preprod`**: the key-bearing command D11 plans for a judge's own funded preprod wallet; `package.json` names `src/preprod/demo.ts`, which does not exist.
 
 ## Every transaction, per file
 
@@ -124,6 +137,18 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | AuthorizeRefund (leg 1) | seller | accept | accepted | 5259570 | `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8` |
 | WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5259570 | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` |
 | replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` |
+
+### `txlog-824bbdd3fbeec6fa5a2ed1edf995d3edfdc2d523a447a944415982b5d2be0eca_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| demo wallets: 2 × 10 tADA to the buyer, 2 × 10 tADA to the seller | - | - | accepted | 5260093 | `d776ff566405c29ae0acaca758815bcd2e6d551a36680c576edf902277c41a48` |
+| lock 1 fixture escrow(s) | - | - | accepted | 5260096 | `66c8a028366bad8e638e1d5059fa1d72f10e55ddc9ec8fcfb87ac8035578d7a5` |
+| SetRefundRequested (buyer raises) | buyer | accept | accepted | 5260099 | `824bbdd3fbeec6fa5a2ed1edf995d3edfdc2d523a447a944415982b5d2be0eca` |
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `e282ef2462c9a601905cf9bca49da16c996e23502acbaee73e1a77608fe096ce` |
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260101 | `022b23f436a9a1d82e4bc5025e8b9e6fd904a0c1aa30bf41985539c3e41a1cd9` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260101 | `d1331e54b38bb18a00f8c64f095dc77e4aca5742ce9bfdcecafa4d078ec3a92c` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `d1331e54b38bb18a00f8c64f095dc77e4aca5742ce9bfdcecafa4d078ec3a92c` |
 
 ### `txlog-8e0d6df4c39144d674aab1f7a0503a26a497da964316d2831fcf58c22ec2bf57_0.json`
 
