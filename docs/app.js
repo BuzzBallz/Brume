@@ -21,6 +21,7 @@ const LIVE = {
   census: () => '/api/census',
   bank: () => '/api/bank',
   datum: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`,
+  value: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`, // the same answer carries the escrow's value
   grid: ref => `/api/grid?ref=${enc(ref)}`,
   solver: ref => `/api/solver?ref=${enc(ref)}`,
   proposal: ref => `/api/proposal/${enc(ref)}`,
@@ -232,13 +233,13 @@ function cell(v, i, row) {
   return h('td', {}, h('button', {
     class: v.allowed ? 'cell can' : 'cell', type: 'button', style: `--i:${i}`, 'aria-haspopup': 'dialog',
     onclick: e => openPop(e.currentTarget, v, row),
-  }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), h('span', { class: 'cell-text' }, v.allowed ? 'can' : (v.failed[0] ?? 'not permitted'))))
+  }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), h('span', { class: 'cell-text' }, v.allowed ? 'can' : (v.failed[0] ?? 'not permitted by the source'))))
 }
 
 function renderGrid(grid, row) {
   const byKey = new Map((grid?.verdicts ?? []).map(v => [`${v.redeemer}/${v.role}`, v]))
   return h('table', { class: 'grid' },
-    h('caption', {}, 'What each party can do now', grid && h('small', {}, `Verdicts at ${utc(grid.atMs)}`)),
+    h('caption', {}, 'What the validator\'s source says each party can do now', grid && h('small', {}, `Verdicts at ${utc(grid.atMs)}`)),
     h('thead', {}, h('tr', {}, h('td'), ROLES.map(r => h('th', { scope: 'col' }, cap(r))))),
     h('tbody', {}, REDEEMERS.map((name, i) => h('tr', {},
       h('th', { scope: 'row' }, h('span', { class: 'idx mono' }, i), name.split(/(?=[A-Z])/).flatMap((part, k) => k ? [h('wbr'), part] : [part])), // narrow screens break at the camel-case humps
@@ -651,7 +652,9 @@ function renderPaths(solver, value) {
 async function solverView(row) {
   const solver = await load('solver', row.ref)
   if (solver.ref !== row.ref) return blank('No solver output for this escrow', 'The solver has not priced this reference in this data set.', false)
-  return [renderBands(solver), renderPaths(solver, row.value)]
+  // Bank rows carry no value (only census rows do); without it the path costs would print as quantities, not shares.
+  const value = row.value ?? (live ? await load('value', row.ref, row.network) : null)
+  return [renderBands(solver), renderPaths(solver, value)]
 }
 
 /* Shell */

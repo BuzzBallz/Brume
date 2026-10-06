@@ -10,7 +10,7 @@ Sources of truth: `PLAN.md` v3 §2–§4 (wins), the specs outside the repo. Cop
 
 **Who uses it.** The two parties of a stuck escrow, reached through the Coworker's job result (verdict + proposed split + a link into this UI). On the project link: judges and builders of agent-commerce deployments.
 
-**The one thing it must do.** Take a disputed escrow from "stuck" to "settled": show what each party can do now, propose the split the solver says both sides can accept, collect both signatures in the safe order, send both legs, show where the value landed.
+**The one thing it must do.** Take a disputed escrow from "stuck" to "settled": show what the validator's source says each party can do now, propose the split the solver says both sides can accept, collect both signatures in the safe order, send both legs, show where the value landed.
 
 **On camera (PLAN §2).** 0:00–0:20 is Sokosumi (theirs). Everything from 0:20 to 2:35 is this UI.
 
@@ -18,7 +18,7 @@ Sources of truth: `PLAN.md` v3 §2–§4 (wins), the specs outside the repo. Cop
 |---|---|---|
 | 0:20–0:40 | Escrow (mainnet, read-only) → Reachability | a real disputed escrow, 7 redeemers × buyer / seller / admin, permitted cells lit |
 | 0:40–1:40 | Escrow (preprod bank) → Settle | seller proposes the solver's split → buyer accepts and pre-signs the exit (leg 2) → seller concedes (leg 1) → both legs sent → balances land. Hashes visible, small |
-| 1:40–2:10 | Escrow (preprod bank) → Reachability | "Try anyway" on a cell the engine marks not permitted → submitted → validator refuses, prediction matched |
+| 1:40–2:10 | Escrow (preprod bank) → Reachability | "Try anyway" on a cell the engine marks not permitted → submitted → refused, with the stage named ("the validator refused it" only for a phase-2 failure), prediction matched |
 | 2:10–2:35 | Escrow → Solver | executable band, what each side gives up by waiting, fee and exposed party per path, per unit of value |
 
 ## 2. References and what each one gives
@@ -133,7 +133,7 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 |---|---|
 | permitted | tan fill + filled glyph + "can"; until the guard ran on preprod the popover says "the validator's source says" |
 | not permitted | panel fill + hollow glyph + the deciding guard in one line |
-| try anyway: sending → refused as predicted | "Engine predicted refused. Node refused: <guard>." with `--ok` check, raw error one click away |
+| try anyway: sending → refused as predicted | "Engine predicted refused, and <reason worded by stage and refusal phase>." with `--ok` check, raw error one click away |
 | try anyway: accepted (mismatch) | shown in `--bad`, never hidden |
 
 **Settle flow (file-drop signing, the guaranteed path)**
@@ -157,7 +157,7 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 
 `shared/types.ts` lands at M0; these are PLAN v3 §4 shapes, re-checked field by field at M0. In live mode the UI calls the agent's API (`src/agent`, built in the back-end session; the routes below are this side's request to it). In read-only mode the same shapes come from `docs/data/*.json`. Routes take the ref as a query parameter (`?ref=`, URL-encoded) because refs contain `#`. Errors come back as `{"error": "<one readable sentence>"}` and the UI shows the sentence as is. Snapshot mode reads `docs/data/<kind>.json`; mock mode reads `shared/mock/*.mock.json` and needs the repo root served (local only). Every response may be the bare object or wrapped under its kind (`{"grid": …}`), as the mocks are.
 
-**Datum, 16 fields** (SPEC-TRANSACTIONS §0, in order): `buyer`, `seller` (nested addresses), `reference_key`, `reference_signature`, `seller_nonce`, `buyer_nonce`, `collateral_return_lovelace`, `input_hash`, `result_hash`, `pay_by_time`, `submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, `seller_cooldown_time`, `buyer_cooldown_time`, `state`. Times are milliseconds. The header shows `state`, whether `result_hash` is empty, and the four clocks that gate the grid (`submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, both cooldowns) as relative time ("opened 318 days ago") with the UTC timestamp on hover; the rest sits in the datum disclosure.
+**Datum, 16 fields** (SPEC-TRANSACTIONS §0, in order): `buyer`, `seller` (nested addresses), `reference_key`, `reference_signature`, `seller_nonce`, `buyer_nonce`, `collateral_return_lovelace`, `input_hash`, `result_hash`, `pay_by_time`, `submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, `seller_cooldown_time`, `buyer_cooldown_time`, `state`. Times are milliseconds. The header shows `state`, whether `result_hash` is empty, and the four clocks that gate the grid (`submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, both cooldowns) as relative time ("opened N days ago", computed from the pinned time) with the UTC timestamp on hover; the rest sits in the datum disclosure.
 
 | View | Consumes | Live route (proposal, B) |
 |---|---|---|
