@@ -197,11 +197,12 @@ function tryAnyway(row, v, anchor) {
     btn.textContent = 'Submitting to preprod…'
     try {
       const e = await post('try', { escrowRef: row.ref, redeemer: v.redeemer, role: v.role })
+      if (hole(e)) throw new Error('Not sent (a hole): the request failed before any ledger check, so there is nothing to compare. Try again.')
       btn.remove()
       // expected = the engine's prediction recorded before submitting; stage = where the outcome was decided.
       const predicted = e.expected === 'accept' ? 'accepted' : 'refused'
       const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`, rawError(e)]
-      const matched = (e.status === 'accepted') === (e.expected === 'accept')
+      const matched = e.status === 'accepted' ? e.expected === 'accept' : expectedRefusal(e)
       out.replaceChildren(matched
         ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result, ownTag(e))
         : h('p', { class: 'error observed' }, `Engine predicted ${predicted}, but `, result, ownTag(e)))
@@ -357,12 +358,18 @@ function walletSign(wallet, role, ctx) {
   return [btn, msg]
 }
 
+// The buyer's wallet signature is offered only once the agent's checkForBuyer read leg 2 as proposed ('ok'); otherwise its
+// sentence. The agent may run on the seller's side, so this is never the buyer's protection: that is pnpm sign on their own
+// machine, or the wallet's own screen.
 function waitingFor(role, ctx) {
   const cmd = signCommand(role, ctx.row.ref)
+  const check = role === 'buyer' ? ctx.wait.buyerCheck : 'ok'
   return h('div', { class: 'cmd' },
     h('code', { class: 'mono' }, cmd), copyButton(cmd),
     h('span', { class: 'hint' }, 'Waiting for the signed file', live && elapsed(ctx.wait)),
-    live && wallets().map(w => walletSign(w, role, ctx)))
+    live && check === 'ok' && wallets().map(w => walletSign(w, role, ctx)),
+    live && role === 'buyer' && check === 'ok' && wallets().length > 0 && h('p', { class: 'hint' }, 'The agent read leg 2 against the chain as proposed. Check the amounts on your wallet\'s screen before you sign.'),
+    live && check && check !== 'ok' && h('p', { class: 'error' }, check))
 }
 
 // Prefilled with the top of the solver's band at the 30-day horizon: the most the seller can ask that the buyer still accepts.
@@ -405,6 +412,7 @@ const pending = e => e?.status === 'accepted' && !e.block
 // A sentence, never the node's raw text: that sits behind rawError().
 function refusal(e) {
   if (e.stage === 'evaluate') return 'refused when evaluated, before submission'
+  if (!e.refusal) return 'not sent (a hole)' // a network failure before any ledger check: no observation
   if (e.refusal?.phase === 2) return 'the validator refused it'
   if (e.refusal?.phase === 1 && /All inputs are spent|BadInputsUTxO/.test(`${e.error ?? ''} ${e.refusal.ledgerError ?? ''}`)) return 'the ledger refused it: its input was already spent'
   return 'the ledger refused it'
@@ -412,7 +420,8 @@ function refusal(e) {
 const rawError = e => (e.error || e.refusal) && h('details', { class: 'raw' }, h('summary', {}, 'raw error'),
   h('pre', { class: 'mono' }, JSON.stringify({ error: e.error, refusal: e.refusal, stage: e.stage }, null, 2)))
 // A refusal the run predicted (a control such as the leg-2 replay) is the expected result, not a failure.
-const expectedRefusal = e => e?.status === 'refused' && e.expected === 'refuse'
+const expectedRefusal = e => e?.status === 'refused' && !!e.refusal && e.expected === 'refuse'
+const hole = e => e?.status === 'refused' && !e.refusal
 
 function settleSteps(row, proposal, log, rerun, band, wait) {
   const ctx = { row, proposal, rerun, wait }
@@ -443,10 +452,10 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
         : [waitingFor(exiter, ctx), validity] },
     { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
       body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
-    { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused,
+    { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused, errorLabel: hole(refused) ? 'Not sent' : undefined,
       waiting: leg1 || leg2 ? 'Waiting for confirmation' : submitted ? 'Submitted' : 'Ready to send',
       body: refused
-        ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`), rawError(refused)]
+        ? [h('p', {}, hole(refused) ? 'Not sent (a hole): nothing reached the ledger, the escrow is not spent.' : `${cap(refusal(refused))}. Start over on the next bank escrow.`), rawError(refused)]
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: `, h('span', { 'data-cue': e.block && `block ${e.step}` }, outcome(e)), ', ',
               h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash)), ownTag(e)))]
@@ -561,7 +570,7 @@ function renderLog(log) {
   if (!log.length) return null
   return h('section', { class: 'log' },
     h('h2', {}, 'Transactions'),
-    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : expectedRefusal(e) ? 'accepted expected' : e.status },
+    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : expectedRefusal(e) ? 'accepted expected' : hole(e) ? 'hole' : e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step, ownTag(e)),
       h('span', { class: 'status' },
@@ -592,7 +601,7 @@ async function settleView(row) {
     const proposal = answer?.proposal ?? null
     // A 'done' submit answer counts until the txlog file carries the same entries; earlier runs in the file stay listed.
     const log = [...fetched, ...(wait.doneLog ?? []).filter(d => !fetched.some(e => e.txHash === d.txHash && e.step === d.step))]
-    Object.assign(wait, { sending: !!answer?.sending, sendError: answer?.error ?? null }) // survives a reload, unlike submittedAt
+    Object.assign(wait, { sending: !!answer?.sending, sendError: answer?.error ?? null, buyerCheck: answer?.buyerCheck ?? null }) // survives a reload, unlike submittedAt
     const mine = proposal?.escrowRef === row.ref ? proposal : null
     const steps = settleSteps(row, mine, log, rerun, band, wait)
     const waiting = steps.find(s => !s.done)?.label ?? null
