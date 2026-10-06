@@ -176,7 +176,8 @@ async function postCbor(url: string, cborHex: string, headers: Record<string, st
     if (res.status === 400) {
       if (mayHaveReached) throw new AmbiguousSubmit(`HTTP 400 after an earlier attempt may have reached the node: ${text.slice(0, 600)}`)
       if (!LEDGER_RULE.test(text)) throw new SubmitTransportError(`the provider rejected the request, not a ledger rule: ${text.slice(0, 300)}`)
-      throw new LedgerRejection(text.slice(0, 1500))
+      // The node quotes the whole script in base64 inside a phase-2 failure: cut it out, so the CEK reason survives truncation.
+      throw new LedgerRejection(text.replace(/[A-Za-z0-9+/]{200,}={0,2}/g, '<script bytes>').slice(0, 1500))
     }
     if (res.status >= 500) mayHaveReached = true
     // Resubmitting the same bytes is safe for the chain (same hash), so transient failures are retried.

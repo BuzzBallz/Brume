@@ -2,11 +2,14 @@
 // Allowed only on a cell the engine predicts refused, on an escrow whose party key we hold. No evaluation: the node runs
 // the script itself, so a refusal at submission is the validator's (phase 2) and costs nothing (rejected from the mempool).
 import { randomBytes } from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Redeemer, Role, TxLogEntry, Value } from '../../shared/types.ts'
 import { PARAMS, SCRIPT_HASH } from '../../shared/constants.ts'
-import { liveUtxos, preprodSubmitter } from './chain.ts'
+import { AmbiguousSubmit, liveUtxos, preprodSubmitter, SubmitTransportError } from './chain.ts'
 import { patchDatum, readDatum, type DatumPatch } from './datum.ts'
 import { buildEscrowSpend } from './escrow.ts'
+import { ROOT } from './env.ts'
 import { escrowAt, lovelace, pureAda, refOf } from './fixture.ts'
 import { upsertTxLog, SettleError } from './settle.ts'
 import { addWitness, confirmTx, cooldownFrom, submitOnly, txWindow, type TxWindow } from './tx.ts'
@@ -33,8 +36,19 @@ function continuationFor(r: Redeemer, raw: string, w: TxWindow): DatumPatch | nu
   }
 }
 
+// Only escrows we locked (fixtures/preprod/bank.json): a control never touches anyone else's escrow.
+function inBank(ref: string): boolean {
+  const file = join(ROOT, 'fixtures', 'preprod', 'bank.json')
+  if (!existsSync(file)) return false
+  const bank = JSON.parse(readFileSync(file, 'utf8')) as { ref: string; disputedFrom?: string }[]
+  return bank.some((e) => e.ref === ref || e.disputedFrom === ref)
+}
+
 export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Role): Promise<TxLogEntry> {
   if (role === 'admin') throw new SettleError('The admin keys of the shared escrow are not ours: the admin control runs on our own deployment.')
+  // Withdraw has two mandatory datum-tagged outputs; without them the script refuses for that reason, not the predicted one.
+  if (redeemer === 'Withdraw') throw new SettleError('Try anyway is not offered for Withdraw: its mandatory outputs, not the predicted guard, would decide.')
+  if (!inBank(escrowRef)) throw new SettleError('Try anyway runs only on our own bank escrows (fixtures/preprod/bank.json).')
   const escrow = await escrowAt(escrowRef)
   const raw = escrow.output.plutusData as string
   const d = readDatum(raw)
@@ -61,12 +75,21 @@ export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Rol
   const signed = await addWitness(built, p)
   const s = preprodSubmitter()
   const base = {
-    step: `try anyway: ${redeemer} by the ${role} (engine: ${cell.failed[0]})`, network: 'preprod' as const, scriptHash: SCRIPT_HASH,
+    step: `try anyway: ${redeemer} by the ${role} (engine: ${cell.failed.join('; ')})`, network: 'preprod' as const, scriptHash: SCRIPT_HASH,
     txHash: built.txHash, atMs: Date.now(), via: s.via, redeemer, role, expected: 'refuse' as const,
   }
-  const refused = await submitOnly(signed, s, base)
+  let refused: TxLogEntry | null
+  try {
+    refused = await submitOnly(signed, s, base)
+  } catch (error: unknown) {
+    // A hole is logged as one, never as the control's outcome; an ambiguous submit may still land (the engine wrong).
+    if (error instanceof SubmitTransportError) return upsertTxLog(escrowRef, { ...base, status: 'refused', stage: 'submit', error: `not sent: ${error.message.slice(0, 200)}` })
+    if (!(error instanceof AmbiguousSubmit)) throw error
+    upsertTxLog(escrowRef, { ...base, status: 'accepted', stage: 'submit', error: 'possibly live, not seen yet: confirming' })
+    refused = null
+  }
   // Accepted would mean the engine was wrong: logged as such (the UI shows it red), never hidden.
-  const entry = refused ?? { ...(await confirmTx(base)), error: 'ACCEPTED although the engine predicted a refusal' }
-  upsertTxLog(escrowRef, entry)
-  return entry
+  if (refused) return upsertTxLog(escrowRef, refused)
+  const c = await confirmTx(base)
+  return upsertTxLog(escrowRef, c.block ? { ...c, error: 'ACCEPTED although the engine predicted a refusal' } : c)
 }

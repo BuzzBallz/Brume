@@ -65,6 +65,7 @@ function guards(r: Redeemer, c: Ctx): string[] {
       if (!hasResult) failed.push('needs a result hash')
       if (!startedAfter(c, d.externalDisputeUnlockTime)) failed.push(`not before external_dispute_unlock_time ${iso(d.externalDisputeUnlockTime)}`)
       if (c.params.requiredAdmins <= 0 || c.params.adminKeyHashes.length === 0) failed.push('no admin set')
+      else if (c.params.requiredAdmins > c.params.adminKeyHashes.length) failed.push(`threshold ${c.params.requiredAdmins} exceeds the ${c.params.adminKeyHashes.length} listed keys`)
       break
     case 'SubmitResult': {
       if (!startedAfter(c, d.sellerCooldownTime)) failed.push(`seller cooldown until ${iso(d.sellerCooldownTime)}`)
