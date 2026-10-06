@@ -52,7 +52,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [x] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession (A) — pair done 6 Oct, blocks 5259662 (accepted) / 5259664 → refused (phase 2). The other unavailable branches are the C11 controls on the shared script (§10: SetRefundRequested clean; the two seller branches re-run with the guard isolated)
 - [ ] S-3 CIP-30 browser signing (upgrade of the file-drop path; only if core done)
 - [ ] S-4 solver hazard term (option to wait, one-sided arrival bound)
-- [ ] S-5 `verify <txhash>` judge script (B); [x] solver over all 61 as fixture (A, `fixtures/solver-61-14032495.json`, §10)
+- [x] S-5 `verify <txhash>` judge script (B, `pnpm verify`, run on real V1 transactions); [x] solver over all 61 as fixture (A, `fixtures/solver-61-14032495.json`, §10)
 - [ ] S-6 CIP-8 signed proposal/accept (part 6)
 - [ ] S-7 x402 payment via the **hosted** facilitator (optional, never a gate)
 
