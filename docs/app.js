@@ -36,8 +36,9 @@ async function load(kind, ref, net) {
   const res = await fetch(url)
   if (res.status === 404 && kind in NOTHING_YET) return NOTHING_YET[kind]
   if (!res.ok) throw new Error(`${url} answered HTTP ${res.status}`)
-  if (res.headers.get('x-brume-source') === 'mock') { mocked.add(kind); renderSource() }
   const json = await res.json()
+  // Mock data is flagged by the agent's header (live) or by the shared mocks' "_note": "MOCK…" (snapshot files).
+  if (res.headers.get('x-brume-source') === 'mock' || /^MOCK/.test(json._note ?? '')) { mocked.add(kind); renderSource() }
   return json[kind] ?? json
 }
 
@@ -107,8 +108,9 @@ function copyButton(text, label = 'Copy') {
 const mocked = new Set() // kinds the live agent still serves from shared/mock (x-brume-source: mock)
 
 function renderSource() {
-  const partly = live && mocked.size > 0
-  $('source').textContent = partly ? 'Live, partly mock' : { live: 'Live', snapshot: 'Snapshot, read-only', mock: 'Mock data' }[source] ?? source
+  const partly = source !== 'mock' && mocked.size > 0
+  const label = { live: 'Live', snapshot: 'Snapshot, read-only', mock: 'Mock data' }[source] ?? source
+  $('source').textContent = partly ? `${label}, partly mock` : label
   if (source === 'mock' || partly) {
     $('band').hidden = false
     $('band').textContent = partly
