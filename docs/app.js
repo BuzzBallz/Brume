@@ -506,6 +506,9 @@ const unitLabel = unit => DECIMALS[unit] === undefined ? `${assetName(unit)} (ba
 
 // Carbon data-table pattern. What leg 2 wrote for each party (Proposal.payout) against what the second indexer reads back
 // (readback.balances, what each party received from leg 2): the split landed as signed, or it did not. readBack null = not read yet.
+// Trailing zeros dropped (15.000000 → 15) so the table fits a phone; a unit without decimals is left whole.
+const trim = s => s.includes('.') ? s.replace(/0+$/, '').replace(/\.$/, '') : s
+
 function renderBalances(written, readBack) {
   const rows = ['buyer', 'seller'].flatMap(party =>
     [...new Set([...Object.keys(written[party] ?? {}), ...Object.keys(readBack?.[party] ?? {})])].map(unit => {
@@ -515,8 +518,8 @@ function renderBalances(written, readBack) {
       return h('tr', {},
         h('td', {}, cap(party)),
         h('td', {}, unitLabel(unit)),
-        h('td', { class: 'num mono', 'data-cue': cue('written') }, qty(unit, w)),
-        readBack ? h('td', { class: 'num mono', 'data-cue': cue('read') }, qty(unit, r)) : h('td', { class: 'num hint' }, 'not read back yet'),
+        h('td', { class: 'num mono', 'data-cue': cue('written') }, trim(qty(unit, w))),
+        readBack ? h('td', { class: 'num mono', 'data-cue': cue('read') }, trim(qty(unit, r))) : h('td', { class: 'num hint' }, 'not read back yet'),
         readBack ? h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs') : h('td'))
     }))
   return h('div', { class: 'balances-wrap', 'data-cue': 'balances' }, h('table', { class: 'balances' },
