@@ -1,0 +1,73 @@
+{
+ "_note": "Test purchase of the Brume agent on preprod, exported from our local Masumi payment service database (tables PurchaseRequest, PaymentRequest, Transaction), 6 Oct 2026. Only public fields: no keys, no wallet secrets.",
+ "network": "Preprod",
+ "agentIdentifier": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000000",
+ "blockchainIdentifier": "0306608c604c0ac0ec2c019ad266a20a6c4ad1043610b0368345a00392018cc00584008d1c5ac52116fa302c1036a2161e46004c02700364e8d270c6c1ab89a74f2d496180571d0f1825934896022f1d30782a2347d19a487580a264d4703bc12476a18e8351e64218c2d4d45a20e2d4908a748c04619090e28e2292a2189286e9048ad414ea8485c00074c9b060e47492e2606956e00aaac5147494d5780850b0c0ad544e907ab0b430aa9935186014d0a27c14143c11a220888ea2a27ad474e2a290d6cce0209288ee997378b0be8898721a9255742886f0f0941184eba8b0928c201492180b4634138fc6a289181419980022871044e80365ac5580f2fa1d148c5a2621ebf7101110143e2210c60bc531104b7e9cd5ac446039241443aecf208aaa89da0c218996aa70d3c019863b8ad28d149279481d681b418c0c823030c93c093aa025a95dc484bbbe41172e406942863f1e244089f805a894472c0ec2a60305816602458c5900c242862230848119273828acd062068e8820b5ccf2fc12048c0e208791603a95ac0f1d660207360151368703f2f9e12062ba04d21d028ae1815b441c540200434de56eb73418a666026934201c3453ca8117f506c36828daac449b4d66f30eb6c91c03586cb63b3d8fcf8471383228e74ba605b6b0013801f4002e180033a1ec00077001789e8b920bd29a0000b003585e3057800da84005617f1000b6a20006e0023b00bb84127800e60007a48578be202a8c04000e87b411d22018400764205e7434140000",
+ "inputHash": "a30e62612860f13e4ff5b97186b8a4f36d9356930ce12afd7f5463d2092eeba4",
+ "resultHash": "d512bf5de14ea104e1767c239c00591a494848299dc474919938058f08aeac8f",
+ "payment": {
+  "onChainState": "ResultSubmitted",
+  "createdAt": "2026-10-06T05:15:24.661",
+  "payByTime": 1791265524171,
+  "submitResultTime": 1791267324171,
+  "unlockTime": 1791288924171,
+  "externalDisputeUnlockTime": 1791310524171,
+  "pricingType": "Fixed",
+  "collateralReturnLovelace": 2253970
+ },
+ "purchase": {
+  "onChainState": "ResultSubmitted",
+  "createdAt": "2026-10-06T05:15:25.183",
+  "resultHash": "d512bf5de14ea104e1767c239c00591a494848299dc474919938058f08aeac8f"
+ },
+ "transactions": [
+  {
+   "side": "purchase",
+   "txHash": "6b359cff0b44064b5e4fc3b5da8e79850b04a46be507b3e6cc596f1f8c770b0c",
+   "status": "Confirmed",
+   "previousOnChainState": null,
+   "newOnChainState": "FundsLocked",
+   "blockHeight": 5259425,
+   "blockTime": 1791263878,
+   "confirmations": 2,
+   "validContract": true,
+   "fees": 203605
+  },
+  {
+   "side": "payment",
+   "txHash": "6b359cff0b44064b5e4fc3b5da8e79850b04a46be507b3e6cc596f1f8c770b0c",
+   "status": "Confirmed",
+   "previousOnChainState": null,
+   "newOnChainState": "FundsLocked",
+   "blockHeight": 5259425,
+   "blockTime": 1791263878,
+   "confirmations": 2,
+   "validContract": true,
+   "fees": 203605
+  },
+  {
+   "side": "payment",
+   "txHash": "eaaf7c516ecf9f6cdb8ef9fdc674a54b2c109e7553a4d1a8da1cc33564fad1f6",
+   "status": "Confirmed",
+   "previousOnChainState": "FundsLocked",
+   "newOnChainState": "ResultSubmitted",
+   "blockHeight": 5259429,
+   "blockTime": 1791263944,
+   "confirmations": 2,
+   "validContract": true,
+   "fees": 706429
+  },
+  {
+   "side": "purchase",
+   "txHash": "eaaf7c516ecf9f6cdb8ef9fdc674a54b2c109e7553a4d1a8da1cc33564fad1f6",
+   "status": "Confirmed",
+   "previousOnChainState": "FundsLocked",
+   "newOnChainState": "ResultSubmitted",
+   "blockHeight": 5259429,
+   "blockTime": 1791263944,
+   "confirmations": 2,
+   "validContract": true,
+   "fees": 706429
+  }
+ ]
+}

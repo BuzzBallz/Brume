@@ -1,0 +1,43 @@
+{
+ "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+ "datum": {
+  "buyer": {
+   "payment": {
+    "type": "key",
+    "hash": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2"
+   },
+   "stake": {
+    "type": "key",
+    "hash": "3ecccc6a2fccae86a2fb80b11c33b2ffe30592f2f226b8037655f85d"
+   }
+  },
+  "seller": {
+   "payment": {
+    "type": "key",
+    "hash": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+   },
+   "stake": {
+    "type": "key",
+    "hash": "2fe99600943aebd7e1c897eff6613a727878190a42c4916599eb7e4e"
+   }
+  },
+  "referenceKey": "a4010103270621215820745d6a0ef84ae2ac851b6228734fc94222243083a4ce4c62afe28f0f9477e313",
+  "referenceSignature": "845869a30127045820745d6a0ef84ae2ac851b6228734fc94222243083a4ce4c62afe28f0f9477e3136761646472657373583901b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f32fe99600943aebd7e1c897eff6613a727878190a42c4916599eb7e4ea166686173686564f4582011eb270d572056ecdc2149f8cc6c73a91612651ec0ac72d9822a6dc446a67421584015e2806564a4ebc8ee6f668d4f6cc620a5e4857424caf5aac7f5c688ff0caba5a8614ad238f2c98b8dce1417210e6772bc142044849926e3c2d3804a02e12b0b",
+  "sellerNonce": "a752698a8ad043be474238081266531ec45be39ac077a2e05c1a995824a35751ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b92eab9d694cbd496a8feb167f059a85a9b0c8896914ffab868f169aec168271a1",
+  "buyerNonce": "865de3a3c27942ea8e31",
+  "collateralReturnLovelace": 4029850,
+  "inputHash": "c814495a94202a5df7c633d4fa89de97b3270aef7f161ded73a8b5d5aa69a400",
+  "resultHash": "f9ed49786cd5df1766216dd9be9dee757c1d2e04c5c23a41baa7d2c8cdf5b3b9",
+  "payByTime": 1759279021972,
+  "submitResultTime": 1759322221973,
+  "unlockTime": 1759343821973,
+  "externalDisputeUnlockTime": 1759365421973,
+  "sellerCooldownTime": 0,
+  "buyerCooldownTime": 1759237196700,
+  "state": "Disputed"
+ },
+ "value": {
+  "lovelace": "4029850",
+  "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+ }
+}
