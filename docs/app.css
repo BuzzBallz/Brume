@@ -275,6 +275,7 @@ body {
 .bands, .paths { max-width: 820px; }
 .bands h2, .paths h2 { margin: 0; font-size: 18px; }
 .bands > .hint { margin: 2px 0 16px; }
+.keys-note { margin: 0 0 16px; max-width: 72ch; }
 .band-grid { display: grid; grid-template-columns: max-content 1fr 9em; align-items: center; gap: 8px 20px; }
 .band-label { font-size: 14px; }
 .track { position: relative; height: 12px; border-radius: 4px; background: var(--panel-2); }

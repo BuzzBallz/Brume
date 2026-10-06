@@ -601,6 +601,9 @@ function renderLog(log) {
       e.status === 'refused' && rawError(e))))) // under the row, full width
 }
 
+// True of the demo as run: the agent loads both keys from .env, so the note says so rather than "Brume holds no key".
+const keysNote = () => h('p', { class: 'hint keys-note' }, 'Each party signs with its own key, in pnpm sign or its wallet\'s own screen. Here we play both parties, so both throwaway preprod keys sit on this machine. The settlement needs no third key.')
+
 async function settleView(row) {
   const panel = h('div', { class: 'settle' })
   const solver = row.spent ? null : await load('solver', row.ref) // a spent escrow has no solver; its share is in the proposal
@@ -629,7 +632,7 @@ async function settleView(row) {
     const steps = settleSteps(row, mine, log, rerun, band, wait)
     const waiting = steps.find(s => !s.done)?.label ?? null
     if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
-    panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
+    panel.replaceChildren(...[keysNote(), renderSteps(steps), renderLog(log)].filter(Boolean))
     if (!seeded || (panel.isConnected && seq === renderSeq)) panel.querySelectorAll('.step').forEach((li, i) => { // a left panel never writes, even while still on screen
       cueStep(li, `${row.ref}:${i}`, i, !seeded)
       li.querySelectorAll('[data-cue]').forEach(el => cueValue(el, `${row.ref}:${i}:${el.dataset.cue}`, !seeded))
