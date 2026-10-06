@@ -1,0 +1,12 @@
+{
+ "bank": [
+  {
+   "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+   }
+  }
+ ]
+}

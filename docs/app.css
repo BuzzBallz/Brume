@@ -1,0 +1,380 @@
+/* IBM Plex, OFL-1.1 (fonts/OFL.txt), self-hosted so the page works offline. */
+@font-face { font-family: "IBM Plex Sans"; src: url(fonts/IBMPlexSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "IBM Plex Sans"; src: url(fonts/IBMPlexSans-SemiBold.woff2) format("woff2"); font-weight: 600; font-display: block; }
+@font-face { font-family: "IBM Plex Mono"; src: url(fonts/IBMPlexMono-Regular.woff2) format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "IBM Plex Mono"; src: url(fonts/IBMPlexMono-SemiBold.woff2) format("woff2"); font-weight: 600; font-display: block; }
+
+/* Tokens: docs/DESIGN.md §4. Radix Colors 3.0.0 (MIT) sand + brown, logo tan. */
+:root {
+  --bg: #fdfdfc;
+  --panel: #f9f9f8;
+  --panel-2: #f1f0ef;
+  --line: #dad9d6;
+  --line-strong: #bcbbb5;
+  --ink: #21201c;
+  --ink-2: #63635e;
+  --brume: #cbb698;
+  --accent: #815e46;
+  --accent-soft: #f6eee7;
+  --ok: #2a7e3b;
+  --warn: #ffc53d;
+  --warn-soft: #fff7c2;
+  --bad: #d13415;
+
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --dur-out: 90ms; --dur-in: 120ms; --dur-press: 160ms; --dur-state: 240ms; --dur-flash: 300ms;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100dvh;
+  display: grid;
+  grid-template:
+    "bar bar" 44px
+    "band band" auto
+    "list detail" 1fr
+    "foot foot" auto / 340px 1fr;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--sans);
+}
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Top bar */
+.bar {
+  grid-area: bar;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 18px;
+  text-decoration: none;
+}
+.brand img { border-radius: 6px; object-fit: cover; background: var(--brume); }
+.badge { font-size: 14px; color: var(--ink-2); margin-left: auto; }
+.btn {
+  font: inherit;
+  font-size: 14px;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.band {
+  grid-area: band;
+  padding: 8px 16px;
+  background: var(--warn-soft);
+  border-bottom: 1px solid var(--warn);
+  font-size: 14px;
+}
+
+/* Escrow list */
+.list {
+  grid-area: list;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 16px 8px;
+}
+.group { margin: 0 8px; font-size: 14px; font-weight: 600; }
+.group ~ .group { margin-top: 20px; }
+.meta { margin: 0 8px 12px; font-size: 14px; color: var(--ink-2); }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+.row[aria-current] { background: var(--accent-soft); box-shadow: inset 2px 0 var(--accent); }
+
+/* State chip: icon + label (Primer StateLabel pattern), glyph shape carries the state */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; white-space: nowrap; }
+.glyph { width: 12px; height: 12px; flex: none; border-radius: 50%; border: 1.5px solid var(--ink); }
+.state-ResultSubmitted .glyph { background: conic-gradient(var(--ink) 0 50%, transparent 0); }
+.state-RefundRequested .glyph { background: radial-gradient(var(--ink) 0 2px, transparent 2.5px); }
+.state-Disputed .glyph { background: var(--ink); }
+.state-null .glyph { border-style: dashed; border-color: var(--ink-2); }
+.net { color: var(--ink-2); }
+
+/* Detail */
+.detail { grid-area: detail; overflow-y: auto; padding: 24px 32px 32px; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 16px; }
+.title { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.title h1 { margin: 0; font-size: 24px; font-weight: 600; }
+.copy { font-size: 14px; padding: 2px 8px; }
+.copy-face { display: inline-grid; }
+.copy-face > * { grid-area: 1 / 1; display: inline-flex; align-items: center; gap: 6px; }
+.copy-face > *::before { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+.copy .idle { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.5'%3E%3Crect x='5.5' y='5.5' width='8.5' height='8.5' rx='1.5'/%3E%3Cpath d='M10.5 4V3A1.5 1.5 0 0 0 9 1.5H3.5A1.5 1.5 0 0 0 2 3v5.5A1.5 1.5 0 0 0 3.5 10H4'/%3E%3C/svg%3E"); }
+.copy .done { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.8'/%3E%3C/svg%3E"); }
+/* Both faces share one grid cell, so the width never changes; the hidden face is out of the accessible name. Revert is instant. */
+.copy .done, .copy[data-copied] .idle { visibility: hidden; }
+.copy[data-copied] .done { visibility: visible; }
+.copy[data-copied="in"] .done { animation: brume-fade var(--dur-in) var(--ease) both; }
+.clocks { display: flex; flex-wrap: wrap; gap: 8px 32px; margin: 0 0 8px; font-size: 14px; }
+.clocks div { display: grid; }
+.clocks dt { color: var(--ink-2); }
+.clocks dd { margin: 0; }
+.datum { margin-bottom: 20px; }
+.datum summary { cursor: pointer; font-size: 14px; color: var(--ink-2); width: fit-content; }
+.datum dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 24px; margin: 8px 0 0; font-size: 14px; }
+.datum dt { color: var(--ink-2); }
+.datum dd { margin: 0; overflow-wrap: anywhere; }
+
+/* Reachability grid */
+.grid { border-collapse: separate; border-spacing: 6px 4px; margin: 0 -6px; }
+.grid caption { text-align: left; padding: 0 6px 6px; font-size: 18px; font-weight: 600; }
+.grid caption small { display: block; font-size: 14px; font-weight: 400; color: var(--ink-2); }
+.grid th { font-size: 14px; font-weight: 600; text-align: left; padding: 0 6px; }
+.grid tbody th { font-weight: 400; white-space: nowrap; padding-right: 16px; }
+.idx { display: inline-block; width: 1.5em; color: var(--ink-2); }
+.cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 200px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.cell .glyph { border-radius: 2px; border-color: var(--ink-2); }
+.cell.can { background: var(--brume); border-color: var(--ink); color: var(--ink); font-weight: 600; }
+.cell.can .glyph { background: var(--ink); border-color: var(--ink); }
+.cell.skel { background: var(--panel-2); border-color: var(--panel-2); animation: none; cursor: default; }
+@keyframes resolve { from { opacity: 0; transform: translateY(2px); } }
+.animate .cell { animation: resolve 120ms var(--ease) both; animation-delay: calc(var(--i) * 14ms); }
+@media (prefers-reduced-motion: reduce) { .animate .cell { animation: none; } }
+/* backwards holds the from-state during the stagger delay only, so the 21 finished cells leave getAnimations(). */
+.animate .cell { animation-fill-mode: backwards; }
+/* Content replacing the painted boot skeleton fades in once, at its final geometry; the grid keeps its own stagger. No fill, so nothing lingers in getAnimations(). */
+@media (prefers-reduced-motion: no-preference) { .fade-in > :not(.grid) { animation: brume-fade var(--dur-in) var(--ease); } }
+
+/* Cell detail popover */
+.pop {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  width: 340px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: 0 4px 16px rgb(33 32 28 / .12);
+  font-size: 14px;
+}
+.pop h3 { margin: 0 0 4px; font-size: 16px; }
+.pop p { margin: 0 0 12px; }
+.pop h4 { margin: 12px 0 4px; font-size: 14px; color: var(--ink-2); font-weight: 400; }
+.pop ul { margin: 0; padding-left: 18px; }
+
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fefdfc; font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.hint { font-size: 14px; color: var(--ink-2); }
+.error { margin: 8px 0 0; color: var(--ink); font-size: 14px; }
+.error::before { content: "!"; display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 6px; border-radius: 50%; background: var(--bad); color: #fff; font-weight: 600; font-size: 12px; }
+
+/* View switch (Primer SegmentedControl pattern) */
+.seg { display: inline-flex; width: fit-content; padding: 2px; border-radius: 6px; background: var(--panel-2); }
+.seg a { padding: 4px 16px; border-radius: 4px; color: var(--ink-2); font-size: 14px; text-decoration: none; }
+.seg a[aria-current] { background: var(--bg); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--line); }
+
+/* Settle steps: Carbon progress-indicator glyphs, GOV.UK task-list status at the row end */
+.steps { list-style: none; margin: 0; padding: 0; max-width: 820px; }
+.step { position: relative; display: grid; grid-template-columns: 16px 1fr; gap: 16px; padding: 10px 16px; border-radius: 6px; }
+.step:not(:last-child)::before { content: ""; position: absolute; left: 23px; top: 32px; bottom: -6px; width: 1.5px; background: var(--line-strong); }
+.step.done::before { background: var(--ink); }
+.step-head { display: flex; justify-content: space-between; gap: 16px; }
+.step-label { font-weight: 600; }
+.step.later .step-label, .step.later .status { color: var(--ink-2); font-weight: 400; }
+.step .status { font-size: 14px; white-space: nowrap; }
+.step.current { background: var(--brume); }
+.step.current .status { font-weight: 600; }
+.step-body p { margin: 2px 0 0; font-size: 14px; }
+.mark { position: relative; width: 16px; height: 16px; margin-top: 4px; border-radius: 50%; border: 1.5px solid var(--ink-2); background: var(--bg); }
+.done .mark { border-color: var(--ink); }
+.done .mark::after { content: ""; position: absolute; left: 4.5px; top: 1.5px; width: 3.5px; height: 7px; border: solid var(--ink); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+.current .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
+.error .mark { border-color: var(--bad); background: var(--bad); }
+.error .mark::after { content: "!"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 600; }
+.hash a, .log a { color: var(--accent); }
+.lock { color: var(--ink-2); }
+.cmd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+.cmd code { padding: 4px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--ink); font-size: 14px; }
+.propose { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
+.propose label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.propose .band-hint { flex-basis: 100%; margin: 0; color: var(--ink); }
+.try { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.try-out { flex-basis: 100%; }
+.try-out p { margin: 0; }
+/* The node's answer arrives once per send (the node is built then), so no tracking: one beat, same for phase 1 and 2, no tint. */
+.try-out .observed { animation: resolve var(--dur-in) var(--ease); }
+.matched::before { content: ""; display: inline-block; width: 4px; height: 8px; margin: 0 9px 2px 5px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.share { width: 6em; padding: 4px 8px; font: inherit; font-family: var(--mono); border: 1px solid var(--line-strong); border-radius: 6px; background: var(--bg); }
+
+/* Balances (Carbon data-table pattern) */
+.balances { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 14px; }
+.balances th, .balances td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--line); }
+.balances thead th { font-weight: 600; border-bottom-color: var(--line-strong); }
+.balances .num { text-align: right; white-space: nowrap; }
+.balances-wrap { overflow-x: auto; }
+
+/* Transactions (Primer Timeline pattern, condensed) */
+.log { margin-top: 32px; max-width: 820px; }
+.log h2 { margin: 0 0 8px; font-size: 18px; }
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { display: grid; grid-template-columns: 16px 1fr auto auto; align-items: center; gap: 16px; padding: 8px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.timeline .status { color: var(--ink-2); }
+.timeline li.accepted .mark { border-color: var(--ok); }
+.timeline li.accepted .mark::after { content: ""; position: absolute; left: 4.5px; top: 1.5px; width: 3.5px; height: 7px; border: solid var(--ok); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); }
+.timeline li.refused .mark { border-color: var(--bad); background: var(--bad); }
+.timeline li.refused .mark::after { content: "!"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 600; }
+.timeline .mark { margin-top: 0; }
+
+/* Solver: range bars on one shared 0-100% axis (dataviz: thin marks, 4px rounded ends, recessive axis, direct labels) */
+.bands, .paths { max-width: 820px; }
+.bands h2, .paths h2 { margin: 0; font-size: 18px; }
+.bands > .hint { margin: 2px 0 16px; }
+.band-grid { display: grid; grid-template-columns: max-content 1fr 9em; align-items: center; gap: 8px 20px; }
+.band-label { font-size: 14px; }
+.track { position: relative; height: 12px; border-radius: 4px; background: var(--panel-2); }
+.range { position: absolute; top: 0; bottom: 0; min-width: 4px; border-radius: 4px; background: var(--brume); box-shadow: inset 0 0 0 1px var(--ink); }
+.band-value { font-size: 14px; }
+.axis { position: relative; height: 20px; font-size: 14px; color: var(--ink-2); }
+.axis span { position: absolute; transform: translateX(-50%); }
+.axis span:first-child { transform: none; }
+.axis span:last-child { transform: translateX(-100%); }
+.paths { margin-top: 24px; }
+.paths table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 14px; }
+.paths th, .paths td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.paths thead th { font-weight: 600; border-bottom-color: var(--line-strong); }
+.paths tbody th { font-weight: 400; color: var(--ink-2); width: 34%; }
+
+/* Empty and error states (Primer Blankslate pattern) */
+.blank { max-width: 56ch; padding: 48px 0; }
+.blank h2 { margin: 0 0 8px; font-size: 18px; }
+.blank p { margin: 0 0 16px; color: var(--ink-2); }
+
+/* Provenance footer (OWID pattern) */
+.foot {
+  grid-area: foot;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.foot .warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
+
+@media (max-width: 900px) {
+  body { height: auto; grid-template: "bar" 44px "band" auto "list" auto "detail" auto "foot" auto / 1fr; }
+  .list { border-right: 0; border-bottom: 1px solid var(--line); }
+  .detail { padding: 16px; overflow-x: auto; }
+}
+
+/* Press feedback and hover, Emil Kowalski's rules: transform only, ease-out, hover only on fine pointers */
+.btn, .cell { transition: transform 160ms var(--ease); }
+.btn:active:not(:disabled), .cell:active { transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { background: var(--panel-2); }
+  .btn.primary:hover { background: #6f503b; }
+  .row:hover { background: var(--panel-2); }
+  .cell:hover { border-color: var(--line-strong); }
+  .cell.can:hover { border-color: var(--ink); }
+}
+@media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled), .cell:active { transform: none; } }
+
+/* Popover grows out of its cell (transform-origin set in JS); exits instantly */
+.pop:popover-open {
+  opacity: 1;
+  transform: none;
+  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  @starting-style { opacity: 0; transform: scale(0.97); }
+}
+@media (prefers-reduced-motion: reduce) { .pop:popover-open { transition: opacity 150ms ease; } }
+
+/* Phone: platform baseline (mobile-native skill) */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+button, a { touch-action: manipulation; }
+.btn, .cell, .seg a { user-select: none; -webkit-user-select: none; }
+.cell-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  /* Grid: three columns share the width; long redeemer names wrap instead of pushing the table off screen */
+  .grid { width: 100%; table-layout: fixed; border-spacing: 4px; margin: 0 -4px; }
+  .grid thead td { width: 38%; }
+  .grid tbody th { white-space: normal; padding-right: 4px; font-size: 14px; }
+  .cell { width: 100%; padding: 0 8px; gap: 6px; }
+  /* Solver bands: label on its own line, then the bar and its value; the axis sits under the bars */
+  .band-grid { grid-template-columns: 1fr auto; gap: 4px 12px; }
+  .band-label { grid-column: 1 / -1; margin-top: 8px; }
+  .band-grid > span:empty { display: none; }
+  /* Transactions: hash and status drop under the step name */
+  .timeline li { grid-template-columns: 16px 1fr; gap: 2px 12px; }
+  .timeline li > :nth-child(n + 3) { grid-column: 2; }
+  .cmd code { overflow-wrap: anywhere; }
+}
+
+.tnum { font-variant-numeric: tabular-nums; }
+.front-run { margin: 8px 0 0; }
+.balances .match { white-space: nowrap; }
+.balances .match::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; }
+.balances .match.ok::before { background: var(--ok); }
+.balances .match.off { font-weight: 600; }
+.balances .match.off::before { background: var(--bad); }
+.band-none { grid-column: span 2; font-size: 14px; color: var(--ink-2); }
+/* Settle step cues: data-motion is set by brumeMotion (app.js) for the render that sees a step change, removed on animationend.
+   The tan of .step.current is the row's own background, so it is not animated. A done step's mark is ink (neutral): no flash. */
+.step[data-motion] .mark, .step[data-motion] .status, .step[data-motion="await-in"] .cmd { animation: resolve var(--dur-in) var(--ease) both; }
+.step[data-motion="refused"], .step[data-motion="expired"] { isolation: isolate; --flash-color: var(--bad); --flash-from: .12; }
+.step[data-motion="refused"]::after, .step[data-motion="expired"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; background: var(--flash-color); animation: brume-flash var(--dur-flash) var(--ease-exit) both; }
+@keyframes brume-flash { from { opacity: var(--flash-from); } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { @keyframes resolve { from { opacity: 0; } } }
+/* Settle values: data-motion is set by cueValue (app.js). Inline-block so resolve's translate applies to a span. */
+span[data-cue] { display: inline-block; }
+[data-cue][data-motion="in"] { animation: resolve var(--dur-in) var(--ease) both; }
+[data-cue][data-motion="swap"] { animation: brume-fade var(--dur-in) var(--ease) both; }
+@keyframes brume-fade { from { opacity: 0; } }
+
+.timeline li.pending .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
+.tag { display: inline-block; margin-left: 4px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+/* The node's raw answer, one click away from the sentence */
+.raw { margin-top: 4px; font-size: 14px; }
+.raw summary { cursor: pointer; color: var(--ink-2); width: fit-content; }
+.raw pre { margin: 4px 0 0; padding: 8px; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.timeline .raw { grid-column: 2 / -1; margin-top: 0; }

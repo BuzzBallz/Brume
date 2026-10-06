@@ -1,0 +1,251 @@
+{
+ "grid": {
+  "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+  "atMs": 1791275447596,
+  "state": "Disputed",
+  "verdicts": [
+   {
+    "redeemer": "Withdraw",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this",
+     "needs ResultSubmitted (is Disputed)"
+    ],
+    "outputRules": [
+     "fee output to the fee address tagged with this escrow's output reference: at least 201492 lovelace + 100000 of c48cbb3d… (5 % of every asset)",
+     "buyer output tagged with this escrow's output reference: at least 4029850 lovelace (no token floor)",
+     "the escrow holds less lovelace than the fee plus the collateral floor: the seller adds 201492 lovelace"
+    ]
+   },
+   {
+    "redeemer": "Withdraw",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "needs ResultSubmitted (is Disputed)"
+    ],
+    "outputRules": [
+     "fee output to the fee address tagged with this escrow's output reference: at least 201492 lovelace + 100000 of c48cbb3d… (5 % of every asset)",
+     "buyer output tagged with this escrow's output reference: at least 4029850 lovelace (no token floor)",
+     "the escrow holds less lovelace than the fee plus the collateral floor: the seller adds 201492 lovelace"
+    ]
+   },
+   {
+    "redeemer": "Withdraw",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this",
+     "needs ResultSubmitted (is Disputed)"
+    ],
+    "outputRules": [
+     "fee output to the fee address tagged with this escrow's output reference: at least 201492 lovelace + 100000 of c48cbb3d… (5 % of every asset)",
+     "buyer output tagged with this escrow's output reference: at least 4029850 lovelace (no token floor)",
+     "the escrow holds less lovelace than the fee plus the collateral floor: the seller adds 201492 lovelace"
+    ]
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "only before unlock_time 2025-10-01 18:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this",
+     "only before unlock_time 2025-10-01 18:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this",
+     "only before unlock_time 2025-10-01 18:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "buyer",
+    "allowed": true,
+    "failed": [],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → ResultSubmitted"
+    ]
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → ResultSubmitted"
+    ]
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except seller cooldown 0 and buyer cooldown ≥ the tx upper bound + 7 min; state → ResultSubmitted"
+    ]
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "needs FundsLocked or RefundRequested (is Disputed)",
+     "needs an empty result hash"
+    ],
+    "outputRules": [
+     "none: no fee output, no collateral output, the outputs are the buyer's to choose"
+    ]
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this",
+     "needs FundsLocked or RefundRequested (is Disputed)",
+     "needs an empty result hash"
+    ],
+    "outputRules": [
+     "none: no fee output, no collateral output, the outputs are the buyer's to choose"
+    ]
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the buyer signs this",
+     "needs FundsLocked or RefundRequested (is Disputed)",
+     "needs an empty result hash"
+    ],
+    "outputRules": [
+     "none: no fee output, no collateral output, the outputs are the buyer's to choose"
+    ]
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "only the admin set signs this"
+    ],
+    "outputRules": [
+     "none; signed by at least 2 of the 3 listed admin keys (a key listed twice counts twice)"
+    ]
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "only the admin set signs this"
+    ],
+    "outputRules": [
+     "none; signed by at least 2 of the 3 listed admin keys (a key listed twice counts twice)"
+    ]
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "admin",
+    "allowed": true,
+    "failed": [],
+    "outputRules": [
+     "none; signed by at least 2 of the 3 listed admin keys (a key listed twice counts twice)"
+    ]
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this",
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this",
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"
+    ]
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except an emptied result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → RefundRequested"
+    ]
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "allowed": true,
+    "failed": [],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except an emptied result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → RefundRequested"
+    ]
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "only the seller signs this"
+    ],
+    "outputRules": [
+     "one escrow output, value kept on every asset; datum kept except an emptied result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → RefundRequested"
+    ]
+   }
+  ]
+ }
+}

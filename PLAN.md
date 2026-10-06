@@ -34,14 +34,14 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 ## 3. Scope
 
 **MUST (demo path)**
-- [ ] M-1 keyless read layer, 429 retry/backoff, hole counter (part 1)
-- [ ] M-2 16-field V1 decoder + `census:mainnet` from the UTxO set, two providers (part 2; README evidence, not on camera)
+- [x] M-1 keyless read layer, 429 retry/backoff, hole counter (part 1)
+- [x] M-2 16-field V1 decoder + `census:mainnet` from the UTxO set, two providers (part 2; README evidence, not on camera)
 - [ ] M-3 reachability engine 7×3 (part 3)
 - [ ] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4)
 - [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5)
 - [x] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal) — and C11 below
 - [ ] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8)
-- [ ] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
+- [x] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
 - [ ] M-10 Coworker registered and listed on preprod Sokosumi (part 5c)
 - [ ] M-11 README (5 commands, mocks, tx hashes, prior art), DEMO.md, pinned fixtures (part 11)
@@ -128,9 +128,9 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 
 **M0 — Skeleton + shared contract · Tue 12:00–13:00 · both**
 - [x] A+B: `shared/types.ts` with the 16 datum fields of §4 (A reviews) [opus/high] — A's revision logged in §11, awaiting B
-- [ ] B: `package.json` (all scripts, Mesh exact pins), `tsconfig.json`, `.gitignore`, `.env.example`, `.githooks/pre-commit` secret grep [haiku]
-- [ ] B: one real Disputed UTxO (Koios + Blockfrost) + mocks in `shared/mock/` [haiku]
-- [ ] A+B: `shared/constants.ts` [sonnet/medium]
+- [x] B: `package.json` (all scripts, Mesh exact pins), `tsconfig.json`, `.gitignore`, `.env.example`, `.githooks/pre-commit` secret grep [haiku]
+- [x] B: one real Disputed UTxO (Koios + Blockfrost) + mocks in `shared/mock/` [haiku]
+- [x] A+B: `shared/constants.ts` [sonnet/medium]
 - [x] A: kickoff freshness output → `fixtures/kickoff-2026-10-06.md` (no probe code) [haiku] — tip 14031823 → 14031828
 - [ ] B: start 5c early: Coworker API opens at 12:00; dispenser-fund the Masumi wallets [—]
 - Done when: first commit ≥ 12:00, `pnpm check` green, branches created.
@@ -141,10 +141,10 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [x] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
 - [x] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
-- [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
-- [ ] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 141 open / 140 decoded reproduced against `fixtures/kickoff-2026-10-06.md`
-- [ ] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
-- [ ] B4 UI v0: escrow + grid + propose/accept/sign/submit flow over mocks [sonnet/medium]
+- [x] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
+- [x] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 141 open / 140 decoded reproduced against `fixtures/kickoff-2026-10-06.md`
+- [x] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
+- [x] B4 UI v0: escrow + grid + propose/accept/sign/submit flow over mocks [sonnet/medium] — on the live agent, not mocks: rehearsal settle from the UI on bank escrow `9054b1d8…#6`, both legs in block 5259766 (B, 6 Oct)
 - [ ] B5 5c: Masumi payment service, agent registered, MIP-003 endpoint answering, listed on preprod Sokosumi [sonnet/high] — done when a hire from Sokosumi reaches `/start_job`
 - Done when (**Integration 1, 23:30**): on A's machine, the UI runs the full settle flow on a bank escrow end to end; grid on a real mainnet escrow; Sokosumi hire reaches the agent.
 
@@ -154,15 +154,15 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [ ] A solver core [sonnet/high] — hand-computed case passes
 - [ ] A control "try anyway" + S-1 race measurement [sonnet/high]
 - [ ] B solver panel + balances + tx links in UI; GitHub Pages read-only mode [sonnet/medium]
-- [ ] B pin fixtures, pick `<HERO_REF>` and `<BANK_REF>`, log in §10 [haiku]
+- [x] B pin fixtures, pick `<HERO_REF>` and `<BANK_REF>`, log in §10 [haiku] — logged in §10 below and in DEMO.md
 - [ ] A+B ugly take following §2
 - Done when: a complete 3-min take exists (**hour-20 question: yes**).
 
 **M3 — Integration + freeze · Wed 09:00–13:00**
-- [ ] B clean-clone judge run (keyless): README commands work [sonnet/high]
+- [x] B clean-clone judge run (keyless): README commands work [sonnet/high] — run from a fresh clone of b/ui with no .env, 6 Oct: check green, fixture census with both providers, live census single-provider and saying so, agent routes answering
 - [ ] A S-2 own deployment + admin pair [sonnet/high + contract-reviewer]
 - [ ] B S-3 CIP-30 only if everything above is green [sonnet/high]
-- [ ] `/code-review high` + contract-reviewer on `src/preprod`, `src/engine`, `src/agent`; claims-checker on README/deck draft
+- [ ] `/code-review high` + contract-reviewer on `src/preprod`, `src/engine`, `src/agent`; claims-checker on README/deck draft — B, 6 Oct: `/code-review high` on the three folders (9 findings, 8 fixed in src/agent, the lock fixed by A in src/preprod); claims-checker on the deck and pitch (no blocker, 4 fixes applied). Still open: contract-reviewer (A), claims-checker on the final README
 - Done when: **freeze 13:00**, main green.
 
 **M4 — Polish · Wed 13:00–17:30**: UI polish (minimalist-ui, dataviz), deck incl. who-pays slide, take 2.
@@ -257,6 +257,8 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - D10 No AI attribution trailers.
 - D11 Keyless census; key-bearing commands take the judge's own funded preprod wallet.
 - D12 Own deployment vendored with licence + commit.
+
+**Demo inputs (B, 6 Oct)**: `<HERO_REF>` = `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` (mainnet, Disputed, read-only). `<BANK_REF>` = `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the video take; `#6` was the UI rehearsal (block 5259766) and is spent. A third bank escrow for B is requested so the take can show settle then try anyway in the script's order (DEMO.md).
 
 ## 11. `/shared` change log
 
