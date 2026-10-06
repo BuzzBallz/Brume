@@ -4,29 +4,53 @@
     {
       "step": "SetRefundRequested",
       "network": "preprod",
+      "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+      "redeemer": "SetRefundRequested",
+      "role": "buyer",
       "txHash": "2222222222222222222222222222222222222222222222222222222222222222",
       "status": "accepted",
       "atMs": 1791262000000,
       "stage": "confirm",
-      "blockHeight": 5259350
+      "via": "koios",
+      "block": {
+        "height": 5259350,
+        "hash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "slot": 135579025
+      }
     },
     {
       "step": "AuthorizeRefund (leg 1)",
       "network": "preprod",
+      "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+      "redeemer": "AuthorizeRefund",
+      "role": "seller",
       "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
       "status": "accepted",
       "atMs": 1791262300000,
       "stage": "confirm",
-      "blockHeight": 5259362
+      "via": "koios",
+      "block": {
+        "height": 5259362,
+        "hash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "slot": 135579037
+      }
     },
     {
       "step": "WithdrawRefund (leg 2)",
       "network": "preprod",
+      "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+      "redeemer": "WithdrawRefund",
+      "role": "buyer",
       "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
       "status": "accepted",
       "atMs": 1791262301000,
       "stage": "confirm",
-      "blockHeight": 5259363,
+      "via": "koios",
+      "block": {
+        "height": 5259363,
+        "hash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "slot": 135579038
+      },
       "readback": {
         "provider": "blockfrost",
         "validContract": true
@@ -35,11 +59,19 @@
     {
       "step": "replay leg 2",
       "network": "preprod",
+      "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+      "redeemer": "WithdrawRefund",
+      "role": "seller",
       "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
       "status": "refused",
       "atMs": 1791262400000,
       "expected": "refuse",
       "stage": "submit",
+      "via": "koios",
+      "refusal": {
+        "phase": 1,
+        "ledgerError": "BadInputsUTxO"
+      },
       "error": "BadInputsUTxO"
     }
   ]

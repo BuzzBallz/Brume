@@ -2,6 +2,7 @@
   "_note": "MOCK, hand-made for building before the real producer exists. Not evidence.",
   "solver": {
     "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+    "path": "B",
     "pathA": {
       "fee": {
         "lovelace": "201492",
@@ -15,6 +16,9 @@
       "defectorKeeps": {
         "lovelace": "0",
         "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1900000"
+      },
+      "topUp": {
+        "lovelace": "201492"
       }
     },
     "pathB": {
@@ -27,11 +31,13 @@
       "defectorKeeps": {
         "lovelace": "4029850",
         "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
-      }
+      },
+      "topUp": {}
     },
     "bands": [
       {
         "horizonDays": 7,
+        "feasible": true,
         "sellerShareMin": 0,
         "sellerShareMax": 0.9352,
         "perUnit": {
@@ -51,6 +57,7 @@
       },
       {
         "horizonDays": 30,
+        "feasible": true,
         "sellerShareMin": 0,
         "sellerShareMax": 0.7504,
         "perUnit": {
@@ -70,6 +77,7 @@
       },
       {
         "horizonDays": 90,
+        "feasible": true,
         "sellerShareMin": 0,
         "sellerShareMax": 0.4226,
         "perUnit": {
@@ -88,10 +96,6 @@
         }
       }
     ],
-    "arbitrationLeak": {
-      "lovelace": 0,
-      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": 0.264
-    },
     "frontRunP": {
       "used": 1,
       "measured": false
