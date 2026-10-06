@@ -1,6 +1,7 @@
 import { BLOCKFROST } from '../../shared/constants.ts'
 import type { Network, RawUtxo, Read, Tip, Value } from '../../shared/types.ts'
 import { request, type Cfg } from './http.ts'
+import type { TxInfo } from './txinfo.ts'
 
 type Row = {
   tx_hash: string
@@ -59,4 +60,15 @@ export async function tip(net: Network, cfg: Cfg = {}): Promise<Read<Tip | null>
   const b = res?.status === 200 ? (res.body as { height: number; hash: string; time: number }) : null
   if (!b) return { data: null, holes: 1, provider: 'blockfrost' }
   return { data: { height: b.height, hash: b.hash, timeMs: b.time * 1000 }, holes: 0, provider: 'blockfrost' }
+}
+
+// v1OutputStates stays empty here: Blockfrost's tx outputs carry the datum as hex only, decode it with src/census/decode.ts if a state is needed.
+export async function tx(net: Network, hash: string, cfg: Cfg = {}): Promise<Read<TxInfo | null>> {
+  const base = cfg.base ?? BLOCKFROST[net]
+  const [info, redeemers] = await Promise.all([request(`${base}/txs/${hash}`, get(net), cfg.backoffMs), request(`${base}/txs/${hash}/redeemers`, get(net), cfg.backoffMs)])
+  if (info?.status === 404) return { data: null, holes: 0, provider: 'blockfrost' }
+  if (!info || info.status !== 200 || !redeemers || redeemers.status !== 200) return { data: null, holes: 1, provider: 'blockfrost' }
+  const t = info.body as { hash: string; block: string; block_height: number; slot: number; valid_contract: boolean }
+  const contracts = (redeemers.body as { purpose: string; script_hash: string }[]).map((r) => ({ scriptHash: r.script_hash, purpose: r.purpose, redeemer: null, valid: t.valid_contract }))
+  return { data: { hash: t.hash, blockHash: t.block, blockHeight: t.block_height, slot: t.slot, contracts, validContract: contracts.length ? t.valid_contract : null, v1OutputStates: [] }, holes: 0, provider: 'blockfrost' }
 }
