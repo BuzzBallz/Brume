@@ -6,7 +6,7 @@
 //   node src/preprod/readback.ts <escrowRef>   backfills readback into fixtures/preprod/txlog-<ref>.json
 import type { Provider, TxLogEntry, Value } from '../../shared/types.ts'
 import { KOIOS } from '../../shared/constants.ts'
-import { blockfrostGet } from './chain.ts'
+import { blockfrostGet, koiosHeaders } from './chain.ts'
 import { readDatum } from './datum.ts'
 import { mesh } from './mesh.ts'
 
@@ -26,7 +26,7 @@ async function viaBlockfrost(txHash: string): Promise<{ fee: bigint; valid: bool
 type KoiosIo = { payment_addr: { bech32: string }; value: string; asset_list: { policy_id: string; asset_name: string; quantity: string }[] | null }
 async function koiosTx(txHash: string): Promise<{ fee: string; inputs: KoiosIo[]; outputs: KoiosIo[]; plutus_contracts: { valid_contract?: boolean }[] | null } | null> {
   const res = await fetch(`${KOIOS.preprod}/tx_info`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _tx_hashes: [txHash], _inputs: true, _assets: true, _scripts: true }), signal: AbortSignal.timeout(30_000),
+    method: 'POST', headers: koiosHeaders({ 'content-type': 'application/json' }), body: JSON.stringify({ _tx_hashes: [txHash], _inputs: true, _assets: true, _scripts: true }), signal: AbortSignal.timeout(30_000),
   })
   if (!res.ok) throw new Error(`Koios tx_info HTTP ${res.status}: no read-back (a hole)`)
   return ((await res.json()) as never[])[0] ?? null
