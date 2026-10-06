@@ -58,7 +58,23 @@ async function run(net: 'mainnet' | 'preprod', ref: string) {
     solver: solve(solverInputFor(ref, datum, value, now), 'B'),
     uiUrl: `${ORIGIN}/?escrow=${encodeURIComponent(ref)}`,
   }
-  return JSON.stringify(result)
+  return `${summary(net, result)}\n\n${JSON.stringify(result)}`
+}
+
+const pct = (x: number) => `${Math.round(x * 100)} %`
+
+// One readable paragraph above the JSON, since a marketplace shows the result as text. Break-evens, never a recommendation (D17).
+export function summary(net: 'mainnet' | 'preprod', r: JobResult): string {
+  const concede = r.grid.verdicts.find((v) => v.redeemer === 'AuthorizeRefund' && v.role === 'seller')?.allowed
+  const band = r.solver.bands.find((b) => b.horizonDays === 30)
+  return [
+    `Escrow ${r.escrowRef} (${net}${net === 'mainnet' ? ', read-only' : ''}): ${r.grid.state}.`,
+    concede ? 'The seller can concede now (AuthorizeRefund), the validator\'s source says.' : 'The seller cannot concede now (AuthorizeRefund), the validator\'s source says.',
+    band?.feasible
+      ? `For a buyer who would wait at most 30 days, any seller share from ${pct(band.sellerShareMin)} to ${pct(band.sellerShareMax)} beats waiting. Break-evens, not a recommended split.`
+      : 'No seller share beats waiting for a buyer who would wait at most 30 days.',
+    `Open in Brume: ${r.uiUrl}`,
+  ].join(' ')
 }
 
 // Wait for the buyer's funds, run the job, hand the result hash to the payment service. A job that cannot run after payment is left failed and unsubmitted, so the buyer can ask for a refund.
