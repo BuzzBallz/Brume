@@ -1,7 +1,7 @@
 {
  "grid": {
   "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
-  "atMs": 1791268902883,
+  "atMs": 1791275447596,
   "state": "Disputed",
   "verdicts": [
    {
@@ -186,7 +186,7 @@
     "allowed": false,
     "failed": [
      "only the seller signs this",
-     "submission window closed at 2025-10-02 00:37 UTC"
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
     ],
     "outputRules": [
      "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"
@@ -197,7 +197,7 @@
     "role": "seller",
     "allowed": false,
     "failed": [
-     "submission window closed at 2025-10-02 00:37 UTC"
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
     ],
     "outputRules": [
      "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"
@@ -209,7 +209,7 @@
     "allowed": false,
     "failed": [
      "only the seller signs this",
-     "submission window closed at 2025-10-02 00:37 UTC"
+     "submission closed at external_dispute_unlock_time 2025-10-02 00:37 UTC"
     ],
     "outputRules": [
      "one escrow output, value kept on every asset; datum kept except a non-empty result hash, seller cooldown ≥ the tx upper bound + 7 min, buyer cooldown 0; state → Disputed"

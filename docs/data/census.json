@@ -2,9 +2,9 @@
  "census": {
   "network": "mainnet",
   "tip": {
-   "height": 14032180,
-   "hash": "5753db6c34830b2127558ec83afc346a046b0144cb3ee4af15aeede0f1ba3779",
-   "timeMs": 1791268848000
+   "height": 14032497,
+   "hash": "e4ec98d2ff2fbdc8e9b581fd1fcd10686e42455cc65cbf9c171f3698fa2671dd",
+   "timeMs": 1791275445000
   },
   "provider": "koios",
   "open": 170,
@@ -12,8 +12,8 @@
   "undecodable": 1,
   "holes": 0,
   "byState": {
-   "FundsLocked": 7,
-   "ResultSubmitted": 97,
+   "FundsLocked": 6,
+   "ResultSubmitted": 98,
    "RefundRequested": 4,
    "Disputed": 61
   },
@@ -776,14 +776,6 @@
     }
    },
    {
-    "ref": "9d121aef5525e067b5b9c3a8d795b4f7ef39df9057c63640805e6e88b88b5be9#4",
-    "state": "FundsLocked",
-    "value": {
-     "lovelace": "4434990",
-     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1800000"
-    }
-   },
-   {
     "ref": "9e3aee0db5762c6c6cac15d08f85553e829c5d2f0ac2d503d6632ee419241dd4#0",
     "state": "ResultSubmitted",
     "value": {
@@ -1059,6 +1051,14 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+    }
+   },
+   {
+    "ref": "c26271025184240d73fb0eca4ba03b1a77e0bfebaf45fdd8e0e84ce5d3b055e5#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1800000"
     }
    },
    {

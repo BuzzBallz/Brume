@@ -38,19 +38,19 @@
     "horizonDays": 7,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.935066139747041,
+    "sellerShareMax": 0.9350813611038642,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.064933860252959,
+      "rBuyer": 0.0649186388961358,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.935066139747041
+      "sellerShareMax": 0.9350813611038642
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.04779132114617782,
+      "rBuyer": 0.04778011822755595,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.9522086788538222
+      "sellerShareMax": 0.9522198817724441
      }
     }
    },
@@ -58,19 +58,19 @@
     "horizonDays": 30,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.7499607944775666,
+    "sellerShareMax": 0.7500131164883136,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.2500392055224334,
+      "rBuyer": 0.2499868835116864,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.7499607944775666
+      "sellerShareMax": 0.7500131164883136
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.184028855264511,
+      "rBuyer": 0.1839903462646012,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.815971144735489
+      "sellerShareMax": 0.8160096537353988
      }
     }
    },
@@ -78,19 +78,19 @@
     "horizonDays": 90,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.4218088441392476,
+    "sellerShareMax": 0.42189713446112664,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.5781911558607524,
+      "rBuyer": 0.5781028655388734,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.4218088441392476
+      "sellerShareMax": 0.42189713446112664
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.42554869071351376,
+      "rBuyer": 0.42548370903661076,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.5744513092864862
+      "sellerShareMax": 0.5745162909633892
      }
     }
    }
