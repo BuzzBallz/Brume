@@ -59,6 +59,7 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-3afaacc7…_0.json` | `pnpm demo:preprod` with Koios at its keyless daily cap (Blockfrost alone, announced) | 5260570 | 6 / 4 tADA, read back on Koios once a registered token lifted the cap |
 | `txlog-47f62a57…_0.json` | `pnpm demo:preprod` with the registered Koios token, 132 s, exit code 0 | 5260621 | 6 / 4 tADA |
 | `txlog-3be437b1…_0.json` | **Integration 1 in the browser**, on A's machine: proposed in the UI, buyer signed by file drop (`checkForBuyer` passed), seller signed and sent, the UI followed both legs and the read-back | 5260703 | 12 tADA + 6 tUSDM / 8 tADA + 4 tUSDM, read back on Koios (leg 2 carried by Blockfrost) |
+| `txlog-9054b1d8…_7.json` | **the video take**: stream B's UI on B's machine, B's wallets | 5260711 | 5 tADA + 2.5 tUSDM / 15 tADA + 7.5 tUSDM, read back on Koios (leg 2 carried by Blockfrost) |
 
 On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and the demo runs `824bbdd3` and `3165d9de`, which check it themselves) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
@@ -77,7 +78,7 @@ Rerun (needs `PREPROD_BUYER_SKEY`, `PREPROD_SELLER_SKEY` and a Disputed escrow o
 | 1 | `AuthorizeRefund` (6) | the escrow (Disputed) | the escrow at the script, RefundRequested, the whole pot | seller | seller | none of the 3 |
 | 2 | `WithdrawRefund` (3) | leg 1's output 0 (RefundRequested) | the pot split between buyer and seller; the escrow leaves the script | buyer | buyer, seller (its UTxO pays the fee) | none of the 3 |
 
-Same on all twelve legs of the six settles exported (`witnesses-7a37751b…`, `-b475bad5…`, `-9054b1d8…_6`, `-9e7c0991…`, `-824bbdd3…`, `-3165d9de…`). One to walk: `7a37751b…#0` (file-drop path, token pot, block 5259570): leg 1 `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8`, leg 2 `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637`, buyer 12 tADA + 6 tUSDM, seller 8 tADA + 4 tUSDM. The redeemer constructors match Koios's own decoding of the same transactions.
+Same on all fourteen legs of the seven settles exported (`witnesses-7a37751b…`, `-b475bad5…`, `-9054b1d8…_6`, `-9054b1d8…_7` (the video take: leg 1 `5c5e323a…`, leg 2 `90bb281f…`, block 5260711), `-9e7c0991…`, `-824bbdd3…`, `-3165d9de…`). One to walk: `7a37751b…#0` (file-drop path, token pot, block 5259570): leg 1 `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8`, leg 2 `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637`, buyer 12 tADA + 6 tUSDM, seller 8 tADA + 4 tUSDM. The redeemer constructors match Koios's own decoding of the same transactions.
 
 ## 2. Bank and fixtures
 
@@ -222,6 +223,14 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | AuthorizeRefund (leg 1) | seller | accept | accepted | 5259766 | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` |
 | WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5259766 | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` |
 | replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` |
+
+### `txlog-9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d_7.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260711 | `5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260711 | `90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c` |
 
 ### `txlog-9e7c0991247df977603972775e449cbeb90152f3273a9611f0f37ce1d31e697a_0.json`
 
