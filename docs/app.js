@@ -477,6 +477,31 @@ function renderSteps(steps) {
   }))
 }
 
+// One-shot cues for a Settle step whose state changes while the same escrow stays on screen. Opening, switching, Reset
+// and the first render of a panel only seed the map; an unchanged state at a poll plays nothing.
+const brumeMotion = new Map() // "<escrowRef>:<step index>" → { state, status } at the last render
+
+function stepCue(i, from, to) {
+  if (to.status === 'Refused') return from.status === 'Refused' ? null : 'refused'
+  if (from.state === 'later' && to.state === 'current') return 'await-in'
+  if (from.state === 'current' && to.state === 'done') return i === 4 ? 'confirmed' : 'tick' // step 4 done = both legs in a block
+  if (from.status === 'Ready to send' && to.status === 'Waiting for confirmation') return 'tick'
+  return null
+}
+
+function cueStep(li, key, i, seed) {
+  const now = { state: li.classList[1], status: li.querySelector('.status').textContent }
+  const was = brumeMotion.get(key)
+  brumeMotion.set(key, now)
+  const cue = !seed && was && stepCue(i, was, now)
+  if (!cue) return
+  li.dataset.motion = cue // li is built fresh on every render, so a cue never restarts on a rebuilt node
+  const stop = () => { clearTimeout(timer); li.removeEventListener('animationend', end); delete li.dataset.motion }
+  const end = () => { if (li.getAnimations({ subtree: true }).every(a => a.playState === 'finished')) stop() }
+  const timer = setTimeout(stop, 320)
+  li.addEventListener('animationend', end)
+}
+
 function renderLog(log) {
   if (!log.length) return null
   return h('section', { class: 'log' },
@@ -496,6 +521,7 @@ async function settleView(row) {
   let shown = null // label of the step last scrolled into view
   const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
   let timer = 0 // one polling chain per panel, whoever triggers the re-render
+  let seeded = false // the first render of this panel seeds brumeMotion without playing a cue
   const poll = () => {
     if (!panel.isConnected) return // the view was left
     // A wallet left open holds polling for 60 s at most, so a file-drop signature is still picked up.
@@ -511,6 +537,8 @@ async function settleView(row) {
     const waiting = steps.find(s => !s.done)?.label ?? null
     if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
+    if (!seeded || panel.isConnected) panel.querySelectorAll('.step').forEach((li, i) => cueStep(li, `${row.ref}:${i}`, i, !seeded)) // a left panel never writes
+    seeded = true
     const now = panel.querySelector('.step.current, .step.error')
     const label = now?.querySelector('.step-label').textContent ?? null
     if (now && label !== shown) requestAnimationFrame(() => now.scrollIntoView({ block: 'nearest' })) // only when the step changes, so polling never yanks the scroll
@@ -596,6 +624,7 @@ let renderSeq = 0
 // Reads escrow and view from the URL. animate: the grid's one orchestrated reveal, never on keyboard or history moves.
 async function render({ animate = true, focusList = false } = {}) {
   const seq = ++renderSeq
+  brumeMotion.clear() // every open, switch, history move and Reset starts a new display
   if ($('pop').matches(':popover-open')) $('pop').hidePopover()
   try {
     base ??= await Promise.all([load('census'), loadBank()])
