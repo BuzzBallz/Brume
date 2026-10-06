@@ -7,7 +7,7 @@
 | Input | Value |
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
-| Census pinned for the video | tip block 14031729, `fixtures/mainnet/utxos-koios.json` (`READ_SOURCE=fixture`) |
+| Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`) |
 | `<BANK_REF>`, a preprod escrow we locked | pending (stream A fixture) |
 | Split proposed by the seller | pending (solver output) |
 | Action the engine marks impossible, for "try anyway" | pending (engine output) |

@@ -25,18 +25,18 @@ A judge needs no key. Node 22.18 or later and pnpm.
 ```
 pnpm install
 pnpm check                          # tsc + node --test
-pnpm census:mainnet                 # live, keyless (Koios); READ_SOURCE=fixture for offline
+pnpm census:mainnet                 # live, keyless (Koios), plus Blockfrost if a key is set; READ_SOURCE=fixture for offline
 pnpm agent                          # UI and API on http://127.0.0.1:8787 (PORT to change)
 pnpm site:data                      # snapshot docs/data/*.json for GitHub Pages
 ```
 
 Commands listed in `package.json` for `engine`, `solver`, `verify`, `sign` and `demo:preprod` point at files that do not exist yet.
 
-`READ_SOURCE=fixture pnpm census:mainnet` reads `fixtures/mainnet/utxos-koios.json` and reprints the census below with no network. A live run reads the chain again, so its tip and counts will have moved.
+`READ_SOURCE=fixture pnpm census:mainnet` reads `fixtures/mainnet/utxos-koios.json` and `utxos-blockfrost.json` and reprints the census below, with its two-provider comparison, with no network. A live run reads the chain again, so its tip and counts will have moved.
 
 ## Census, mainnet, read-only
 
-Pinned to tip block **14031729**, hash `99c2eeeb831fa611dfac3b8ec48b8f769e09c7b5e35ef63766217cf2f09af525`, read 6 Oct 2026 from one provider (Koios), 0 holes. Totals are summed from the UTxO set at the V1 script address, never from an address summary.
+Pinned to tip block **14031954**, hash `e4d15bf4126618bbf9c9ae9d0d3077e90815a1fa2aaf466fc8560fedeb2b72d1`, read 6 Oct 2026 from two providers (Koios and Blockfrost), 0 holes on both. Totals are summed from the UTxO set at the V1 script address, never from an address summary.
 
 | | |
 |---|---|
@@ -46,11 +46,11 @@ Pinned to tip block **14031729**, hash `99c2eeeb831fa611dfac3b8ec48b8f769e09c7b5
 | By state | FundsLocked 6, ResultSubmitted 69, RefundRequested 4, Disputed 61 |
 | Disputed, held | 295.342750 ADA and 498.15 USDM (native units, no fiat) |
 
-What this run does not show: the second-provider cross-check. It needs a Blockfrost key, none was set, so this census is **not** cross-checked. With `BLOCKFROST_MAINNET_PROJECT_ID` in `.env`, `pnpm census:mainnet --pin` reads both providers, prints the per-row and per-total differences, and pins both snapshots.
+The two providers agree: 141 refs on each, the same values, the same inline datums and the same totals (794.769350 ADA, 669.70 USDM and 1 unit of one other asset over all open UTxOs), printed as `diff: none`. A run without `BLOCKFROST_MAINNET_PROJECT_ID` in `.env` is single-provider and says so; `pnpm census:mainnet --pin` re-reads both providers and re-pins the two snapshots.
 
 The decoder is checked three ways in `src/census/census.test.ts`: against Koios's own decoding of a real mainnet datum, on a set of corrupted datums that must fail (truncated, trailing byte, state as an integer, unknown state, 11 and 15 fields), and on the census arithmetic.
 
-Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals as the Koios census above, so the two providers agree at two tips.
+Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals, a third read at an earlier tip.
 
 The Pages snapshot in `docs/data/` is a separate read, at tip 14031774.
 
