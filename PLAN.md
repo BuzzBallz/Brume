@@ -138,8 +138,8 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 **M1 — Ugly end-to-end · Tue 13:00 → Wed 00:00 · spike gate 18:00**
 - [x] A1 tx helper + preprod guard [opus/high] — no tx without upper bound (test) — `src/preprod/tx.ts`, 28 tests; first tx block 5259438
 - [x] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A — **PASSED 13:50 SGT, path B**: leg 2 signed against leg 1's future output, both legs in block 5259491, replay refused (phase 1). `fixtures/preprod/txlog-spike-6d3b12d4…_0.json`
-- [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
-- [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
+- [x] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
+- [x] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
 - [ ] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 141 open / 140 decoded reproduced against `fixtures/kickoff-2026-10-06.md`
@@ -214,6 +214,8 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - `AuthorizeRefund` from `Disputed` → `RefundRequested`, result hash emptied (leg 1, block 5259491).
 - `WithdrawRefund` from `RefundRequested`, paying 40 % of the pot to the seller: no fee output, no collateral output (leg 2, block 5259491). This is C8 executed: the exit was signed against an output that did not exist yet. It removes a refusal; it says nothing about a front-run.
 - Leg 2 replayed byte for byte: refused by the ledger (phase 1, inputs spent), not by the validator.
+- **First refusal by the deployed bytes (A4 done-when):** the engine predicted the buyer cannot take `WithdrawRefund` while `Disputed`; built and sent anyway (`tryAnyway`, no evaluation, the node ran the script), it was refused in phase 2 (`ValidationTagMismatch (IsValid True) … PlutusFailure`) on bank escrow `8e0d6df4…#0`. Rejected from the mempool, no collateral taken.
+- A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
 
 **Tooling traps met in A1–A2 (each fixed in `src/preprod`, each would have cost an hour later)**
