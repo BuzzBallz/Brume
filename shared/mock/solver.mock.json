@@ -9,22 +9,24 @@
       },
       "exposedParty": "buyer",
       "exposedFloor": {
-        "lovelace": "4029850"
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
       },
       "defectorKeeps": {
         "lovelace": "0",
-        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1900000"
       }
     },
     "pathB": {
       "fee": {},
       "exposedParty": "seller",
       "exposedFloor": {
-        "lovelace": "0"
-      },
-      "defectorKeeps": {
         "lovelace": "0",
         "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
+      },
+      "defectorKeeps": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
       }
     },
     "bands": [
@@ -33,8 +35,18 @@
         "sellerShareMin": 0,
         "sellerShareMax": 0.9352,
         "perUnit": {
-          "lovelace": { "rBuyer": 0.0648, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.9352 },
-          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.0477, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.9523 }
+          "lovelace": {
+            "rBuyer": 0.0648,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.9352
+          },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
+            "rBuyer": 0.0477,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.9523
+          }
         }
       },
       {
@@ -42,8 +54,18 @@
         "sellerShareMin": 0,
         "sellerShareMax": 0.7504,
         "perUnit": {
-          "lovelace": { "rBuyer": 0.2496, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.7504 },
-          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.1837, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.8163 }
+          "lovelace": {
+            "rBuyer": 0.2496,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.7504
+          },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
+            "rBuyer": 0.1837,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.8163
+          }
         }
       },
       {
@@ -51,8 +73,18 @@
         "sellerShareMin": 0,
         "sellerShareMax": 0.4226,
         "perUnit": {
-          "lovelace": { "rBuyer": 0.5774, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.4226 },
-          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.425, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.575 }
+          "lovelace": {
+            "rBuyer": 0.5774,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.4226
+          },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
+            "rBuyer": 0.425,
+            "rSeller": 0,
+            "sellerShareMin": 0,
+            "sellerShareMax": 0.575
+          }
         }
       }
     ],
@@ -60,6 +92,9 @@
       "lovelace": 0,
       "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": 0.264
     },
-    "frontRunP": { "used": 1, "measured": false }
+    "frontRunP": {
+      "used": 1,
+      "measured": false
+    }
   }
 }
