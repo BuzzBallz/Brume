@@ -34,7 +34,7 @@ The full derivation, both theorems, the fee-incidence result and the quantitativ
 
 ## The evidence, up front
 
-Ten settlements on preprod, both legs of each in one block: nine indexed in `fixtures/preprod/README.md` §1, and the take on `9054b1d8…#7` under *Transactions sent*. For six of them, twelve legs, the witness walk (`fixtures/preprod/witnesses-*.json`) read each leg's CBOR back from the chain, checked its hash, and found every vkey witness hashing to the buyer or the seller of that escrow's own datum: **no admin key in any of them**.
+Eleven settlements on preprod, both legs of each in one block, all indexed in `fixtures/preprod/README.md` §1 (the take on `9054b1d8…#7` also under *Transactions sent*). For all eleven, twenty-two legs, the witness walk (`fixtures/preprod/witnesses-*.json`) read each leg's CBOR back from the chain, checked its hash, and found every vkey witness hashing to the buyer or the seller of that escrow's own datum: **no admin key in any of them**.
 
 One to read, a token pot in **block 5259570**:
 
@@ -61,7 +61,7 @@ This README states what exists today. The status table says what does not.
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
-| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 10 logged settles on path B and 5 race runs, see Transactions sent |
+| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 11 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed and withdrawn on preprod, exported to `fixtures/masumi/test-purchase.json` |
 | Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000001`; a metadata update replaced `…cc8c16000000`, the identifier the test purchase used); not yet visible on preprod Sokosumi |
 | Transactions | listed below with hashes and blocks; the full index, the earlier settles included, is `fixtures/preprod/README.md` |
