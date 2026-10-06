@@ -27,6 +27,7 @@ export type LockOptions = {
   state: Extract<State, 'ResultSubmitted' | 'Disputed'>
   unlock: 'future' | 'past' // path B needs nothing from unlock_time; path A's Withdraw needs it past
   collateralReturnLovelace: number
+  arbitration?: 'open' | 'closed' // external_dispute_unlock_time past (the admin set may act) or 12 h ahead (default)
 }
 
 // A fresh 16-field datum with its own nonces and hashes. The result hash is set and submit_result_time is past, so the
@@ -45,7 +46,7 @@ export function fixtureDatum(buyer: string, seller: string, nowMs: number, o: Lo
     payByTime: nowMs - 30 * MIN,
     submitResultTime: nowMs - 20 * MIN,
     unlockTime: o.unlock === 'future' ? nowMs + 6 * 60 * MIN : nowMs - 10 * MIN,
-    externalDisputeUnlockTime: nowMs + 12 * 60 * MIN,
+    externalDisputeUnlockTime: o.arbitration === 'open' ? nowMs - 5 * MIN : nowMs + 12 * 60 * MIN,
     sellerCooldownTime: 0,
     buyerCooldownTime: 0,
     state: o.state,
@@ -53,12 +54,12 @@ export function fixtureDatum(buyer: string, seller: string, nowMs: number, o: Lo
 }
 
 // Blockfrost's /txs/{hash}/utxos also lists spent outputs, so unspentness is confirmed on Koios before anything is built.
-export async function escrowAt(ref: string): Promise<UTxO> {
+export async function escrowAt(ref: string, scriptAddress: string = V1_ADDRESS.preprod): Promise<UTxO> {
   const [hash, idx] = ref.split('#')
   const u = (await preprodChain().fetchUTxOs(hash, Number(idx))).find((x) => x.input.outputIndex === Number(idx))
   if (!u) throw new Error(`escrow ${ref} not found (not indexed yet?)`)
   const status = await utxoStatus([ref])
   if (status.get(ref) !== 'unspent') throw new Error(`escrow ${ref} is ${status.get(ref) ?? 'unknown to Koios'}: nothing is built on it`)
-  if (u.output.address !== V1_ADDRESS.preprod || !u.output.plutusData) throw new Error(`${ref} is not a V1 escrow with an inline datum`)
+  if (u.output.address !== scriptAddress || !u.output.plutusData) throw new Error(`${ref} is not an escrow at ${scriptAddress.slice(0, 20)}… with an inline datum`)
   return u
 }

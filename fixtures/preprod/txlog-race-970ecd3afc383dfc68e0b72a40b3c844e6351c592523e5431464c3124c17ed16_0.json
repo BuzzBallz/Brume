@@ -1,0 +1,55 @@
+[
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "6331ca92f6e8a2bf097dc1178657377b2977656bf77409f46c030c4c459919f3",
+    "atMs": 1791272025446,
+    "via": "blockfrost",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259799,
+      "hash": "d465f9742483bb9997c6a889b437c48b0cc8820d786cf4f8920b2afacadfddfe",
+      "slot": 135588818
+    }
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "3f4abd689b785830628ac893517a196a30ceb60056057fd54888fc0169edb063",
+    "atMs": 1791272030740,
+    "via": "blockfrost",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259799,
+      "hash": "d465f9742483bb9997c6a889b437c48b0cc8820d786cf4f8920b2afacadfddfe",
+      "slot": 135588818
+    }
+  },
+  {
+    "step": "rival (run 4): the buyer's own WithdrawRefund, fired through Koios on first sight of leg 1 in Blockfrost's mempool, retried until leg1#0 is spent",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "37087b798e6cdaf05639cb92218786b7af8292f1f3d391865e5a8338258e00af",
+    "atMs": 1791272017201,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\"6331ca92f6e8a2bf097dc1178657377b2977656bf77409f46c030c4c459919f3\\\"}) (TxIx {unTxIx = 0})]))))\",\"ConwayUtxowFailure (UtxoFailure (ValueNotConservedUTxO Mismatch (RelEQ) {supplied: MaryValue (Coin 20000000) (MultiAsset (fromList [])), expected: MaryValue (Coin 40000000) (MultiAsset (fromList []))}))\",\"ConwayUtxowFailure (ScriptIntegrityHashMismatch Mismatch (RelEQ) {supplied: SJust (SafeHash \\\"40a0c78c05349bea1efabba22"
+    }
+  }
+]

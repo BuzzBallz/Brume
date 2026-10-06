@@ -2,7 +2,7 @@
 // Allowed only on a cell the engine predicts refused, on an escrow whose party key we hold. No evaluation: the node runs
 // the script itself, so a refusal at submission is the validator's (phase 2) and costs nothing (rejected from the mempool).
 import { randomBytes } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Redeemer, Role, TxLogEntry, Value } from '../../shared/types.ts'
 import { PARAMS, SCRIPT_HASH } from '../../shared/constants.ts'
@@ -12,7 +12,7 @@ import { buildEscrowSpend } from './escrow.ts'
 import { ROOT } from './env.ts'
 import { escrowAt, lovelace, pureAda, refOf } from './fixture.ts'
 import { upsertTxLog, SettleError } from './settle.ts'
-import { addWitness, confirmTx, cooldownFrom, submitOnly, txWindow, type TxWindow } from './tx.ts'
+import { addWitness, confirmTx, cooldownFrom, submitAndConfirm, submitOnly, txWindow, type TxWindow } from './tx.ts'
 import { party } from './wallet.ts'
 import { reach } from '../engine/reach.ts'
 
@@ -44,7 +44,7 @@ function inBank(ref: string): boolean {
   return bank.some((e) => e.ref === ref || e.disputedFrom === ref)
 }
 
-export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Role): Promise<TxLogEntry> {
+export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Role, logAs: string = escrowRef): Promise<TxLogEntry> {
   if (role === 'admin') throw new SettleError('The admin keys of the shared escrow are not ours: the admin control runs on our own deployment.')
   // Withdraw has two mandatory datum-tagged outputs; without them the script refuses for that reason, not the predicted one.
   if (redeemer === 'Withdraw') throw new SettleError('Try anyway is not offered for Withdraw: its mandatory outputs, not the predicted guard, would decide.')
@@ -83,13 +83,93 @@ export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Rol
     refused = await submitOnly(signed, s, base)
   } catch (error: unknown) {
     // A hole is logged as one, never as the control's outcome; an ambiguous submit may still land (the engine wrong).
-    if (error instanceof SubmitTransportError) return upsertTxLog(escrowRef, { ...base, status: 'refused', stage: 'submit', error: `not sent: ${error.message.slice(0, 200)}` })
+    if (error instanceof SubmitTransportError) return upsertTxLog(logAs, { ...base, status: 'refused', stage: 'submit', error: `not sent: ${error.message.slice(0, 200)}` })
     if (!(error instanceof AmbiguousSubmit)) throw error
-    upsertTxLog(escrowRef, { ...base, status: 'accepted', stage: 'submit', error: 'possibly live, not seen yet: confirming' })
+    upsertTxLog(logAs, { ...base, status: 'accepted', stage: 'submit', error: 'possibly live, not seen yet: confirming' })
     refused = null
   }
   // Accepted would mean the engine was wrong: logged as such (the UI shows it red), never hidden.
-  if (refused) return upsertTxLog(escrowRef, refused)
+  if (refused) return upsertTxLog(logAs, refused)
   const c = await confirmTx(base)
-  return upsertTxLog(escrowRef, c.block ? { ...c, error: 'ACCEPTED although the engine predicted a refusal' } : c)
+  return upsertTxLog(logAs, c.block ? { ...c, error: 'ACCEPTED although the engine predicted a refusal' } : c)
+}
+
+// C11 on the shared script: after a concession alone, every branch the engine says is gone is sent anyway and must be
+// refused by the validator; then the buyer, the only party left, exits. Our own bank escrow, our own keys, one log.
+//   node src/preprod/controls.ts c11 <disputed bank ref>
+// minimalCooldown: the concession writes seller_cooldown = upper bound + the V1 period (7 min, R5) + 1 min, the smallest
+// safe value, so the seller controls can be sent once it has passed and the cooldown cannot be what refuses them.
+async function concedeAlone(ref: string, logAs: string, minimalCooldown = false): Promise<string> {
+  const seller = await party('seller')
+  const escrow = await escrowAt(ref)
+  const raw = escrow.output.plutusData as string
+  const utxos = pureAda(await liveUtxos(seller.address)).filter((u) => lovelace(u) >= 5_000_000n)
+  if (utxos.length < 2) throw new SettleError('The seller needs two pure-ADA UTxOs of at least 5 tADA.')
+  const window = txWindow(Date.now())
+  const built = await buildEscrowSpend({
+    network: 'preprod', window, escrow, redeemer: 'AuthorizeRefund', signers: [seller], funding: [utxos[0]], collateral: utxos[1],
+    continuation: { datumCbor: patchDatum(raw, { resultHash: '', sellerCooldownTime: minimalCooldown ? window.toMs + PARAMS.cooldownMs + 60_000 : cooldownFrom(window), buyerCooldownTime: 0, state: 'RefundRequested' }), amount: escrow.output.amount },
+    outputs: [], changeAddress: seller.address,
+  })
+  const e = await submitAndConfirm(await addWitness(built, seller), preprodSubmitter(), `AuthorizeRefund alone (C11: the concession, no exit signed${minimalCooldown ? '; minimal seller cooldown' : ''})`, Date.now(), SCRIPT_HASH)
+  upsertTxLog(logAs, { ...e, redeemer: 'AuthorizeRefund', role: 'seller', expected: 'accept' })
+  if (e.status !== 'accepted' || !e.block) throw new SettleError(`the concession was ${e.status} at ${e.stage}`)
+  // The bank entry follows the escrow to its new output, so the controls below run on a registered ref.
+  const file = join(ROOT, 'fixtures', 'preprod', 'bank.json')
+  const bank = JSON.parse(readFileSync(file, 'utf8')) as { ref: string; disputedFrom?: string; state: string; concededFrom?: string }[]
+  const entry = bank.find((x) => x.ref === ref)
+  if (entry) Object.assign(entry, { concededFrom: ref, ref: `${built.txHash}#0`, state: 'RefundRequested' })
+  writeFileSync(file, JSON.stringify(bank, null, 2) + '\n')
+  return `${built.txHash}#0`
+}
+
+async function buyerExit(ref: string, logAs: string): Promise<TxLogEntry> {
+  const buyer = await party('buyer')
+  const escrow = await escrowAt(ref)
+  const utxos = pureAda(await liveUtxos(buyer.address)).filter((u) => lovelace(u) >= 5_000_000n)
+  if (utxos.length < 2) throw new SettleError('The buyer needs two pure-ADA UTxOs of at least 5 tADA.')
+  const built = await buildEscrowSpend({
+    network: 'preprod', window: txWindow(Date.now()), escrow, redeemer: 'WithdrawRefund', signers: [buyer], funding: [utxos[0]], collateral: utxos[1],
+    outputs: [{ address: buyer.address, amount: escrow.output.amount }], changeAddress: buyer.address,
+  })
+  const e = await submitAndConfirm(await addWitness(built, buyer), preprodSubmitter(), 'WithdrawRefund by the buyer (C11: the only party left)', Date.now(), SCRIPT_HASH)
+  return upsertTxLog(logAs, { ...e, redeemer: 'WithdrawRefund', role: 'buyer', expected: 'accept' })
+}
+
+// C11 with the guard isolated: concession with the minimal cooldown, then each seller control only once the engine's
+// reasons for it no longer include any cooldown, so the state or the emptied result hash is what decides.
+if (process.argv[1]?.endsWith('controls.ts') && process.argv[2] === 'c11-isolated' && process.argv[3]) {
+  const start = process.argv[3]
+  const logAs = `c11-isolated-${start}`
+  const after = await concedeAlone(start, logAs, true)
+  console.log(`conceded: ${after}; waiting for the seller cooldown to pass`)
+  const seller = [['SubmitResult', 'seller'], ['AuthorizeRefund', 'seller']] as const
+  for (;;) {
+    const escrow = await escrowAt(after)
+    const d = readDatum(escrow.output.plutusData as string)
+    const v: Value = Object.fromEntries(escrow.output.amount.map((a) => [a.unit, a.quantity]))
+    const g = reach(d, v, Date.now(), PARAMS, after)
+    const cells = seller.map(([r, role]) => g.verdicts.find((x) => x.redeemer === r && x.role === role))
+    if (cells.every((c) => c && !c.failed.some((f) => /cooldown/.test(f)))) break
+    await new Promise((r) => setTimeout(r, 20_000))
+  }
+  for (const [redeemer, role] of seller) {
+    const e = await tryAnyway(after, redeemer, role, logAs)
+    console.log(`  ${e.step}: ${e.status} at ${e.stage}${e.refusal ? `, phase ${e.refusal.phase}` : ''}`)
+  }
+  const exit = await buyerExit(after, logAs)
+  console.log(`  ${exit.step}: ${exit.status} at ${exit.stage}${exit.block ? `, block ${exit.block.height}` : ''}`)
+}
+
+if (process.argv[1]?.endsWith('controls.ts') && process.argv[2] === 'c11' && process.argv[3]) {
+  const start = process.argv[3]
+  const logAs = `c11-${start}`
+  const after = await concedeAlone(start, logAs)
+  console.log(`conceded: ${after}`)
+  for (const [redeemer, role] of [['SubmitResult', 'seller'], ['AuthorizeRefund', 'seller'], ['SetRefundRequested', 'buyer']] as const) {
+    const e = await tryAnyway(after, redeemer, role, logAs)
+    console.log(`  ${e.step}: ${e.status} at ${e.stage}${e.refusal ? `, phase ${e.refusal.phase}` : ''}`)
+  }
+  const exit = await buyerExit(after, logAs)
+  console.log(`  ${exit.step}: ${exit.status} at ${exit.stage}${exit.block ? `, block ${exit.block.height}` : ''}`)
 }

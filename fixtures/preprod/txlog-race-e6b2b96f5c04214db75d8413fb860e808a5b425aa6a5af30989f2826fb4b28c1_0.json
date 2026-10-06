@@ -1,0 +1,56 @@
+[
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "409d9e2a32701d64953355afc07dd35cc0f2f04a2efad0e8169bcab1bedd7684",
+    "atMs": 1791271189547,
+    "via": "blockfrost",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259750,
+      "hash": "98d2824b3b42c13b8aebb00675e5f251d4a4deb72fceaa22384cf18516e4c512",
+      "slot": 135587984
+    }
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "953c3de01cedaaeb66b0ce5a2144f9ffd98f265b1ef17e9f38cf343e3b00f165",
+    "atMs": 1791271194862,
+    "via": "blockfrost",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259750,
+      "hash": "98d2824b3b42c13b8aebb00675e5f251d4a4deb72fceaa22384cf18516e4c512",
+      "slot": 135587984
+    }
+  },
+  {
+    "step": "rival (run 1): the buyer's own WithdrawRefund, fired through Koios on first sight of leg 1 in Blockfrost's mempool",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "adc7ff7528e85cc5b78302efeca47363448dfc973c6da6516176865a0d7b3b9a",
+    "atMs": 1791271162868,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\"409d9e2a32701d64953355afc07dd35cc0f2f04a2efad0e8169bcab1bedd7684\\\"}) (TxIx {unTxIx = 0})]))))\",\"ConwayUtxowFailure (UtxoFailure (ValueNotConservedUTxO Mismatch (RelEQ) {supplied: MaryValue (Coin 10000000) (MultiAsset (fromList [])), expected: MaryValue (Coin 30000000) (MultiAsset (fromList []))}))\",\"ConwayUtxowFailure (ScriptIntegrityHashMismatch Mismatch (RelEQ) {supplied: SJust (SafeHash \\\"ee438cc6ce7fe95200654ac29d93f2ec51d9b8e7b140dd571a754f69d117c17f\\\"), expected: SJust (SafeHash \\\"982b528d5c2a949709df93660d21f942cfdb37d1065aef3246eef2d8edbb24a3\\\")} (SJust \\\"\\\\161\\\\130\\\\NUL\\\\SOH\\\\130\\\\216|\\\\128\\\\130\\\\SUB\\\\NUL\\\\STX\\\\169o\\\\SUB\\\\ETX\\\\242\\\\206\\\\184\\\\160\\\"))\",\"ConwayUtxowFailure (ExtraRedeemers (ConwaySpending (AsIx {unAsIx = 1}) :| []))\",\"ConwayUtxowFailure (ExtraneousScriptWitnessesUTXOW (NonEmptySet (fromList [ScriptHash \\\"bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0\\\"])))\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\"409d9e2a32701d64953355afc07dd35cc0f2f04a2efad0e8169bcab1bedd7684\\\"}) (TxIx {unTxIx = 0})]))))\",\"ConwayUtxowFailure (UtxoFailure (ValueNotConservedUTxO Mismatch (RelEQ) {supplied: MaryValue (Coin 10000000) (MultiAsset (fromList [])), expected: MaryValue (Coin 30000000) (MultiAsset (fromList []))}))\",\"ConwayUtxowFailure (ScriptIntegrityHashMismatch Mismatch (RelEQ) {supplied: SJust (SafeHash \\\"ee438cc6ce7fe95200654ac29"
+  }
+]

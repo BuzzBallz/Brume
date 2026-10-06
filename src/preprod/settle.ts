@@ -7,6 +7,7 @@
 // out/seller/<hash>_<index>.json is the seller's own record (what it built), never shared;
 // fixtures/preprod/txlog-<hash>_<index>.json is the run log, one entry per (step, tx), updated pending → confirmed.
 import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { hostname } from 'node:os'
 import { join } from 'node:path'
 import type { Asset, UTxO } from '@meshsdk/core'
 import type { Address, Proposal, Role, TxLogEntry, Value } from '../../shared/types.ts'
@@ -317,17 +318,57 @@ async function replayControl(escrowRef: string, leg2: Built): Promise<TxLogEntry
 }
 
 // One settlement per escrow at a time: an exclusive lock file, released on every exit path.
-function lock(escrowRef: string): () => void {
+// The lock names its owner (pid, host, time). A lock whose process is gone (same host), or older than the longest a
+// settlement can run (leg 2's whole window, any host), is stale: an agent that died mid-send must not block its escrow.
+export const LOCK_MAX_AGE_MS = LEG1_WINDOW_MS + LEG2_AFTER_LEG1_MS + 10 * MIN
+type LockOwner = { pid: number; host: string; atMs: number }
+const alive = (pid: number): boolean => {
+  try {
+    process.kill(pid, 0) // signal 0: existence check only
+    return true
+  } catch (error: unknown) {
+    return (error as NodeJS.ErrnoException).code === 'EPERM' // exists, not ours to signal
+  }
+}
+export function isStale(owner: LockOwner | null, nowMs = Date.now(), host = hostname()): boolean {
+  if (!owner || typeof owner.pid !== 'number') return true // unreadable or pre-pid lock: no owner to wait for
+  if (nowMs - owner.atMs > LOCK_MAX_AGE_MS) return true
+  return owner.host === host && !alive(owner.pid)
+}
+export function lock(escrowRef: string): () => void {
   mkdirSync(sellerDir(), { recursive: true })
   const file = join(sellerDir(), `${slug(escrowRef)}.lock`)
-  let fd: number
-  try {
-    fd = openSync(file, 'wx')
-  } catch {
-    throw new SettleError('A settlement of this escrow is already running: wait for it to finish.')
+  const me: LockOwner = { pid: process.pid, host: hostname(), atMs: Date.now() }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const fd = openSync(file, 'wx')
+      writeFileSync(fd, JSON.stringify(me))
+      closeSync(fd)
+      // Released only by its owner: never removes a lock another process has since taken over.
+      return () => {
+        try {
+          const now = JSON.parse(readFileSync(file, 'utf8')) as LockOwner
+          if (now.pid === me.pid && now.host === me.host && now.atMs === me.atMs) rmSync(file, { force: true })
+        } catch {
+          // already gone
+        }
+      }
+    } catch (error: unknown) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      let owner: LockOwner | null = null
+      try {
+        owner = JSON.parse(readFileSync(file, 'utf8')) as LockOwner
+      } catch {
+        owner = null
+      }
+      if (attempt === 0 && isStale(owner)) {
+        rmSync(file, { force: true }) // a dead owner's lock: taken over once
+        continue
+      }
+      throw new SettleError(`A settlement of this escrow is already running${owner ? ` (process ${owner.pid} on ${owner.host}, since ${sgt(owner.atMs)})` : ''}: wait for it to finish.`)
+    }
   }
-  closeSync(fd)
-  return () => rmSync(file, { force: true })
+  throw new SettleError('A settlement of this escrow is already running: wait for it to finish.')
 }
 
 export async function submit(proposal: Proposal, opts: { replay?: boolean } = {}): Promise<TxLogEntry[]> {
