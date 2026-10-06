@@ -54,11 +54,13 @@ function staticFile(path: string, res: ServerResponse) {
   const base = rel.startsWith('shared/mock/') ? ROOT : join(ROOT, 'docs')
   const file = join(base, rel)
   if (!file.startsWith(base) || !TYPES[extname(file)]) throw new HttpError(404, 'not found')
+  let content: Buffer
   try {
-    res.writeHead(200, { 'content-type': TYPES[extname(file)], 'cache-control': 'no-store' }).end(readFileSync(file))
+    content = readFileSync(file)
   } catch {
     throw new HttpError(404, 'not found')
   }
+  res.writeHead(200, { 'content-type': TYPES[extname(file)], 'cache-control': 'no-store' }).end(content)
 }
 
 const routeKey = (method: string, pathname: string) =>
