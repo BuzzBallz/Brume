@@ -99,18 +99,55 @@ export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise
   return Object.values(ok).map((r) => ({ mem: r.memory, steps: r.steps }))
 }
 
+// Koios's keyless tier has a daily request cap per IP (6 Oct: "Exceeded Tier Limit" after ~6,300 preprod calls). When Koios
+// answers 429 it is set aside for 30 min and every read below goes to Blockfrost alone, said once on stderr: a degraded mode
+// with one provider, never a silent one. Submits then default to Blockfrost too (SUBMIT_VIA still wins when set).
+const KOIOS_REST_MS = 30 * 60_000
+let koiosDownUntil = 0
+let koiosDownSaid = false
+export const koiosAvailable = (now = Date.now()): boolean => now >= koiosDownUntil
+export function koiosLimited(status: number, now = Date.now()): void {
+  if (status !== 429) return
+  koiosDownUntil = now + KOIOS_REST_MS
+  if (!koiosDownSaid) console.error(`preprod: Koios answered 429 (its keyless daily cap): reading on Blockfrost alone until ${new Date(koiosDownUntil).toISOString()} — one provider, degraded`)
+  koiosDownSaid = true
+}
+
 // Blockfrost's address listing lags a fresh spend (seen 6 Oct: an input spent one block earlier was still listed), so every
-// UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws.
+// UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws, except
+// its daily cap (429), which falls back to Blockfrost's per-transaction view (consumed_by_tx), not its lagging listing.
 // Koios utxo_info for a set of refs: spent or not, and at which address. A ref Koios does not know is absent from the map.
 export async function utxoInfo(refs: string[]): Promise<Map<string, { spent: boolean; address: string }>> {
   const out = new Map<string, { spent: boolean; address: string }>()
   if (refs.length === 0) return out
-  const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
-  })
-  if (!res.ok) throw new Error(`Koios utxo_info HTTP ${res.status}: cannot confirm which UTxOs are unspent`)
-  for (const r of (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean; address: string }[]) {
-    out.set(`${r.tx_hash}#${r.tx_index}`, { spent: r.is_spent, address: r.address })
+  if (koiosAvailable()) {
+    const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
+    })
+    if (res.ok) {
+      for (const r of (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean; address: string }[]) {
+        out.set(`${r.tx_hash}#${r.tx_index}`, { spent: r.is_spent, address: r.address })
+      }
+      return out
+    }
+    if (res.status !== 429) throw new Error(`Koios utxo_info HTTP ${res.status}: cannot confirm which UTxOs are unspent`)
+    koiosLimited(res.status)
+  }
+  return utxoInfoBlockfrost(refs)
+}
+// Blockfrost's view of each transaction's outputs: address and the tx that consumed it, if any. One call per tx hash; a tx
+// Blockfrost does not know leaves its refs absent (unknown: never treated as unspent). A read error throws (a hole).
+async function utxoInfoBlockfrost(refs: string[]): Promise<Map<string, { spent: boolean; address: string }>> {
+  const out = new Map<string, { spent: boolean; address: string }>()
+  const byTx = new Map<string, number[]>()
+  for (const r of refs) {
+    const [h, i] = r.split('#')
+    byTx.set(h, [...(byTx.get(h) ?? []), Number(i)])
+  }
+  for (const [h, idx] of byTx) {
+    const u = await blockfrostGet<{ outputs: { output_index: number; address: string; consumed_by_tx?: string | null }[] }>(`/txs/${h}/utxos`)
+    if (!u) continue
+    for (const o of u.outputs) if (idx.includes(o.output_index)) out.set(`${h}#${o.output_index}`, { spent: !!o.consumed_by_tx, address: o.address })
   }
   return out
 }
@@ -148,11 +185,16 @@ export function markSpent(refs: string[]): void {
 
 export async function liveUtxos(address: string): Promise<UTxO[]> {
   const fromBlockfrost = await preprodChain().fetchAddressUTxOs(address)
-  const kres = await fetch(`${KOIOS.preprod}/address_utxos`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _addresses: [address], _extended: true }), signal: AbortSignal.timeout(30_000),
-  })
-  if (!kres.ok) throw new Error(`Koios address_utxos HTTP ${kres.status}: cannot list the UTxOs on a second provider`)
-  const fromKoios: UTxO[] = ((await kres.json()) as KoiosUtxo[]).map((r) => ({
+  let koiosRows: KoiosUtxo[] = []
+  if (koiosAvailable()) {
+    const kres = await fetch(`${KOIOS.preprod}/address_utxos`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _addresses: [address], _extended: true }), signal: AbortSignal.timeout(30_000),
+    })
+    if (kres.ok) koiosRows = (await kres.json()) as KoiosUtxo[]
+    else if (kres.status === 429) koiosLimited(kres.status) // degraded: Blockfrost's listing alone, each candidate still checked per tx
+    else throw new Error(`Koios address_utxos HTTP ${kres.status}: cannot list the UTxOs on a second provider`)
+  }
+  const fromKoios: UTxO[] = koiosRows.map((r) => ({
     input: { txHash: r.tx_hash, outputIndex: r.tx_index },
     output: { address: r.address, amount: [{ unit: 'lovelace', quantity: r.value }, ...(r.asset_list ?? []).map((a) => ({ unit: a.policy_id + a.asset_name, quantity: a.quantity }))] },
   }))
@@ -184,7 +226,7 @@ export const refusalPhase = (ledgerError: string): 1 | 2 =>
 
 export type Submitter = { via: Provider; submitTx: (cborHex: string) => Promise<string> }
 
-async function postCbor(url: string, cborHex: string, headers: Record<string, string>): Promise<string> {
+async function postCbor(url: string, cborHex: string, headers: Record<string, string>, onStatus?: (status: number) => void): Promise<string> {
   let mayHaveReached = false
   for (let attempt = 0, wait = 1_000; ; attempt++, wait *= 2) {
     let res: Response
@@ -200,6 +242,7 @@ async function postCbor(url: string, cborHex: string, headers: Record<string, st
     }
     const text = await res.text()
     if (res.ok) return text.replace(/"/g, '').trim()
+    onStatus?.(res.status)
     if (res.status === 400) {
       if (mayHaveReached) throw new AmbiguousSubmit(`HTTP 400 after an earlier attempt may have reached the node: ${text.slice(0, 600)}`)
       if (!LEDGER_RULE.test(text)) throw new SubmitTransportError(`the provider rejected the request, not a ledger rule: ${text.slice(0, 300)}`)
@@ -231,10 +274,13 @@ export async function seenByChain(txHash: string, ms = 90_000): Promise<boolean>
 // SUBMIT_VIA=koios|blockfrost (PLAN §9 R-3). Koios is keyless: no auth header is sent at all.
 export function preprodSubmitter(via?: 'koios' | 'blockfrost'): Submitter {
   loadEnv()
-  if ((via ?? process.env.SUBMIT_VIA) === 'blockfrost') {
+  // An empty SUBMIT_VIA= line (as .env.example ships it) counts as unset. Koios, by default or from SUBMIT_VIA, gives way
+  // to Blockfrost while it answers 429 (its keyless daily cap), said once on stderr; an explicit `via` argument is kept.
+  const asked = via ?? ((process.env.SUBMIT_VIA || undefined) === 'blockfrost' || !koiosAvailable() ? 'blockfrost' : 'koios')
+  if (asked === 'blockfrost') {
     const id = requireEnv('BLOCKFROST_PREPROD_PROJECT_ID')
     if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
     return { via: 'blockfrost', submitTx: (cborHex) => postCbor(`${BLOCKFROST_PREPROD}/tx/submit`, cborHex, { project_id: id }) }
   }
-  return { via: 'koios', submitTx: (cborHex) => postCbor(`${KOIOS.preprod}/submittx`, cborHex, {}) }
+  return { via: 'koios', submitTx: (cborHex) => postCbor(`${KOIOS.preprod}/submittx`, cborHex, {}, koiosLimited) }
 }
