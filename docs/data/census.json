@@ -2,18 +2,18 @@
  "census": {
   "network": "mainnet",
   "tip": {
-   "height": 14032015,
-   "hash": "df658983e9165aa9a9628dc21d16f4e1167b3a6876a73a618d85dc0a2d5c2e6c",
-   "timeMs": 1791265710000
+   "height": 14032180,
+   "hash": "5753db6c34830b2127558ec83afc346a046b0144cb3ee4af15aeede0f1ba3779",
+   "timeMs": 1791268848000
   },
   "provider": "koios",
-  "open": 141,
-  "decoded": 140,
+  "open": 170,
+  "decoded": 169,
   "undecodable": 1,
   "holes": 0,
   "byState": {
-   "FundsLocked": 6,
-   "ResultSubmitted": 69,
+   "FundsLocked": 7,
+   "ResultSubmitted": 97,
    "RefundRequested": 4,
    "Disputed": 61
   },
@@ -60,6 +60,14 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+    }
+   },
+   {
+    "ref": "07e4d4ad21245653543ae4394cdc9280811c30105a52108d2805f99698547603#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2300000"
     }
    },
    {
@@ -166,6 +174,38 @@
     }
    },
    {
+    "ref": "137f696655ffa1fa6cf75495532d54cf5708f1425eb217d18b9f75bc0baee55c#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
+    "ref": "13bd06d1c07e7fb79f9c4dd0abf05da8b62265b5f806b199bd2b2fbccc0be217#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8500000"
+    }
+   },
+   {
+    "ref": "140038a5c68c902e2069b7c78354486b76ac1ac97c8703eef0dbf6d4ecdd9249#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
+    "ref": "1533aa037c23906266c4c325310f12e6e9fed4092bf3b2bb49ec144c0ac30818#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
     "ref": "1916734c0e64e6beefb3b5d07d56e1e5ce7d756a3514d92c745409dcffccf1c3#0",
     "state": "Disputed",
     "value": {
@@ -219,6 +259,14 @@
     "value": {
      "lovelace": "7331310",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+    }
+   },
+   {
+    "ref": "2430654cd9322cc2ed947098b6d6faaaa34c9229a747cb0fbbbadc9ae297b327#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2800000"
     }
    },
    {
@@ -341,6 +389,14 @@
     }
    },
    {
+    "ref": "3fbca46507e1b7c9a50a168843a27460343b933a35816562b51bbf7121082f42#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "4486710",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+    }
+   },
+   {
     "ref": "3feca358580adafe68b4db537c3103f7f9bdfcfb5b2a3bfeafd5f8803c87d76c#0",
     "state": "FundsLocked",
     "value": {
@@ -388,11 +444,27 @@
     }
    },
    {
+    "ref": "45d6fe4dd725db085228ff03d04c627c0bc51540058f242e8def59afa14e9ef5#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2800000"
+    }
+   },
+   {
     "ref": "47fdaf2eaa8dbeeff81395a4607c495344920ca94051feddfe4a371248819c10#0",
     "state": "Disputed",
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+    }
+   },
+   {
+    "ref": "4af65395473fad333da92bf187b88e8f2f9605c2f56372f66b6684524aadffc6#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
     }
    },
    {
@@ -428,11 +500,27 @@
     }
    },
    {
+    "ref": "58affb8063a92d95334e4c693cc9e15bf7cd62124161a0aeacc4b3eb282f9b37#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2600000"
+    }
+   },
+   {
     "ref": "5bb9067017dbfd6c1a2aec5b567d8c0b0bbaf1efe77c386cb03349ce04d925aa#0",
     "state": "ResultSubmitted",
     "value": {
      "lovelace": "4025540",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+    }
+   },
+   {
+    "ref": "5f7292d5c35d3bd7e50cde5ee7635905e3528d1f781b4b549b29e51ab41eb902#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "9000000"
     }
    },
    {
@@ -460,11 +548,27 @@
     }
    },
    {
+    "ref": "61e325d105a4a12fe7d16274b65b060bd0e9fb2a8d82204f8cb279a7e8765437#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2800000"
+    }
+   },
+   {
     "ref": "645c157eb7b5b0eabde69ae1098dffe9bddde74923bd7371b4efe8b91e195248#0",
     "state": "Disputed",
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "39000000"
+    }
+   },
+   {
+    "ref": "665d750731f9efbc041c72be545a91018a68942eb4a968b82123328527019ebe#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "800000"
     }
    },
    {
@@ -551,6 +655,30 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+    }
+   },
+   {
+    "ref": "89cd4cf8d6927c5af18e94f942a3b0c06ba1ab9e922fb56b1856d0029628bd81#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
+    "ref": "8a76334d3fa5387581072c8e3498538f69f29ed515f222056ebca078a8d20dff#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "900000"
+    }
+   },
+   {
+    "ref": "8af8335dba2586c7c536fda8823886c1a18c52bcdccca7452f9d495c0a0ae022#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1300000"
     }
    },
    {
@@ -648,6 +776,38 @@
     }
    },
    {
+    "ref": "9d121aef5525e067b5b9c3a8d795b4f7ef39df9057c63640805e6e88b88b5be9#4",
+    "state": "FundsLocked",
+    "value": {
+     "lovelace": "4434990",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1800000"
+    }
+   },
+   {
+    "ref": "9e3aee0db5762c6c6cac15d08f85553e829c5d2f0ac2d503d6632ee419241dd4#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
+    "ref": "9e962cae12e13a597cedcaea7b212aade050c7d2a1404516d5df09b0f48c6a83#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "600000"
+    }
+   },
+   {
+    "ref": "9e9990232b65d592237134dd6372ae710ced9ea04db4e5ebecd33f10dd5143b4#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "300000"
+    }
+   },
+   {
     "ref": "9f84d9feb627a6be4cc0fae39130e5a3b367a62d837bbd4ed140cfcf63d87fbb#0",
     "state": "Disputed",
     "value": {
@@ -708,6 +868,14 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "39000000"
+    }
+   },
+   {
+    "ref": "a72d90ef604a59638bf9f969674b182d47479da06f4d007cf31c860385394e12#0",
+    "state": "FundsLocked",
+    "value": {
+     "lovelace": "4434990",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
     }
    },
    {
@@ -806,19 +974,19 @@
     }
    },
    {
-    "ref": "b905e9c66ff6bf75510ab767893843a89b004dc3d8df4f7d5943c7c1ca0c8beb#0",
-    "state": "FundsLocked",
-    "value": {
-     "lovelace": "4434990",
-     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
-    }
-   },
-   {
     "ref": "ba8684c65aa46b79a9a2e7a1f0014950846412897610c13e254076573a7e0bf8#0",
     "state": "Disputed",
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+    }
+   },
+   {
+    "ref": "ba9af6f9a7276b97bb1b7adc9b38831d4fe40a5240afe0f42c9b2b1021ee88ff#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "9750000"
     }
    },
    {
@@ -835,6 +1003,22 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+    }
+   },
+   {
+    "ref": "bc43f2474fbfc40bdbafcace1aac9bff3de05d81669c5346bcdfeab7e1d50e19#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "800000"
+    }
+   },
+   {
+    "ref": "bcfe2690e22b147392a93d190513ee20f6441d3b32a0eaadf10b82c404421e54#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
     }
    },
    {
@@ -894,6 +1078,14 @@
     }
    },
    {
+    "ref": "c542e23802d97dbecba52bd4401591ba026f335d7aab56e860deea1025b5f80b#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "900000"
+    }
+   },
+   {
     "ref": "c7e5a062c572b30f69e22e3adf5e038a06d80cdff3d6d199345656a212e6f843#0",
     "state": "Disputed",
     "value": {
@@ -907,6 +1099,14 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+    }
+   },
+   {
+    "ref": "cb680d0534c2d825a409c0cbf3efbcb78cafdbcc98e4fc92d4d914b481f19f84#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2800000"
     }
    },
    {
@@ -963,6 +1163,14 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+    }
+   },
+   {
+    "ref": "dbfe89133f56d3ed2e88f6f1be99a6acb18f5f534e5b47a6fb1800350f27c8eb#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "4434990",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "9000000"
     }
    },
    {
@@ -1026,6 +1234,22 @@
     "value": {
      "lovelace": "4029850",
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+    }
+   },
+   {
+    "ref": "e93daed65595db5685a96b672241388bcb330b0dfa6a13677be6eaf02ec02ba2#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "9000000"
+    }
+   },
+   {
+    "ref": "ea1260fcd916e2c73fd86e2b306afc8e2729f6c4b9a0b8ea2e9aaaedd02b71e4#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "7000000"
     }
    },
    {
@@ -1097,6 +1321,14 @@
     "state": "ResultSubmitted",
     "value": {
      "lovelace": "3818660"
+    }
+   },
+   {
+    "ref": "f842eb0c533ea566140e8159230c091cb2698d9f3f9df83d1e133cf378143976#0",
+    "state": "ResultSubmitted",
+    "value": {
+     "lovelace": "7331310",
+     "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "300000"
     }
    },
    {
