@@ -63,6 +63,36 @@ export async function blockfrostGet<T>(path: string): Promise<T | null> {
   }
 }
 
+export type ExUnits = { mem: number; steps: number }
+export class EvaluationFailure extends Error {}
+
+// Script evaluation against UTxOs that are not on chain yet (leg 1's output, for leg 2). Mesh's own conversion of
+// chained txs drops the inline datum, so the validator could never read it: the extra set is written here, datum included.
+export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise<ExUnits[]> {
+  const id = requireEnv('BLOCKFROST_PREPROD_PROJECT_ID')
+  if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
+  const additionalUtxoSet = extra.map((u) => {
+    const assets: Record<string, number> = {}
+    let coins = 0
+    for (const a of u.output.amount) {
+      if (a.unit === 'lovelace') coins = Number(a.quantity)
+      else assets[`${a.unit.slice(0, 56)}.${a.unit.slice(56)}`] = Number(a.quantity)
+    }
+    const out: Record<string, unknown> = { address: u.output.address, value: Object.keys(assets).length ? { coins, assets } : { coins } }
+    if (u.output.plutusData) out.datum = u.output.plutusData
+    return [{ txId: u.input.txHash, index: u.input.outputIndex }, out]
+  })
+  const res = await fetch(`${BLOCKFROST_PREPROD}/utils/txs/evaluate/utxos`, {
+    method: 'POST', headers: { project_id: id, 'content-type': 'application/json' }, body: JSON.stringify({ cbor: cborHex, additionalUtxoSet }), signal: AbortSignal.timeout(60_000),
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Blockfrost evaluate HTTP ${res.status}: ${text.slice(0, 300)}`)
+  const body = JSON.parse(text) as { result?: { EvaluationResult?: Record<string, { memory: number; steps: number }>; EvaluationFailure?: unknown } }
+  const ok = body.result?.EvaluationResult
+  if (!ok) throw new EvaluationFailure(`evaluation failed: ${JSON.stringify(body.result?.EvaluationFailure ?? body).slice(0, 1200)}`)
+  return Object.values(ok).map((r) => ({ mem: r.memory, steps: r.steps }))
+}
+
 // Blockfrost's address listing lags a fresh spend (seen 6 Oct: an input spent one block earlier was still listed), so every
 // UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws.
 export async function liveUtxos(address: string): Promise<UTxO[]> {

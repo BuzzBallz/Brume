@@ -174,7 +174,7 @@ async function settle(ref: string, share: number): Promise<void> {
   const leg2 = await buildEscrowSpend({
     network: 'preprod', window: w2, escrow: leg1Out, redeemer: 'WithdrawRefund', signers: [buyer], funding: [s2], collateral: s2,
     outputs: [{ address: buyer.address, amount: payout.buyer }, { address: seller.address, amount: payout.seller }],
-    changeAddress: seller.address, chained: [leg1.cborHex],
+    changeAddress: seller.address, pending: [leg1Out],
   })
   console.log(`leg 2 WithdrawRefund   ${leg2.txHash}  (spends ${leg1.txHash.slice(0, 12)}…#0, which does not exist yet; valid until ${new Date(w2.toMs).toISOString()})`)
   console.log(`      split: seller ${JSON.stringify(payout.seller)} / buyer ${JSON.stringify(payout.buyer)}`)

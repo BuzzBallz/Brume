@@ -1,10 +1,10 @@
 import type { Asset, UTxO } from '@meshsdk/core'
 import type { Network, Redeemer } from '../../shared/types.ts'
 import { REDEEMER } from '../../shared/types.ts'
-import { assertPreprod, assertPreprodAddress, blockfrostGet, preprodChain } from './chain.ts'
+import { assertPreprod, assertPreprodAddress, blockfrostGet, evaluateWithUtxos, preprodChain, type ExUnits } from './chain.ts'
 import { builderCst, cst, mesh } from './mesh.ts'
 import { deployedV1, type Script } from './script.ts'
-import { checkTx, TxRuleError, type Built, type TxOut, type TxWindow } from './tx.ts'
+import { checkTx, protocol, TxRuleError, type Built, type TxOut, type TxWindow } from './tx.ts'
 import type { Party } from './wallet.ts'
 
 // One spend of one escrow UTxO (SPEC-VALIDATOR P4/P5): exactly one escrow input, at most one escrow output, which is
@@ -20,7 +20,7 @@ export type EscrowSpend = {
   continuation?: { datumCbor: string; amount: Asset[] } // the escrow output, for continuation branches
   outputs: TxOut[] // everything else, e.g. the negotiated split on an exit branch
   changeAddress: string
-  chained?: string[] // CBOR of unsubmitted txs whose outputs this one spends (leg 1, for leg 2's evaluation)
+  pending?: UTxO[] // outputs of unsubmitted txs this one spends, inline datum included (leg 1's escrow output, for leg 2)
   script?: Script // defaults to the shared deployed V1; our own deployment (S-2) passes its own
 }
 
@@ -65,25 +65,20 @@ export async function buildEscrowSpend(spec: EscrowSpend): Promise<Built> {
   for (const u of [...spec.funding, spec.collateral]) assertPreprodAddress(u.output.address)
   if (spec.funding.some((u) => u.output.address === script.address.preprod)) throw new TxRuleError('a funding input sits at the script address: one escrow input per tx')
 
-  const chain = preprodChain()
-  const b = new mesh.MeshTxBuilder({ fetcher: chain, evaluator: chain, params: await chain.fetchProtocolParameters() }).setNetwork('preprod')
-  b.spendingPlutusScriptV3()
-    .txIn(...known(spec.escrow))
-    .txInInlineDatumPresent()
-    .txInRedeemerValue({ alternative: REDEEMER.indexOf(spec.redeemer), fields: [] }, 'Mesh')
-    .txInScript(script.cbor)
-  for (const u of spec.funding) b.txIn(...known(u))
-  const [ch, ci, ca, caddr] = known(spec.collateral)
-  b.txInCollateral(ch, ci, ca, caddr)
-  if (spec.continuation) b.txOut(script.address.preprod, spec.continuation.amount).txOutInlineDatumValue(spec.continuation.datumCbor, 'CBOR')
-  for (const o of spec.outputs) {
-    if (o.address === script.address.preprod) throw new TxRuleError('extra output to the script address')
-    b.txOut(o.address, o.amount)
+  let cborHex: string
+  if (!spec.pending?.length) {
+    cborHex = await assemble(spec, script) // escrow on chain: Mesh's evaluator resolves it
+  } else {
+    // Escrow not on chain yet: evaluate against the pending outputs ourselves, then build with those units plus 10 %,
+    // then evaluate the final body again. A leg that fails here never lets the leg before it go out.
+    const provisional = await assemble(spec, script, PROVISIONAL)
+    const [used] = await evaluateWithUtxos(provisional, spec.pending)
+    if (!used) throw new TxRuleError('evaluation returned no redeemer budget')
+    const units = { mem: Math.ceil(used.mem * 1.1), steps: Math.ceil(used.steps * 1.1) }
+    cborHex = await assemble(spec, script, units)
+    const [check] = await evaluateWithUtxos(cborHex, spec.pending)
+    if (!check || check.mem > units.mem || check.steps > units.steps) throw new TxRuleError('the final body needs more than the declared execution units')
   }
-  for (const s of spec.signers) b.requiredSignerHash(s.pkh)
-  b.invalidBefore(spec.window.fromSlot).invalidHereafter(spec.window.toSlot).changeAddress(spec.changeAddress)
-  for (const tx of spec.chained ?? []) b.chainTx(tx)
-  const cborHex = await withChainScriptDataHash(await b.complete())
 
   checkTx(cborHex, {
     signers: spec.signers.map((s) => s.pkh),
@@ -96,4 +91,28 @@ export async function buildEscrowSpend(spec: EscrowSpend): Promise<Built> {
     throw new TxRuleError('the escrow continuation is not output 0: a pre-signed next leg would name the wrong output')
   }
   return { cborHex, txHash: mesh.resolveTxHash(cborHex) }
+}
+
+// Below the per-tx ceiling, only a placeholder for the first pass; never submitted.
+const PROVISIONAL: ExUnits = { mem: 7_000_000, steps: 3_000_000_000 }
+
+async function assemble(spec: EscrowSpend, script: Script, units?: ExUnits): Promise<string> {
+  const chain = preprodChain()
+  const b = new mesh.MeshTxBuilder({ fetcher: chain, evaluator: units ? undefined : chain, params: await protocol() }).setNetwork('preprod')
+  b.spendingPlutusScriptV3()
+    .txIn(...known(spec.escrow))
+    .txInInlineDatumPresent()
+    .txInRedeemerValue({ alternative: REDEEMER.indexOf(spec.redeemer), fields: [] }, 'Mesh', units)
+    .txInScript(script.cbor)
+  for (const u of spec.funding) b.txIn(...known(u))
+  const [ch, ci, ca, caddr] = known(spec.collateral)
+  b.txInCollateral(ch, ci, ca, caddr)
+  if (spec.continuation) b.txOut(script.address.preprod, spec.continuation.amount).txOutInlineDatumValue(spec.continuation.datumCbor, 'CBOR')
+  for (const o of spec.outputs) {
+    if (o.address === script.address.preprod) throw new TxRuleError('extra output to the script address')
+    b.txOut(o.address, o.amount)
+  }
+  for (const s of spec.signers) b.requiredSignerHash(s.pkh)
+  b.invalidBefore(spec.window.fromSlot).invalidHereafter(spec.window.toSlot).changeAddress(spec.changeAddress)
+  return withChainScriptDataHash(await b.complete())
 }
