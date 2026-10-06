@@ -79,7 +79,7 @@
     "ref": "18268b5a82f9d5a9a526cd00a28f47bb76656b711d3040276cd94abc768f0e9d#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed",
+    "state": "spent",
     "disputedFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#3",
     "disputedInBlock": 5259541
   },
@@ -100,7 +100,7 @@
     "ref": "fd9eb4f3ab29f6aa997289a05c252d16e43973022862c22e9e09d34b74452423#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "RefundRequested",
+    "state": "spent",
     "disputedFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#4",
     "disputedInBlock": 5259543,
     "concededFrom": "8e0d6df4c39144d674aab1f7a0503a26a497da964316d2831fcf58c22ec2bf57#0"
@@ -141,7 +141,7 @@
     "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#6",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed"
+    "state": "spent"
   },
   {
     "purpose": "stream B demo 2 (locked directly in Disputed for B's wallets)",
@@ -179,7 +179,7 @@
     "ref": "7a37751b9633f64ef043d5d6e53e062862c60d7cf63c1921a34f25dd8021ba8e#0",
     "lockedIn": "a5642c65f98dbb65576e03a480cbf830cd131dfd11ddab1a7bf0415fcfff74e9",
     "lockedInBlock": 5259544,
-    "state": "Disputed",
+    "state": "spent",
     "disputedFrom": "a5642c65f98dbb65576e03a480cbf830cd131dfd11ddab1a7bf0415fcfff74e9#0",
     "disputedInBlock": 5259545,
     "targetStateMs": 53719
@@ -197,9 +197,98 @@
     "ref": "b475bad59115308bc51609d794aee1cf8d3ed26c70f41052aad56a6763f9c99b#0",
     "lockedIn": "70c19fc6115bdb11d43ad5ce57be5ef420ac2b1787fccd6e2dedab2df5f5dcf9",
     "lockedInBlock": 5259547,
-    "state": "Disputed",
+    "state": "spent",
     "disputedFrom": "70c19fc6115bdb11d43ad5ce57be5ef420ac2b1787fccd6e2dedab2df5f5dcf9#0",
     "disputedInBlock": 5259549,
     "targetStateMs": 35406
+  },
+  {
+    "purpose": "fast fixture run (spare, path B)",
+    "path": "B",
+    "owners": "A",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      }
+    ],
+    "ref": "e738e5b0496b448f41ec04a7b936f470fbc81b641b25d0c0421e7a70f9e7feb8#0",
+    "lockedIn": "c776678795d8cfd4ab41706e415b6f01b5ce2e014cb5170fe13a7e8112844894",
+    "lockedInBlock": 5259723,
+    "state": "spent",
+    "disputedFrom": "c776678795d8cfd4ab41706e415b6f01b5ce2e014cb5170fe13a7e8112844894#0"
+  },
+  {
+    "purpose": "fast fixture run (spare, path B)",
+    "path": "B",
+    "owners": "A",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      }
+    ],
+    "ref": "794370a207b45c07c397ea9662e80011a0eb1b24bd121e19d2bc0e9fa352d5a8#0",
+    "lockedIn": "2263b7a84c681c6c714410b9b2c31f7138208c76bf6650c6f950e9d9ed590169",
+    "lockedInBlock": 5259724,
+    "state": "spent",
+    "disputedFrom": "2263b7a84c681c6c714410b9b2c31f7138208c76bf6650c6f950e9d9ed590169#0",
+    "disputedInBlock": 5259725,
+    "targetStateMs": 48807,
+    "concededFrom": "7e37dc3fd7cdef7c28e9766627f887c65ab5560060f27fdf3e351b619a3926ee#0"
+  },
+  {
+    "purpose": "fast fixture run (spare, path B)",
+    "path": "B",
+    "owners": "A",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      }
+    ],
+    "ref": "e6b2b96f5c04214db75d8413fb860e808a5b425aa6a5af30989f2826fb4b28c1#0",
+    "lockedIn": "75fd6edfbb075898442e593a46c8235b8c4f936025f34c254d0a15e358e1bab5",
+    "lockedInBlock": 5259726,
+    "state": "spent",
+    "disputedFrom": "75fd6edfbb075898442e593a46c8235b8c4f936025f34c254d0a15e358e1bab5#0",
+    "disputedInBlock": 5259733,
+    "targetStateMs": 119391
+  },
+  {
+    "purpose": "fast fixture run (spare, path B)",
+    "path": "B",
+    "owners": "A",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      }
+    ],
+    "ref": "f1f193952baaf8b2ee20dd3ba5004a288af93a27e6f337ea42a2c100c6c3c94b#0",
+    "lockedIn": "f8250a04e1eb82e31df4e47c04f3cfa81a3867df17370a097de081a9ead356bf",
+    "lockedInBlock": 5259735,
+    "state": "spent",
+    "disputedFrom": "f8250a04e1eb82e31df4e47c04f3cfa81a3867df17370a097de081a9ead356bf#0",
+    "disputedInBlock": 5259736,
+    "targetStateMs": 16591
+  },
+  {
+    "purpose": "fast fixture run (spare, path B)",
+    "path": "B",
+    "owners": "A",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      }
+    ],
+    "ref": "970ecd3afc383dfc68e0b72a40b3c844e6351c592523e5431464c3124c17ed16#0",
+    "lockedIn": "f34266af219d57162f8a18c9f89d86084a8e0a511d3009bd9ff6778afd2aad68",
+    "lockedInBlock": 5259737,
+    "state": "Disputed",
+    "disputedFrom": "f34266af219d57162f8a18c9f89d86084a8e0a511d3009bd9ff6778afd2aad68#0",
+    "disputedInBlock": 5259739,
+    "targetStateMs": 141955
   }
 ]

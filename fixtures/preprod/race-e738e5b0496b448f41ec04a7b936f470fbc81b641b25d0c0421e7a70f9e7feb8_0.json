@@ -1,0 +1,37 @@
+{
+  "label": "S-1 race, contended run 2: our own bank escrow, our own keys; a data point, not a probability",
+  "escrow": "e738e5b0496b448f41ec04a7b936f470fbc81b641b25d0c0421e7a70f9e7feb8#0",
+  "leg1": "3f26bdb6311de071bd751fdf8831f32f052fda254c5998eb47d26cd8b595d93a",
+  "leg2": "941c042b90a52b78a1c2f1c78510a357d8da082e5971297a32ec4390c7266d15",
+  "rival": "83ba486f40b59824028d67e65511eaf8c4627e10ed1f911754c1551391691169",
+  "rivalPositiveControl": "evaluated OK twice against leg 1's pending output (a valid exit had leg1#0 been free)",
+  "setup": "legs to Blockfrost (seller); rival polls Blockfrost's mempool every 200 ms and submits through Koios",
+  "absoluteMs": {
+    "leg1Sent": 1791271306597,
+    "leg1Answered": 1791271306960,
+    "leg2Answered": 1791271307256,
+    "rivalSeesLeg1": 1791271307660,
+    "rivalAnswered": 1791271404008
+  },
+  "relativeMs": {
+    "leg1Sent": 0,
+    "leg1Answered": 363,
+    "leg2Answered": 659,
+    "rivalSeesLeg1": 1063,
+    "rivalAnswered": 97411
+  },
+  "rivalSighting": "mempool",
+  "rivalAttempts": 1,
+  "rivalAnswer": {
+    "status": "refused",
+    "detail": "hole: HTTP 400 after an earlier attempt may have reached the node: {\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (Ut"
+  },
+  "leg2Answer": "accepted by Blockfrost",
+  "winner": "leg 2 (the settlement)",
+  "blocks": {
+    "leg1": 5259754,
+    "leg1TimeS": 1791271364,
+    "leg2": 5259754,
+    "rival": null
+  }
+}

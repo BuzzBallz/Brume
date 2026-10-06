@@ -169,5 +169,185 @@
     "redeemer": "SetRefundRequested",
     "role": "buyer",
     "expected": "accept"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "c776678795d8cfd4ab41706e415b6f01b5ce2e014cb5170fe13a7e8112844894",
+    "atMs": 1791270525048,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259723,
+      "hash": "861317c64f6b1f790031d7ea56c6249647aeee99ae59d4d62306a0ed2abd9d9d",
+      "slot": 135587372
+    }
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "f69be23399cb2080a2e89bac3721cb9ad2a64ced4c6f994f461065e44cf2c51a",
+    "atMs": 1791270613238,
+    "via": "koios",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "2263b7a84c681c6c714410b9b2c31f7138208c76bf6650c6f950e9d9ed590169",
+    "atMs": 1791270600992,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259724,
+      "hash": "e7e3a429c491a3d9c15fd385cf12f2d5410b4e4747dca7934e131af049546556",
+      "slot": 135587435
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "7e37dc3fd7cdef7c28e9766627f887c65ab5560060f27fdf3e351b619a3926ee",
+    "atMs": 1791270641169,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259725,
+      "hash": "c212b0cc7800abfeed7039bd8b5bdf4377f0110072aaa881c4c2878ec4b15317",
+      "slot": 135587446
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "75fd6edfbb075898442e593a46c8235b8c4f936025f34c254d0a15e358e1bab5",
+    "atMs": 1791270658593,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259726,
+      "hash": "d8851bcd32b8856017a8f8cc6f0fed781b3eb1e98937e8be3f94d97cc2cb76e3",
+      "slot": 135587475
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "e6b2b96f5c04214db75d8413fb860e808a5b425aa6a5af30989f2826fb4b28c1",
+    "atMs": 1791270698304,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259733,
+      "hash": "dd91d36394d5e7256ae854f2fa77dd6beb647ffb334c47fda6cf577b8dc6b30e",
+      "slot": 135587561
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "f8250a04e1eb82e31df4e47c04f3cfa81a3867df17370a097de081a9ead356bf",
+    "atMs": 1791270782783,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259735,
+      "hash": "4e74902680fea8c95d647c2f0dc1a4147b96adc9537aeb3b06744b3c16d982ae",
+      "slot": 135587586
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "e738e5b0496b448f41ec04a7b936f470fbc81b641b25d0c0421e7a70f9e7feb8",
+    "atMs": 1791270776556,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259735,
+      "hash": "4e74902680fea8c95d647c2f0dc1a4147b96adc9537aeb3b06744b3c16d982ae",
+      "slot": 135587586
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "f1f193952baaf8b2ee20dd3ba5004a288af93a27e6f337ea42a2c100c6c3c94b",
+    "atMs": 1791270791742,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259736,
+      "hash": "41e868b5aa208f7a1a7a40c7239f92d3baa8a8bf4e53fdda03e16a7fc3fd7a34",
+      "slot": 135587598
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "f34266af219d57162f8a18c9f89d86084a8e0a511d3009bd9ff6778afd2aad68",
+    "atMs": 1791270804151,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259737,
+      "hash": "e39022839cf846b3d99f65a8ae6a1d34807812054990676be778adec72ab3f6e",
+      "slot": 135587613
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "970ecd3afc383dfc68e0b72a40b3c844e6351c592523e5431464c3124c17ed16",
+    "atMs": 1791270824562,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259739,
+      "hash": "6b7819f536e195cccf7a8ff6e11d8006018278548e200d92465f78deaf50e892",
+      "slot": 135587735
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
   }
 ]

@@ -1,0 +1,52 @@
+[
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "6f0d67cef821dd7f6d76d08288a2bafaa9a373a758725ac1761ea94e9f9361f4",
+    "atMs": 1791271360758,
+    "via": "blockfrost",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259751,
+      "hash": "4737ea4d4c960e59e6f916320cad840e660602a9e50506653f3b9e5814fa8b85",
+      "slot": 135588061
+    }
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "8b2bb5eeba534f44d1ecf8cfacf1a66338692608c17ea6ca186eab64862d1691",
+    "atMs": 1791271366001,
+    "via": "blockfrost",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259751,
+      "hash": "4737ea4d4c960e59e6f916320cad840e660602a9e50506653f3b9e5814fa8b85",
+      "slot": 135588061
+    }
+  },
+  {
+    "step": "rival (run 2): the buyer's own WithdrawRefund, fired through Koios on first sight of leg 1 in Blockfrost's mempool, retried until leg1#0 is spent",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "8ea5a76719a3c32b5bc4d5d4197a1ee862ed9cbe01a13d97a4b83d784fea9a1a",
+    "atMs": 1791271259722,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "error": "hole: HTTP 400 after an earlier attempt may have reached the node: {\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (Ut"
+  }
+]
