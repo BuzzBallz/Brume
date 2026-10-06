@@ -38,7 +38,7 @@ async function load(kind, ref, net) {
     : LIVE[kind](ref, net)
   const res = await fetch(url)
   if (res.status === 404 && kind in NOTHING_YET) return NOTHING_YET[kind]
-  if (!res.ok) throw new Error(`${url} answered HTTP ${res.status}`)
+  if (!res.ok) throw new Error((await res.json().catch(() => null))?.error ?? `${url} answered HTTP ${res.status}`) // the agent's sentence when it sent one
   const json = await res.json()
   // Mock data is flagged by the agent's header (live) or by the shared mocks' "_note": "MOCK…" (snapshot files).
   if (res.headers.get('x-brume-source') === 'mock' || /^MOCK/.test(json._note ?? '')) { mocked.add(kind); renderSource() }
@@ -135,7 +135,7 @@ function renderSource() {
   }
 }
 
-function renderList(census, bank, selected) {
+function renderList(census, bank, selected, bankHole) {
   const row = r => h('a', { class: 'row', href: urlFor(r.ref), title: r.ref, 'aria-current': r.ref === selected ? 'page' : null },
     h('span', { class: 'mono' }, short(r.ref)), chip(r.state))
   $('list').replaceChildren(
@@ -143,7 +143,7 @@ function renderList(census, bank, selected) {
     h('p', { class: 'meta' }, `${census.byState.Disputed} disputed of ${census.open} open`),
     ...census.rows.filter(r => r.state === 'Disputed').map(row),
     h('h2', { class: 'group' }, 'Preprod bank'),
-    h('p', { class: 'meta' }, `${bank.length} ${bank.length === 1 ? 'escrow' : 'escrows'} we locked`),
+    h('p', { class: bankHole ? 'meta warn' : 'meta' }, bankHole ? 'Not read: the provider did not answer (a hole).' : `${bank.length} ${bank.length === 1 ? 'escrow' : 'escrows'} we locked`),
     ...bank.map(row),
   )
 }
@@ -600,7 +600,8 @@ async function settleView(row) {
     const [answer, fetched] = await Promise.all([load('settle', row.ref), load('txlog', row.ref)])
     const proposal = answer?.proposal ?? null
     // A 'done' submit answer counts until the txlog file carries the same entries; earlier runs in the file stay listed.
-    const log = [...fetched, ...(wait.doneLog ?? []).filter(d => !fetched.some(e => e.txHash === d.txHash && e.step === d.step))]
+    const ownLog = live || answer?.proposal?.escrowRef === row.ref ? fetched : [] // a snapshot holds one run: it belongs to its proposal's escrow
+    const log = [...ownLog, ...(wait.doneLog ?? []).filter(d => !fetched.some(e => e.txHash === d.txHash && e.step === d.step))]
     Object.assign(wait, { sending: !!answer?.sending, sendError: answer?.error ?? null, buyerCheck: answer?.buyerCheck ?? null }) // survives a reload, unlike submittedAt
     const mine = proposal?.escrowRef === row.ref ? proposal : null
     const steps = settleSteps(row, mine, log, rerun, band, wait)
@@ -694,6 +695,7 @@ function blank(title, text, back = true) {
 
 let base = null // [census, bank], loaded once per page
 let renderSeq = 0
+let bankRetry = null
 let skeletonPainted = false
 
 // Reads escrow and view from the URL. animate: the grid's one orchestrated reveal, never on keyboard or history moves.
@@ -702,18 +704,26 @@ async function render({ animate = true, focusList = false } = {}) {
   brumeMotion.clear() // every open, switch, history move and Reset starts a new display
   if ($('pop').matches(':popover-open')) $('pop').hidePopover()
   try {
-    base ??= await Promise.all([load('census'), loadBank()])
-    const [census, bank] = base
+    // A preprod hole never takes mainnet down: the bank shows as not read and is read again in the background,
+    // for the next navigation (a failing read takes the agent's whole backoff, so nothing waits on it).
+    const fresh = !base
+    base ??= await Promise.all([load('census'), loadBank().catch(err => err)])
+    if (!fresh && base[1] instanceof Error) bankRetry ??= loadBank().then(b => { base[1] = b }, () => {}).finally(() => { bankRetry = null })
+    const [census, bankRead] = base
+    const bankHole = bankRead instanceof Error ? bankRead : null
+    const bank = bankHole ? [] : bankRead
     const rows = [...census.rows.map(r => ({ ...r, network: 'mainnet' })), ...bank.map(r => ({ ...r, network: 'preprod' }))]
     const ref = escrowFromUrl() ?? census.rows.find(r => r.state === 'Disputed')?.ref
-    renderList(census, bank, ref)
+    renderList(census, bank, ref, bankHole)
     if (focusList) document.querySelector('.row[aria-current]')?.focus()
     renderFoot(census)
     // A settled bank escrow is spent and leaves /api/bank; its recorded run still opens, so a reload after a take shows it.
     const row = rows.find(r => r.ref === ref)
-      ?? (live && ref && (await load('settle', ref))?.proposal ? { ref, network: 'preprod', state: 'Settled', spent: true } : null)
+      ?? (ref && !bankHole && (await load('settle', ref))?.proposal?.escrowRef === ref ? { ref, network: 'preprod', state: 'Settled', spent: true } : null)
     if (!row) {
-      $('detail').replaceChildren(blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
+      $('detail').replaceChildren(bankHole
+        ? blank('The preprod bank could not be read', `${cap(bankHole.message)}. Open it again in a moment.`)
+        : blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
       return
     }
     document.title = `Brume, ${short(row.ref)}`

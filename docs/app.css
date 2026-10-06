@@ -301,7 +301,7 @@ body {
   font-size: 14px;
   color: var(--ink-2);
 }
-.foot .warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
+.foot .warn::before, .meta.warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
 
 @media (max-width: 900px) {
   /* The asked escrow comes first; the list follows it */
