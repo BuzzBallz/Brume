@@ -515,7 +515,7 @@ function stepCue(i, from, to) {
   if (to.status === 'Expired') return from.status === 'Expired' ? null : 'expired' // leg 1 ran out while on screen; the countdown is simply gone
   if (from.state === 'later' && to.state === 'current') return 'await-in'
   if (from.state === 'current' && to.state === 'done') return i === 4 ? 'confirmed' : 'tick' // step 4 done = both legs in a block
-  if (from.status === 'Ready to send' && to.status === 'Waiting for confirmation') return 'tick'
+  if (from.status === 'Ready to send' && (to.status === 'Submitted' || to.status === 'Waiting for confirmation')) return 'tick'
   return null
 }
 
@@ -565,6 +565,7 @@ async function settleView(row) {
   const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
   let timer = 0 // one polling chain per panel, whoever triggers the re-render
   let seeded = false // the first render of this panel seeds brumeMotion without playing a cue
+  const seq = renderSeq // a newer render() clears brumeMotion before this panel leaves the screen
   const poll = () => {
     if (!panel.isConnected) return // the view was left
     // A wallet left open holds polling for 60 s at most, so a file-drop signature is still picked up.
@@ -584,7 +585,7 @@ async function settleView(row) {
     const waiting = steps.find(s => !s.done)?.label ?? null
     if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
-    if (!seeded || panel.isConnected) panel.querySelectorAll('.step').forEach((li, i) => { // a left panel never writes
+    if (!seeded || (panel.isConnected && seq === renderSeq)) panel.querySelectorAll('.step').forEach((li, i) => { // a left panel never writes, even while still on screen
       cueStep(li, `${row.ref}:${i}`, i, !seeded)
       li.querySelectorAll('[data-cue]').forEach(el => cueValue(el, `${row.ref}:${i}:${el.dataset.cue}`, !seeded))
     })
