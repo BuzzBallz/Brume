@@ -42,7 +42,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [x] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal) — and C11 below
 - [x] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8) — `src/solver`, hand-computed cases pass; run over the 61 (§10)
 - [x] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
-- [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
+- [x] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages — `docs/`, live on the agent (rehearsal settle `9054b1d8…#6` from the UI), snapshot read-only on Pages from main
 - [ ] M-10 Coworker registered and listed on preprod Sokosumi (part 5c)
 - [ ] M-11 README (5 commands, mocks, tx hashes, prior art), DEMO.md, pinned fixtures (part 11)
 - [ ] M-12 recording + slides incl. "who pays" (part 12)
@@ -153,7 +153,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 **M2 — First complete ugly take · Wed 05:00–09:00**
 - [x] A solver core [sonnet/high] — hand-computed case passes (`src/solver/solve.test.ts`)
 - [x] A control "try anyway" + S-1 race measurement [sonnet/high] — §10
-- [ ] B solver panel + balances + tx links in UI; GitHub Pages read-only mode [sonnet/medium]
+- [x] B solver panel + balances + tx links in UI; GitHub Pages read-only mode [sonnet/medium] — balances compare leg 2's payout with the read-back; Cexplorer links on every accepted tx
 - [x] B pin fixtures, pick `<HERO_REF>` and `<BANK_REF>`, log in §10 [haiku] — logged in §10 below and in DEMO.md
 - [ ] A+B ugly take following §2
 - Done when: a complete 3-min take exists (**hour-20 question: yes**).
