@@ -9,3 +9,5 @@ const require = createRequire(import.meta.url)
 export const mesh: typeof import('@meshsdk/core') = require('@meshsdk/core')
 // The direct @meshsdk/core-cst dependency (1.9.0-beta.90): the copy that applies V1 params exactly (PLAN §10). Hex in, hex out.
 export const cst: typeof import('@meshsdk/core-cst') = require('@meshsdk/core-cst')
+// The core-cst copy @meshsdk/core builds with (beta.96): used only to re-encode a body it built, so the encoding matches.
+export const builderCst: typeof import('@meshsdk/core-cst') = createRequire(require.resolve('@meshsdk/core'))('@meshsdk/core-cst')
