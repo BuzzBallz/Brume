@@ -58,6 +58,7 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-3165d9de…_0.json` | `pnpm demo:preprod` rerun on the code fixed after the contract review | 5260164 | 6 / 4 tADA |
 | `txlog-3afaacc7…_0.json` | `pnpm demo:preprod` with Koios at its keyless daily cap (Blockfrost alone, announced) | 5260570 | 6 / 4 tADA, read back on Koios once a registered token lifted the cap |
 | `txlog-47f62a57…_0.json` | `pnpm demo:preprod` with the registered Koios token, 132 s, exit code 0 | 5260621 | 6 / 4 tADA |
+| `txlog-3be437b1…_0.json` | **Integration 1 in the browser**, on A's machine: proposed in the UI, buyer signed by file drop (`checkForBuyer` passed), seller signed and sent, the UI followed both legs and the read-back | 5260703 | 12 tADA + 6 tUSDM / 8 tADA + 4 tUSDM, read back on Koios (leg 2 carried by Blockfrost) |
 
 On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and the demo runs `824bbdd3` and `3165d9de`, which check it themselves) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
@@ -98,13 +99,13 @@ Each control is built without local evaluation and sent, so the node runs the va
 | File | Control | Result |
 |---|---|---|
 | `txlog-8e0d6df4…_0.json` | buyer's `WithdrawRefund` while Disputed (engine: needs FundsLocked or RefundRequested) | refused, phase 2: the first refusal by the deployed bytes (A4) |
-| `txlog-5aee2110…_0.json` | the same control through stream B's agent (`POST /api/try`) | refused, phase 2 |
+| `txlog-5aee2110…_0.json` | the same control through stream B's agent: first `POST /api/try` (16:34 SGT), then the "Try anyway" button of the UI's grid in the browser (Integration 1, 21:20 SGT) | refused, phase 2, both times; the UI says "Engine predicted refused, and the validator refused it" |
 | `txlog-c11-8e0d6df4…_0.json` | C11, first run: after the seller's concession alone (5259672), `SetRefundRequested` (buyer), `SubmitResult` and `AuthorizeRefund` (seller), then the buyer's exit | all three refused in phase 2; the buyer's `WithdrawRefund` accepted (5259675). **Only `SetRefundRequested` is isolated here**: the two seller refusals ran inside the seller cooldown the concession armed, which alone explains them |
 | `txlog-c11-isolated-7e37dc3f…_0.json` | C11, seller branches isolated: concession with the minimal cooldown (5259745), each control sent once the engine named no cooldown | `SubmitResult` refused (emptied result hash the only failing guard) and `AuthorizeRefund` refused (state the only failing guard), both phase 2; buyer's exit accepted (5259786) |
 | `txlog-c11-withdraw-9054b1d8…_5.json` | C11's last branch and C12: after the concession (5259926), the seller's `Withdraw` with BOTH mandatory outputs (5 % of every asset to the fee address, `c` lovelace to the buyer, both tagged with the escrow's own reference) | refused, phase 2; buyer's exit accepted (5259927). **Positive control:** the same output construction on an escrow where `Withdraw` is open (lock 5259931) — accepted (5259933), so the refusal is the guards, not a malformed tx |
 | `own-deployment.json`, `txlog-own-deployment.json` | S-2 on our own deployment: escrow X, the admin's `WithdrawDisputed` before any concession; escrow Y, the seller's `AuthorizeRefund`, then the same admin tx | X accepted (5259662); Y conceded (5259664), the admin then refused in phase 2, the buyer's exit accepted (5259665) |
 
-**Sayable (R5):** after the seller's concession alone, every branch but the buyer's exit was refused by the deployed bytes (C11): `SetRefundRequested`, `SubmitResult`, `AuthorizeRefund` and `Withdraw` on the shared script, `WithdrawDisputed` on our own deployment of the same compiled code. C12's fee rule ran on the deployed bytes. **Not sayable:** the admin branch on the shared script (its keys are Masumi's): there it is still "the validator's source says". A phase-1 refusal is never "refused by the validator".
+**Sayable (R5):** on escrows past `submit_result_time` (all of ours, and all 61 Disputed mainnet escrows), after the seller's concession alone, every branch but the buyer's exit was refused by the deployed bytes (C11): `SetRefundRequested`, `SubmitResult`, `AuthorizeRefund` and `Withdraw` on the shared script, `WithdrawDisputed` on our own deployment of the same compiled code. C12's fee rule ran on the deployed bytes. **Not sayable:** the admin branch on the shared script (its keys are Masumi's): there it is still "the validator's source says". A phase-1 refusal is never "refused by the validator". Nor that a concession closes arbitration on an escrow before its `submit_result_time`: there, the seller's `SubmitResult` writes a result hash and returns it to Disputed (the validator's source says; the engine models it).
 
 Rerun: `node src/preprod/controls.ts c11 <Disputed ref>`, `c11-isolated <ref>`, `c11-withdraw <ref past unlock_time>`; `node src/preprod/own.ts info | fund-admin | lock | concede <ref> | arbitrate <ref> | exit <ref>`.
 
@@ -162,6 +163,14 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260570 | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
 | replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
 
+### `txlog-3be437b109bdbaeb3c094773ad620e8052118344f051342bb21dcad8bbb99777_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260703 | `74c619c0598aebcdd8fe9d235eb35d7711c826c0c7521ede14123f45dc1c2664` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260703 | `395def9274b72e8b7583daf79c04cff012aede136500e7c6cd902723ddcb7a99` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `395def9274b72e8b7583daf79c04cff012aede136500e7c6cd902723ddcb7a99` |
+
 ### `txlog-47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50_0.json`
 
 | Step | Role | Expected | Result | Block | Tx |
@@ -178,6 +187,7 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | Step | Role | Expected | Result | Block | Tx |
 |---|---|---|---|---|---|
 | try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `a816d4d7d42e045115e6c6a01d7f7fa51e234e475c78ada3324e037a805ab2c5` |
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `b45009be15103680283f226254f30a777a682fcf71316a2004b8da23a35d9cd2` |
 
 ### `txlog-7a37751b9633f64ef043d5d6e53e062862c60d7cf63c1921a34f25dd8021ba8e_0.json`
 
@@ -372,3 +382,4 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 |---|---|---|---|---|---|
 | split seller into 5 × 15 tADA | - | - | accepted | 5259438 | `24d563285e08a1a900fe61ca0cb78706925ac09546c915de30e6d4308fc219f4` |
 | seller → buyer 90 tUSDM | - | - | accepted | 5259526 | `7170d91ecfe746b8e5d55ead07404ee686b3a912dce868c42549ffd91af27a68` |
+| split seller into 4 × 10 tADA | - | - | accepted | 5260615 | `7033b725d83f4b903a8d54a91d8a6a237ce0e58fc80e2c402f073c22eb43d7f5` |

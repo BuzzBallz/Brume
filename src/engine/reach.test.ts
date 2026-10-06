@@ -26,7 +26,7 @@ test('hero mainnet escrow at the kickoff tip: exactly the three moves the 61 hav
   assert.match(wd?.failed[0] ?? '', /needs ResultSubmitted \(is Disputed\)/)
 })
 
-test('after the seller concedes (C11): only the buyer can move the value, and the admin set is out', () => {
+test('after the seller concedes, past submit_result_time (C11): only the buyer can move the value, and the admin set is out', () => {
   const after: Datum = { ...HERO, state: 'RefundRequested', resultHash: '', sellerCooldownTime: KICKOFF + 3_600_000, buyerCooldownTime: 0 }
   const g = reach(after, HERO_VALUE, KICKOFF, PARAMS)
   assert.deepEqual(sorted(allowedCells(g)), sorted(['WithdrawRefund/buyer', 'UnSetRefundRequested/buyer']))
