@@ -101,7 +101,12 @@ async function disputeAll(bank: Entry[], buyer: Awaited<ReturnType<typeof party>
       Object.assign(e, { disputedFrom: e.ref, ref: next, disputedInBlock: d.block.height, state: 'Disputed', ...(t0 ? { targetStateMs: Date.now() - t0 } : {}) })
       console.log(`  ${e.purpose}: Disputed in block ${d.block.height}${t0 ? `, ${Math.round((Date.now() - t0) / 1000)} s after the lock was sent` : ''} → ${next}`)
     } else console.log(`  ${e.purpose}: dispute ${d.status} at ${d.stage}${d.error ? `: ${d.error.slice(0, 200)}` : ''}`)
-    save(bank)
+    // The whole registry is re-read and only this entry replaced: `bank` may be a subset (a top-up's fresh entries).
+    const all = load()
+    const i = all.findIndex((x) => x.lockedIn === e.lockedIn && (x.ref === (e.disputedFrom ?? e.ref) || x.ref === e.ref))
+    if (i >= 0) all[i] = e
+    else all.push(e)
+    save(all)
   }
 }
 
@@ -140,7 +145,6 @@ async function topup(owners: 'A' | 'B', count: number, ada: number, usdm: number
   save(bank)
   console.log(`lock block ${entry.block.height}: ${refs.length} escrows for stream ${owners}`)
   if (owners === 'A') await disputeAll(fresh, buyer, t0)
-  save(load().map((x) => fresh.find((f) => f.lockedIn === x.lockedIn && (f.disputedFrom ?? f.ref) === (x.disputedFrom ?? x.ref)) ?? x))
   for (const e of fresh) console.log(`  ${e.ref} ${e.state}`)
 }
 
