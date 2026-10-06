@@ -53,7 +53,7 @@ async function run(net: 'mainnet' | 'preprod', ref: string) {
     escrowRef: ref,
     grid: mockGrid(ref, datum.state),
     solver: mockSolver(ref),
-    uiUrl: `${ORIGIN}/?escrow=${ref}`,
+    uiUrl: `${ORIGIN}/?escrow=${encodeURIComponent(ref)}`,
     mock: ['grid', 'solver'],
   }
   return JSON.stringify(result)
