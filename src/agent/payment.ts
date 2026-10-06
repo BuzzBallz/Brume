@@ -8,7 +8,7 @@ const SUBMIT_WITHIN_MS = 60 * 60_000
 export const sha256 = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex')
 
 // RFC 8785 for the value kinds an input can hold: sorted keys, no whitespace.
-const canonical = (v: unknown): string =>
+export const canonical = (v: unknown): string =>
   Array.isArray(v)
     ? `[${v.map(canonical).join(',')}]`
     : v && typeof v === 'object'
