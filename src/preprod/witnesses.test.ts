@@ -1,7 +1,9 @@
 // Offline: witnesses.ts summarize() and paidOf() on a hand-written leg pair shaped like the chain walk of a real
 // seller-first settlement (fixtures/preprod/witnesses-9e7c…_0.json), and witnessSummary()'s refusal to keep a failed read.
 // No fetch is made: the summary is pure, and the failing read stops at the missing local log before any network call.
+// Then every committed witness walk (fixtures/preprod/witnesses-*.json, one per settle we ran), through the same summary.
 import assert from 'node:assert/strict'
+import { readdirSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { PARAMS, TUSDM, V1_ADDRESS } from '../../shared/constants.ts'
 import { paidOf, summarize, witnessSummary, type LegWalk, type Settlement } from './witnesses.ts'
@@ -129,4 +131,24 @@ test('witnessSummary: a failed read is not cached, so the next call reads again'
   const b = witnessSummary(ref)
   assert.equal(a, b)
   await assert.rejects(a)
+})
+
+test('every committed walk: AuthorizeRefund then WithdrawRefund, no admin key, leg 2 pays out exactly the pot leg 1 kept', () => {
+  const dir = new URL('../../fixtures/preprod/', import.meta.url)
+  const files = readdirSync(dir).filter((n) => /^witnesses-[0-9a-f]{64}_\d+\.json$/.test(n))
+  assert.ok(files.length >= 11, `${files.length} walks: one per settle (11 by 7 Oct)`)
+  for (const n of files) {
+    const walk = JSON.parse(readFileSync(new URL(n, dir), 'utf8')) as Settlement
+    const s = summarize(walk)
+    assert.equal(s.noAdminKey, true, n)
+    assert.deepEqual(s.legs.map((l) => l.redeemer.constructor), [6, 3], n)
+    assert.deepEqual(s.legs.map((l) => [l.spends.state, l.leaves?.state ?? null]), [['Disputed', 'RefundRequested'], ['RefundRequested', null]], n)
+    assert.deepEqual([s.legs[0].requiredSigners, s.legs[1].requiredSigners], [['seller'], ['buyer']], n)
+    const kept = walk.legs[0].outputs.filter((o) => o.party === 'script')
+    assert.equal(kept.length, 1, n)
+    const paid: Record<string, bigint> = {}
+    for (const v of [s.legs[1].paid.buyer, s.legs[1].paid.seller]) for (const [u, q] of Object.entries(v)) paid[u] = (paid[u] ?? 0n) + BigInt(q)
+    assert.deepEqual(Object.fromEntries(Object.entries(paid).map(([u, q]) => [u, q.toString()])), kept[0].value, n)
+    assert.deepEqual(s.legs[0].paid, { buyer: {}, seller: {} }, n) // leg 1 pays nobody: its one seller output is change
+  }
 })
