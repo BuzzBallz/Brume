@@ -13,5 +13,20 @@
       "hash": "faf200bd66e97b6d9467e3150abf24ea77ead5ff305c44a6f04d8652bf7f264a",
       "slot": 135580949
     }
+  },
+  {
+    "step": "seller → buyer 90 tUSDM",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "7170d91ecfe746b8e5d55ead07404ee686b3a912dce868c42549ffd91af27a68",
+    "atMs": 1791265832440,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259526,
+      "hash": "f2a89f84fc455bb849ead7a1d319fe1a4961f422e959ee00bcb627b83f297579",
+      "slot": 135582638
+    }
   }
 ]
