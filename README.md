@@ -50,6 +50,8 @@ What this run does not show: the second-provider cross-check. It needs a Blockfr
 
 The decoder is checked three ways in `src/census/census.test.ts`: against Koios's own decoding of a real mainnet datum, on a set of corrupted datums that must fail (truncated, trailing byte, state as an integer, unknown state, 11 and 15 fields), and on the census arithmetic.
 
+Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals as the Koios census above, so the two providers agree at two tips.
+
 The Pages snapshot in `docs/data/` is a separate read, at tip 14031774.
 
 ## Mocks
@@ -87,7 +89,7 @@ None yet. Every write will be on preprod, against escrows we locked ourselves, a
 
 - Mainnet is read-only. No transaction is built, evaluated or submitted against a mainnet escrow.
 - An HTTP error is a hole, counted and printed, never a data point.
-- Until a guard has been exercised on preprod, its cell says "the validator's source says". The deployed bytes are not reproducible from the published source, so the guard table is a hypothesis.
+- Until a guard has been exercised on preprod, its cell says "the validator's source says". The deployed V1 addresses were reproduced by stream A from the committed blueprint with the deployed parameters (PLAN §10, 6 Oct); a script a judge can run follows with the own-deployment work.
 - Only the 16-field V1 datum is supported. A 19-field V2 escrow shows as not decodable.
 - Keys come from `.env` only. Nothing secret is printed or committed.
 
