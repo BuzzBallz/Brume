@@ -9,6 +9,7 @@ type Row = {
   address?: string
   amount: { unit: string; quantity: string }[]
   inline_datum: string | null
+  consumed_by_tx?: string | null
 }
 
 const PAGE = 100
@@ -43,7 +44,7 @@ export async function utxosAt(net: Network, address: string, cfg: Cfg = {}): Pro
   return { data, holes, provider: 'blockfrost' }
 }
 
-// Blockfrost has no spent/unspent lookup by ref; resolve the tx outputs and match the index. A spent output is still returned, so callers needing "unspent" use utxosAt.
+// Resolve the tx outputs and match the index. An output Blockfrost reports as consumed is treated as gone (null), as Koios does.
 export async function utxo(net: Network, ref: string, cfg: Cfg = {}): Promise<Read<RawUtxo | null>> {
   const base = cfg.base ?? BLOCKFROST[net]
   const [hash, idx] = ref.split('#')
@@ -51,7 +52,7 @@ export async function utxo(net: Network, ref: string, cfg: Cfg = {}): Promise<Re
   if (res?.status === 404) return { data: null, holes: 0, provider: 'blockfrost' }
   if (!res || res.status !== 200) return { data: null, holes: 1, provider: 'blockfrost' }
   const row = (res.body as { outputs: Row[] }).outputs.find((o) => o.output_index === Number(idx))
-  return { data: row ? toUtxo({ ...row, tx_hash: hash }, row.address ?? '') : null, holes: 0, provider: 'blockfrost' }
+  return { data: row && !row.consumed_by_tx ? toUtxo({ ...row, tx_hash: hash }, row.address ?? '') : null, holes: 0, provider: 'blockfrost' }
 }
 
 export async function tip(net: Network, cfg: Cfg = {}): Promise<Read<Tip | null>> {

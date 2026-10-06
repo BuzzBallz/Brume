@@ -12,7 +12,19 @@ const ours = (): string[] =>
     .filter((e) => e.owners === 'B')
     .map((e) => e.ref)
 
-export async function getBank(): Promise<BankRow[]> {
+const TTL_MS = 15_000
+let cache: { at: number; read: Promise<BankRow[]> } | null = null
+
+// Cached 15 s: the UI reads the bank on each navigation, and every row is one provider call.
+export function getBank(): Promise<BankRow[]> {
+  if (cache && Date.now() - cache.at < TTL_MS) return cache.read
+  const read = readBank()
+  read.catch(() => (cache = null))
+  cache = { at: Date.now(), read }
+  return read
+}
+
+async function readBank(): Promise<BankRow[]> {
   const reads = await Promise.all(
     ours().map((ref) =>
       readDatum('preprod', ref).then(
