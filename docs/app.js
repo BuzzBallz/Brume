@@ -647,6 +647,7 @@ function blank(title, text, back = true) {
 
 let base = null // [census, bank], loaded once per page
 let renderSeq = 0
+let skeletonPainted = false
 
 // Reads escrow and view from the URL. animate: the grid's one orchestrated reveal, never on keyboard or history moves.
 async function render({ animate = true, focusList = false } = {}) {
@@ -673,6 +674,7 @@ async function render({ animate = true, focusList = false } = {}) {
     const body = await { settle: settleView, reach: reachView, solver: solverView }[view](row)
     if (seq !== renderSeq) return // a newer navigation already rendered
     $('detail').classList.toggle('animate', animate)
+    $('detail').classList.toggle('fade-in', animate && skeletonPainted && skeleton.isConnected) // once, over a skeleton that reached the screen
     $('detail').replaceChildren(renderHead(row, view), ...[body].flat())
   } catch (err) {
     if (seq !== renderSeq) return
@@ -719,5 +721,7 @@ addEventListener('keydown', e => {
 renderSource()
 document.querySelector('.brand').setAttribute('href', urlFor())
 $('reset').addEventListener('click', () => go(urlFor(), { animate: false }))
-$('detail').replaceChildren(renderGrid(null))
+const skeleton = renderGrid(null)
+$('detail').replaceChildren(skeleton)
+requestAnimationFrame(() => { skeletonPainted = true }) // runs right before the frame that paints the skeleton
 render()

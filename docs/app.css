@@ -177,6 +177,8 @@ body {
 @keyframes resolve { from { opacity: 0; transform: translateY(2px); } }
 .animate .cell { animation: resolve 120ms var(--ease) both; animation-delay: calc(var(--i) * 14ms); }
 @media (prefers-reduced-motion: reduce) { .animate .cell { animation: none; } }
+/* Content replacing the painted boot skeleton fades in once, at its final geometry; the grid keeps its own stagger. No fill, so nothing lingers in getAnimations(). */
+@media (prefers-reduced-motion: no-preference) { .fade-in > :not(.grid) { animation: brume-fade var(--dur-in) var(--ease); } }
 
 /* Cell detail popover */
 .pop {
