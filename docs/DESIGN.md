@@ -141,6 +141,8 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | awaiting signature | tan row, the exact command with a Copy button, "Waiting for the signed file" and a live elapsed time; the UI polls the agent |
 | signed | check, the body hash in mono |
 | proposal locked | from the moment leg 2 is signed, the share, fee and validity bounds are read-only and shown with a lock: any change to leg 1 changes its hash and voids leg 2. Changing the split means "Start over" (new proposal, both signatures again) |
+| leg 1 expiring | live countdown on `leg1.validToMs` (about 20 min after prepare) in the signing and send steps |
+| leg 1 expired | the first step still waiting turns into "Expired": "Leg 1 expired before it was sent. Prepare it again: both sides sign the new hashes." + Prepare again (re-runs `POST /api/proposal` with the same share) |
 | sending | spinner in place of the icon, tx hash + Cexplorer link as soon as known |
 | confirmed | check, block / slot |
 | refused or failed | `--bad` icon, the node's reason rewritten to the guard it hit, raw error one click away, what to do next (retry on the next bank escrow) |
@@ -160,7 +162,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` `{escrowRef, redeemer, role}` → `TxLogEntry`; preprod escrows only, never offered on mainnet |
 | Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal/<ref, URL-encoded>` polled every 2 s while a signature is missing (404 = no proposal yet) |
-| Wallet signature (S-3) | witness set from `api.signTx(leg.cborHex, true)` | `POST /api/proposal/<ref>/witness` `{role, witnessSet}` (requested): the agent adds the witness to the leg and updates `signedBy` |
+| Wallet signature (S-3) | witness set from `api.signTx(leg.cborHex, true)` | `POST /api/proposal/<ref>/witness` `{role, leg: 1 | 2, witnessSet}` → `witness(proposal, role, leg, witnessSetCbor)` (stream A, A5): the agent merges and verifies the witness, refuses a wrong key or a changed hash. Who signs which leg follows `proposal.path`: on B the buyer signs leg 2, the seller leg 1 and leg 2 (its funding inputs); A is mirrored |
 | Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit`; `GET /api/txlog?ref=<ref>` (requested; 404 = no run yet) |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
 | Preprod bank list | `{ref, state}[]` | `GET /api/bank` (requested; 404 = empty bank) |

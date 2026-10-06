@@ -334,3 +334,4 @@ button, a { touch-action: manipulation; }
 }
 
 .tnum { font-variant-numeric: tabular-nums; }
+.front-run { margin: 8px 0 0; }

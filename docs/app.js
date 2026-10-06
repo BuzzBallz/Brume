@@ -181,9 +181,15 @@ function tryAnyway(row, v, anchor) {
     try {
       const e = await post('try', { escrowRef: row.ref, redeemer: v.redeemer, role: v.role })
       btn.remove()
-      out.replaceChildren(e.status === 'refused'
-        ? h('p', { class: 'matched' }, `Engine predicted refused. Node refused: ${e.error ?? 'no reason given'}.`)
-        : h('p', { class: 'error' }, 'Engine predicted refused, but the node accepted it: ', txLink(e.txHash)))
+      // expected = the engine's prediction recorded before submitting; stage = where the outcome was decided.
+      const predicted = e.expected === 'accept' ? 'accepted' : 'refused'
+      const result = e.status === 'accepted'
+        ? ['the node accepted it: ', txLink(e.txHash)]
+        : [`${e.stage === 'evaluate' ? 'refused when evaluated, before submission' : 'the node refused it'}: ${e.error ?? 'no reason given'}.`]
+      const matched = (e.status === 'accepted') === (e.expected === 'accept')
+      out.replaceChildren(matched
+        ? h('p', { class: 'matched' }, `Engine predicted ${predicted}, and `, result)
+        : h('p', { class: 'error' }, `Engine predicted ${predicted}, but `, result))
     } catch (x) {
       out.replaceChildren(h('p', { class: 'error' }, x.message))
       btn.disabled = false
@@ -262,8 +268,38 @@ function elapsed(wait) {
 // CIP-30 wallets the page can see (S-3). The file drop stays the guaranteed path; this only adds a shortcut next to it.
 const wallets = () => Object.values(window.cardano ?? {}).filter(w => w?.apiVersion && typeof w.enable === 'function')
 
+// Who signs which leg (stream A, 6 Oct). Path B: the buyer pre-signs the exit (leg 2); the seller signs the concession (leg 1)
+// and adds its witness to leg 2, whose fee and collateral inputs it owns. Path A mirrors it.
+const PATH_ROLES = { B: { exiter: 'buyer', conceder: 'seller' }, A: { exiter: 'seller', conceder: 'buyer' } }
+const pathRoles = proposal => PATH_ROLES[proposal?.path] ?? PATH_ROLES.B
+const legsToSign = (proposal, role) => role === pathRoles(proposal).exiter ? [2] : [1, 2]
+
+// Leg 1's body is frozen at prepare() with an upper bound about 20 minutes out; past it, both sides sign new hashes.
+function countdown(toMs, onExpire) {
+  const el = h('span', { class: 'tnum' })
+  const tick = () => {
+    if (!el.isConnected) return clearInterval(id)
+    const s = Math.floor((toMs - Date.now()) / 1000)
+    if (s <= 0) { clearInterval(id); return onExpire() }
+    el.textContent = `Leg 1 valid for ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}.`
+  }
+  const id = setInterval(tick, 1000)
+  requestAnimationFrame(tick)
+  return el
+}
+
+function prepareAgain(row, proposal, rerun) {
+  const err = h('p', { class: 'error', hidden: true })
+  const btn = h('button', { class: 'btn primary', type: 'button', onclick: async () => {
+    btn.disabled = true
+    try { await post('proposal', { escrowRef: row.ref, sellerShare: proposal.sellerShare }); rerun() }
+    catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false }
+  } }, 'Prepare again')
+  return [h('p', {}, 'Leg 1 expired before it was sent. Prepare it again: both sides sign the new hashes.'), h('div', {}, btn, err)]
+}
+
 function walletSign(wallet, role, ctx) {
-  const leg = role === 'buyer' ? ctx.proposal?.leg2 : ctx.proposal?.leg1 // buyer pre-signs the exit, seller signs the concession
+  const legs = legsToSign(ctx.proposal, role).map(n => [n, ctx.proposal?.[`leg${n}`]])
   const { wait } = ctx
   const msg = h('p', { class: 'error', hidden: !wait.errors[role] }, wait.errors[role]) // survives the 2 s re-render
   const fail = text => {
@@ -275,7 +311,7 @@ function walletSign(wallet, role, ctx) {
     btn.textContent = label
   }
   const label = `Sign with ${wallet.name}`
-  const btn = h('button', { class: 'btn', type: 'button', disabled: !leg, onclick: async () => {
+  const btn = h('button', { class: 'btn', type: 'button', disabled: legs.some(([, leg]) => !leg), onclick: async () => {
     btn.disabled = true
     msg.hidden = true
     wait.errors[role] = null
@@ -285,10 +321,12 @@ function walletSign(wallet, role, ctx) {
       btn.textContent = 'Connecting to the wallet…'
       const api = await wallet.enable()
       if (await api.getNetworkId() !== 0) return fail(`${wallet.name} is on mainnet. Switch it to preprod and try again. Nothing was signed.`)
-      btn.textContent = 'Confirm in your wallet…'
-      const witnessSet = await api.signTx(leg.cborHex, true)
-      btn.textContent = 'Sending the signature…'
-      await post(`proposal/${enc(ctx.row.ref)}/witness`, { role, witnessSet })
+      for (const [n, leg] of legs) {
+        btn.textContent = legs.length > 1 ? `Confirm leg ${n} in your wallet…` : 'Confirm in your wallet…'
+        const witnessSet = await api.signTx(leg.cborHex, true)
+        btn.textContent = 'Sending the signature…'
+        await post(`proposal/${enc(ctx.row.ref)}/witness`, { role, leg: n, witnessSet })
+      }
       wait.busy = false
       ctx.rerun()
     } catch (x) {
@@ -339,41 +377,52 @@ function sendButton(row, rerun) {
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
+const outcome = e => e.blockHeight ? `confirmed in block ${e.blockHeight.toLocaleString('en')}` : 'accepted'
+
 function settleSteps(row, proposal, log, rerun, band, wait) {
   const ctx = { row, proposal, rerun, wait }
+  const { exiter, conceder } = pathRoles(proposal)
   const signed = role => proposal?.signedBy.includes(role) ?? false
   const bothSigned = signed('buyer') && signed('seller') // nothing can be sent before both signatures exist
   const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash)
   const leg1 = entry('leg1')
   const leg2 = entry('leg2')
   const refused = [leg1, leg2].find(e => e?.status === 'refused')
-  return [
+  const validTo = live && !leg1 && proposal?.leg1?.validToMs // countdown only matters until leg 1 is sent
+  const validity = validTo ? h('p', { class: 'hint' }, countdown(validTo, () => rerun())) : null
+  const steps = [
     { label: 'Buyer raises the dispute', done: ['Disputed', 'RefundRequested'].includes(row.state) || !!proposal,
       waiting: 'Waiting for buyer', body: [] },
-    { label: 'Seller proposes the split', done: !!proposal, waiting: 'Waiting for seller',
+    { label: `${cap(conceder)} proposes the split`, done: !!proposal, waiting: `Waiting for ${conceder}`,
       body: proposal
         ? [h('p', {}, `Seller receives ${pct(proposal.sellerShare)} of the value, buyer ${pct(1 - proposal.sellerShare)}.`),
           proposal.leg1 && h('p', { class: 'hash' }, 'Leg 1 fixed, hash ', h('span', { class: 'mono', title: proposal.leg1.txHash }, short(proposal.leg1.txHash)))]
         : [proposeForm(row, rerun, band)] },
-    { label: 'Buyer pre-signs the exit (leg 2)', done: signed('buyer'), waiting: 'Waiting for buyer',
-      body: signed('buyer')
+    { label: `${cap(exiter)} pre-signs the exit (leg 2)`, done: signed(exiter), waiting: `Waiting for ${exiter}`,
+      body: signed(exiter)
         ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash }, short(proposal.leg2.txHash))),
           h('p', { class: 'lock' }, 'Split locked: changing leg 1 now would void this signature.')]
-        : [waitingFor('buyer', ctx)] },
-    { label: 'Seller signs the concession (leg 1)', done: signed('seller'), waiting: 'Waiting for seller',
-      body: signed('seller') ? [] : [waitingFor('seller', ctx)] },
-    { label: 'Seller sends both legs', done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
+        : [waitingFor(exiter, ctx), validity] },
+    { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
+      body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
+    { label: `${cap(conceder)} sends both legs`, done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
       body: refused
         ? [h('p', {}, `Refused by the node: ${refused.error ?? 'no reason given'}. Start over on the next bank escrow.`)]
         : leg1 || leg2
-          ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: accepted, `, txLink(e.txHash)))]
-          : [sendButton(row, rerun)] },
+          ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: ${outcome(e)}, `, txLink(e.txHash)))]
+          : [sendButton(row, rerun), validity] },
     { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
       body: leg2?.readback ? [
         h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
         leg2.readback.balances && renderBalances(leg2.readback.balances),
       ] : [] },
   ]
+  // Leg 1 expired before it was sent: the first step still waiting turns into the re-prepare step.
+  if (validTo && Date.now() >= validTo) {
+    const stuck = steps.findIndex((s, i) => i >= 2 && !s.done)
+    if (stuck >= 0) Object.assign(steps[stuck], { error: true, errorLabel: 'Expired', body: prepareAgain(row, proposal, rerun) })
+  }
+  return steps
 }
 
 // One escrow's native quantities (DESIGN §10.1). ADA has 6 decimals; other tokens stay in base units until their decimals are pinned in shared/constants.ts.
@@ -406,7 +455,7 @@ function renderSteps(steps) {
   return h('ol', { class: 'steps' }, steps.map(s => {
     const state = s.error ? 'error' : s.done ? 'done' : reached ? 'later' : 'current'
     if (!s.done) reached = true
-    const status = { done: 'Done', current: s.waiting, later: 'Cannot start yet', error: 'Refused' }[state]
+    const status = { done: 'Done', current: s.waiting, later: 'Cannot start yet', error: s.errorLabel ?? 'Refused' }[state]
     return h('li', { class: `step ${state}` },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('div', { class: 'step-body' },
@@ -423,7 +472,7 @@ function renderLog(log) {
     h('ol', { class: 'timeline' }, log.map(e => h('li', { class: e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step),
-      h('span', { class: 'status' }, e.status === 'accepted' ? 'Accepted' : `Refused: ${e.error ?? 'no reason given'}`),
+      h('span', { class: 'status' }, e.status === 'accepted' ? cap(outcome(e)) : `Refused: ${e.error ?? 'no reason given'}`),
       txRef(e)))))
 }
 
@@ -505,7 +554,11 @@ function renderPaths(solver, value) {
         row('Protocol fee', p => Object.keys(p.fee).length ? perAsset(p.fee, value) : 'None'),
         row('Exposed on the second leg', p => cap(p.exposedParty)),
         row('Least the exposed party keeps', p => perAsset(p.exposedFloor, value)),
-        row('What a defector can take', p => perAsset(p.defectorKeeps, value)))))
+        row('What a defector can take', p => perAsset(p.defectorKeeps, value))),
+    ),
+    solver.frontRunP && h('p', { class: 'hint front-run' }, solver.frontRunP.measured
+      ? `Front-run risk on the second leg is priced at p = ${solver.frontRunP.used}, measured on preprod.`
+      : `Front-run risk on the second leg is priced at p = ${solver.frontRunP.used}, the worst case, until it is measured.`))
 }
 
 async function solverView(row) {
