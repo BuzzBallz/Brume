@@ -302,7 +302,8 @@ body {
 .foot .warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
 
 @media (max-width: 900px) {
-  body { height: auto; grid-template: "bar" 44px "band" auto "list" auto "detail" auto "foot" auto / 1fr; }
+  /* The asked escrow comes first; the list follows it */
+  body { height: auto; grid-template: "bar" 44px "band" auto "detail" auto "list" auto "foot" auto / 1fr; }
   .list { border-right: 0; border-bottom: 1px solid var(--line); }
   .detail { padding: 16px; overflow-x: auto; }
 }

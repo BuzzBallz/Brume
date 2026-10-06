@@ -728,7 +728,8 @@ async function render({ animate = true, focusList = false } = {}) {
 
 function go(href, opts) {
   history.pushState(null, '', href)
-  render(opts)
+  const phone = matchMedia('(max-width: 900px)').matches // the list sits under the detail
+  render(opts).then(() => phone && $('detail').scrollIntoView({ block: 'start' }))
 }
 
 // In-page links (?escrow=…&view=…) navigate without a reload. e.detail is 0 when Enter activated the link.
