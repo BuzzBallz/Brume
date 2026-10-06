@@ -671,7 +671,7 @@ function renderBands(solver) {
   const ticks = [0, 0.25, 0.5, 0.75, 1]
   const who = solver.path === 'A' ? 'buyer' : 'seller' // the bands are priced for one settle path
   return h('section', { class: 'bands' },
-    h('h2', {}, `Splits both sides can accept, ${who} concedes first`),
+    h('h2', {}, `Seller shares that beat waiting, ${who} concedes first`), // D17: a break-even, never "both sides accept"
     h('p', { class: 'hint' }, 'Seller\'s share of the escrow value, for a buyer who would wait at most this long for an arbiter.'),
     h('div', { class: 'band-grid' },
       solver.bands.map(b => [
