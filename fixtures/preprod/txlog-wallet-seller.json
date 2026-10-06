@@ -1,0 +1,17 @@
+[
+  {
+    "step": "split seller into 5 × 15 tADA",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "24d563285e08a1a900fe61ca0cb78706925ac09546c915de30e6d4308fc219f4",
+    "atMs": 1791264131590,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259438,
+      "hash": "faf200bd66e97b6d9467e3150abf24ea77ead5ff305c44a6f04d8652bf7f264a",
+      "slot": 135580949
+    }
+  }
+]
