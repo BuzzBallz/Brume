@@ -84,14 +84,12 @@ async function advance(t: Task, s: Scope) {
 
 // A paid Task advances one stage per poll until it settles; it stays in the journal after its completion, until the
 // payment service has collected and the seller receipt is in.
-let owner: string | undefined
 async function pay(id: string, j: Journal, s: Scope) {
-  owner ??= s.name === 'personal' ? cli(['auth', 'whoami']).id : undefined
   let p = j.paid as Paid
   for (let step = 0; step < 6; step++) {
     const before = p.stage
     p = await advancePaid(p, {
-      taskId: id, input: j.input ?? '', coworkerId: COWORKER_ID, contextUserId: s.name === 'personal' ? owner : undefined,
+      taskId: id, input: j.input ?? '', coworkerId: COWORKER_ID,
       answer, saveResult: (r) => writeFileSync(resultFile(id), r),
       complete: () => cli(['runtime', 'complete', id, ...s.runtime, '--coworker-id', COWORKER_ID, '--result-file', resultFile(id)]),
       receipt: () => cli(['runtime', 'receipt', id, '--coworker-id', COWORKER_ID]),
