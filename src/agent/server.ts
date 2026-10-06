@@ -145,7 +145,13 @@ const routes: Record<string, Handler> = {
     if (typeof witnessSet !== 'string' || !/^[0-9a-f]+$/i.test(witnessSet)) throw new HttpError(400, 'witnessSet must be hex CBOR')
     const current: Proposal = readJson(proposalFile(ref), 'no proposal for this escrow yet')
     if (role === 'buyer' && leg === 2) await checkForBuyer(current)
-    const updated = witness(current, role, leg, witnessSet)
+    let updated: Proposal
+    try {
+      updated = witness(current, role, leg, witnessSet)
+    } catch (e) {
+      if (e instanceof Error && /cbor/i.test(`${e.name} ${e.message}`)) throw new HttpError(400, 'This witness set is not valid CBOR: nothing was recorded.')
+      throw e
+    }
     saveProposal(updated)
     if (leg === 1) return startSubmit(updated)
     return { body: { proposal: updated } }
