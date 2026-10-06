@@ -76,7 +76,7 @@ export function splitPot(amount: Asset[], share: number): { buyer: Asset[]; sell
 }
 const toValue = (assets: Asset[]): Value => Object.fromEntries(assets.map((a) => [a.unit, a.quantity]))
 
-type SellerRecord = { escrowRef: string; leg1Hash: string; leg2Hash: string; leg2Funding: string[]; leg1Seller?: string /* CIP-30 witness set, kept here only */ }
+type SellerRecord = { escrowRef: string; leg1Hash: string; leg2Hash: string; leg2Funding: string[]; buyerPkh?: string /* read from the chain datum at prepare() */; leg1Seller?: string /* CIP-30 witness set, kept here only */ }
 
 export async function prepare(escrowRef: string, sellerShare: number): Promise<Proposal> {
   const seller = await party('seller')
@@ -119,7 +119,7 @@ export async function prepare(escrowRef: string, sellerShare: number): Promise<P
     signedBy: [],
   }
   // A new prepare replaces the previous proposal for this escrow (new hashes, signatures reset).
-  writeJson(sellerRecordFile(escrowRef), { escrowRef, leg1Hash: leg1.txHash, leg2Hash: leg2.txHash, leg2Funding: [`${s2.input.txHash}#${s2.input.outputIndex}`] } satisfies SellerRecord)
+  writeJson(sellerRecordFile(escrowRef), { escrowRef, leg1Hash: leg1.txHash, leg2Hash: leg2.txHash, leg2Funding: [`${s2.input.txHash}#${s2.input.outputIndex}`], buyerPkh: d.buyer.payment.hash } satisfies SellerRecord)
   writeJson(proposalFile(escrowRef), proposal)
   return proposal
 }
@@ -164,20 +164,17 @@ export function witness(proposal: Proposal, role: Role, leg: 1 | 2, witnessSetCb
   return { ...proposal, leg2: { ...target, cborHex }, signedBy: [...new Set<Role>([...proposal.signedBy, role])] }
 }
 
-let partiesCache: { escrowRef: string; buyer: string; seller: string } | null = null
+// The parties named in THIS proposal's leg-1 continuation datum, read on every call: never cached, since a proposal is
+// untrusted input and a cache keyed by escrow would let one forged proposal decide whose witness a real one accepts.
+// The seller side does not rely on it for the buyer: submit() checks against the buyer read from the chain at prepare().
 function proposalPkh(proposal: Proposal, role: Role): string {
-  // The parties are those of the escrow's datum, read once when the proposal was prepared (cached per escrow).
-  if (!partiesCache || partiesCache.escrowRef !== proposal.escrowRef) {
-    const leg1 = proposal.leg1
-    if (!leg1) throw new SettleError('This proposal has no leg 1.')
-    const out0 = cst.deserializeTx(leg1.cborHex).body().outputs()[0]
-    const datum = out0?.datum()?.asInlineData()?.toCbor()
-    if (!datum) throw new SettleError('Leg 1 carries no escrow datum.')
-    const d = readDatum(datum)
-    partiesCache = { escrowRef: proposal.escrowRef, buyer: d.buyer.payment.hash, seller: d.seller.payment.hash }
-  }
   if (role === 'admin') throw new SettleError('The admin set has no part in a settlement.')
-  return partiesCache[role]
+  const leg1 = proposal.leg1
+  if (!leg1) throw new SettleError('This proposal has no leg 1.')
+  const datum = cst.deserializeTx(leg1.cborHex).body().outputs()[0]?.datum()?.asInlineData()?.toCbor()
+  if (!datum) throw new SettleError('Leg 1 carries no escrow datum.')
+  const d = readDatum(datum)
+  return role === 'buyer' ? d.buyer.payment.hash : d.seller.payment.hash
 }
 
 function readRecord(escrowRef: string): SellerRecord {
@@ -192,7 +189,7 @@ export async function checkBeforeConcession(proposal: Proposal, record: SellerRe
   if (!leg1 || !leg2) throw new SettleError('This proposal is missing a leg.')
   if (leg1.txHash !== record.leg1Hash || leg2.txHash !== record.leg2Hash) throw new SettleError('These legs are not the ones this seller prepared: prepare again.')
   if (mesh.resolveTxHash(leg1.cborHex) !== record.leg1Hash || mesh.resolveTxHash(leg2.cborHex) !== record.leg2Hash) throw new SettleError('A leg\'s body was changed after it was prepared.')
-  if (!hasValidWitness(leg2.cborHex, proposalPkh(proposal, 'buyer'))) throw new SettleError('Leg 2 must be signed by the buyer before the seller signs leg 1.')
+  if (!hasValidWitness(leg2.cborHex, record.buyerPkh ?? proposalPkh(proposal, 'buyer'))) throw new SettleError('Leg 2 must be signed by the buyer before the seller signs leg 1.')
   if (!refs(leg2.cborHex, 'inputs').includes(`${leg1.txHash}#0`)) throw new SettleError('Leg 2 does not spend leg 1\'s escrow output.')
   const t1 = ttlMs(leg1.cborHex), t2 = ttlMs(leg2.cborHex)
   if (t1 - nowMs < MIN) throw new SettleError(`Leg 1 expired at ${sgt(t1)}: prepare again.`)
