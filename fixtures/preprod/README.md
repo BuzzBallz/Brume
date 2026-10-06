@@ -56,12 +56,26 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-9e7c0991…_0.json` | Integration 1 dry run through stream B's agent API (A's machine) | 5259954 | 12 tADA + 1.2 tUSDM / 8 tADA + 0.8 tUSDM |
 | `txlog-824bbdd3…_0.json` | `pnpm demo:preprod`, from nothing in one command | 5260101 | 6 / 4 tADA |
 | `txlog-3165d9de…_0.json` | `pnpm demo:preprod` rerun on the code fixed after the contract review | 5260164 | 6 / 4 tADA |
+| `txlog-3afaacc7…_0.json` | `pnpm demo:preprod` with Koios at its keyless daily cap (Blockfrost alone, announced) | 5260570 | read-back pending: it must come from the other indexer, Koios, until its cap resets |
 
 On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and the demo runs `824bbdd3` and `3165d9de`, which check it themselves) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
 Rerun (needs `PREPROD_BUYER_SKEY`, `PREPROD_SELLER_SKEY` and a Disputed escrow of yours): `pnpm sign --prepare <ref> --share 0.4`, then `pnpm sign --role buyer <file>`, then `pnpm sign --role seller <file>`. Readback of a settled log: `node src/preprod/readback.ts <ref>`.
 
 **Sayable (R5):** the deployed bytes accept `SetRefundRequested` (ResultSubmitted → Disputed), `AuthorizeRefund` (Disputed → RefundRequested) and `WithdrawRefund` from RefundRequested with no fee or collateral output; an exit was signed against an output that did not exist yet and landed (C8). **Not sayable:** anything about a front-run from these runs (each handed both legs to one node: favourable, not a race). That is section 4.
+
+## 1b. The witness sets: name the redeemer, walk to the UTxO
+
+`node src/preprod/witnesses.ts <escrowRef>` reads each leg's CBOR on Blockfrost (its hash checked) and the spent escrow's datum, and writes `witnesses-<ref>.json`: the redeemer and the UTxO it spends, the escrow's state before and after, the outputs per party, the required signers, every vkey witness hashed to its key and named against the escrow's datum, and the check against the three admin key hashes of the deployed parameters.
+
+**We never split a Disputed escrow.** The only branch that splits a Disputed escrow is `WithdrawDisputed`, and it needs 2 of the 3 admin keys: nobody can do it without them, and we do not claim otherwise. We operate on **RefundRequested**, the state the seller's own concession creates: leg 1 moves no value, leg 2 splits it.
+
+| Leg | Redeemer | Spends (state) | Leaves | Required signer | Witnesses | Admin keys |
+|---|---|---|---|---|---|---|
+| 1 | `AuthorizeRefund` (6) | the escrow (Disputed) | the escrow at the script, RefundRequested, the whole pot | seller | seller | none of the 3 |
+| 2 | `WithdrawRefund` (3) | leg 1's output 0 (RefundRequested) | the pot split between buyer and seller; the escrow leaves the script | buyer | buyer, seller (its UTxO pays the fee) | none of the 3 |
+
+Same on all twelve legs of the six settles exported (`witnesses-7a37751b…`, `-b475bad5…`, `-9054b1d8…_6`, `-9e7c0991…`, `-824bbdd3…`, `-3165d9de…`). One to walk: `7a37751b…#0` (file-drop path, token pot, block 5259570): leg 1 `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8`, leg 2 `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637`, buyer 12 tADA + 6 tUSDM, seller 8 tADA + 4 tUSDM. The redeemer constructors match Koios's own decoding of the same transactions.
 
 ## 2. Bank and fixtures
 
@@ -135,6 +149,17 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | AuthorizeRefund (leg 1) | seller | accept | accepted | 5260164 | `424d7940866f12f7a51afcba345efd73822c6ba9b0289bc33e4e848111c86c90` |
 | WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260164 | `883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820` |
 | replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820` |
+
+### `txlog-3afaacc729cf03902afce4284f6b3fe2193027fedd59555e9f6abc8aff4f0a89_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| lock 1 fixture escrow(s) | - | - | accepted | 5260567 | `496826443844e20d892144d8fb9f3fb73368e8245b3737faeba96432451f5b80` |
+| SetRefundRequested (buyer raises) | buyer | accept | accepted | 5260568 | `3afaacc729cf03902afce4284f6b3fe2193027fedd59555e9f6abc8aff4f0a89` |
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `77bc28dffa0f6935ec6472d4989a0c4c5c802ca7280a54827839041b44699298` |
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260570 | `99ea2e4cc23f873078a8826f201b93002c64bf37240ac858a6d3d1b56075c89c` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260570 | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
 
 ### `txlog-5aee2110a6a7c407a24258899ed051aa6c878c8cfe7105c2674c3ce79b071386_0.json`
 
