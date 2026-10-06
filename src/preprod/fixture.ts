@@ -2,14 +2,13 @@ import { randomBytes } from 'node:crypto'
 import type { UTxO } from '@meshsdk/core'
 import type { Address, Datum, State } from '../../shared/types.ts'
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import { preprodChain } from './chain.ts'
+import { preprodChain, utxoStatus } from './chain.ts'
 import { mesh } from './mesh.ts'
 
 // Our own preprod fixtures: escrows we lock, with a V1 datum we write. Never a mainnet or third-party escrow.
 
 export const MIN = 60_000
-// Preprod USDM as the Masumi dispenser hands it out (6 decimals).
-export const TUSDM = '16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d'
+export { TUSDM } from '../../shared/constants.ts'
 
 export const lovelace = (u: UTxO): bigint => BigInt(u.output.amount.find((a) => a.unit === 'lovelace')?.quantity ?? '0')
 export const tokenQty = (u: UTxO, unit: string): bigint => BigInt(u.output.amount.find((a) => a.unit === unit)?.quantity ?? '0')
@@ -53,10 +52,13 @@ export function fixtureDatum(buyer: string, seller: string, nowMs: number, o: Lo
   }
 }
 
+// Blockfrost's /txs/{hash}/utxos also lists spent outputs, so unspentness is confirmed on Koios before anything is built.
 export async function escrowAt(ref: string): Promise<UTxO> {
   const [hash, idx] = ref.split('#')
   const u = (await preprodChain().fetchUTxOs(hash, Number(idx))).find((x) => x.input.outputIndex === Number(idx))
-  if (!u) throw new Error(`escrow ${ref} not found (spent, or not indexed yet)`)
+  if (!u) throw new Error(`escrow ${ref} not found (not indexed yet?)`)
+  const status = await utxoStatus([ref])
+  if (status.get(ref) !== 'unspent') throw new Error(`escrow ${ref} is ${status.get(ref) ?? 'unknown to Koios'}: nothing is built on it`)
   if (u.output.address !== V1_ADDRESS.preprod || !u.output.plutusData) throw new Error(`${ref} is not a V1 escrow with an inline datum`)
   return u
 }
