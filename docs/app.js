@@ -660,10 +660,10 @@ function renderBands(solver) {
   const who = solver.path === 'A' ? 'buyer' : 'seller' // the bands are priced for one settle path
   return h('section', { class: 'bands' },
     h('h2', {}, `Splits both sides can accept, ${who} concedes first`),
-    h('p', { class: 'hint' }, 'Seller\'s share of the escrow value, by how long the buyer is willing to wait for an arbiter.'),
+    h('p', { class: 'hint' }, 'Seller\'s share of the escrow value, for a buyer who would wait at most this long for an arbiter.'),
     h('div', { class: 'band-grid' },
       solver.bands.map(b => [
-        h('span', { class: 'band-label' }, `Buyer waits ${b.horizonDays} days`),
+        h('span', { class: 'band-label' }, `Buyer who would wait at most ${b.horizonDays} days`),
         b.feasible === false
           ? h('span', { class: 'band-none' }, 'No split both sides accept at this horizon.')
           : [h('div', { class: 'track', title: `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)} of the value` },
@@ -673,6 +673,35 @@ function renderBands(solver) {
       h('span'),
       h('div', { class: 'axis', 'aria-hidden': 'true' }, ticks.map(t => h('span', { style: `left:${t * 100}%` }, pct(t)))),
     ))
+}
+
+// D17: the option to wait as break-evens, never as a value of waiting, a probability of arrival or a recommended split.
+// The chain only bounds the arbiter's rate from above (silent since the last arbitration, through a block someone read).
+const day = ms => new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+// Rounded toward the safe side: a share beats waiting below the floored deadline and at or above the ceiled rate.
+const rate = r => r * 100 >= 1e5 ? 'over 100,000\u00a0%/yr' : `${Math.ceil(r * 100).toLocaleString('en')}\u00a0%/yr`
+
+function renderWait(wait) {
+  const d = wait.dormancy
+  const where = d.providers.length === 1 ? ' on one provider' : d.providers.length >= 2 && d.method !== 'pin' ? ` on ${d.providers.length === 2 ? 'two' : d.providers.length} providers` : ''
+  const alert = d.status !== 'silent' || d.acted.length > 0
+  return h('section', { class: 'paths wait' },
+    h('h2', {}, 'Waiting for an arbiter'),
+    h('p', { class: 'hint' }, `No arbitration since ${day(d.lastActionMs)}, checked to block ${d.through.height.toLocaleString('en')}${where} (${d.method}).`),
+    alert
+      ? h('div', { class: 'alert', role: 'alert' }, h('strong', {}, 'ALERT '),
+          d.acted.length
+            ? [`the arbiter acted after block ${d.pin.height.toLocaleString('en')}. Break-evens are not shown.`,
+                h('ul', {}, d.acted.map(a => h('li', {}, `WithdrawDisputed in block ${a.height.toLocaleString('en')}, ${utc(a.timeMs)}${a.validContract ? '' : ', phase 2 failed'}: `, txLink(a.txHash))))]
+            : `the arbiter's silence could not be verified past block ${d.pin.height.toLocaleString('en')} (${d.holes} holes, ${d.diff.length} provider differences). Break-evens are not shown.`)
+      : [h('p', { class: 'hint' }, `At 95 %, the arbiter acts at most once every ${Math.round(wait.meanGapDaysAtLeast)} days on average; nothing puts a floor under that.`),
+        h('table', {},
+          h('thead', {}, h('tr', {}, ['Seller share', 'Beats waiting for a buyer who would stop within', 'or who discounts at, or more'].map(c => h('th', { scope: 'col' }, c)))),
+          h('tbody', {}, wait.curve.map(p => h('tr', { class: p.feasible ? null : 'off', title: p.feasible ? null : 'Outside the splits both sides can accept' },
+            h('th', { scope: 'row', class: 'mono' }, pct(p.sellerShare)),
+            h('td', { class: 'mono' }, p.deadlineDays === null ? 'any wait' : `${Math.floor(p.deadlineDays)}\u00a0days`),
+            h('td', { class: 'mono' }, p.breakEvenDiscountAnnual === null ? 'no rate does' : rate(p.breakEvenDiscountAnnual))))))],
+    h('p', { class: 'hint' }, 'The chain bounds the arbiter; it cannot measure the buyer\'s patience, so Brume shows break-evens, not a recommended split.'))
 }
 
 function renderPaths(solver, value) {
@@ -697,7 +726,7 @@ function renderPaths(solver, value) {
 async function solverView(row) {
   const solver = await load('solver', row.ref)
   if (solver.ref !== row.ref) return blank('No solver output for this escrow', 'The solver has not priced this reference in this data set.', false)
-  return [renderBands(solver), renderPaths(solver, row.value)] // census and bank rows both carry the escrow's value
+  return [renderBands(solver), solver.wait && renderWait(solver.wait), renderPaths(solver, row.value)].filter(Boolean) // census and bank rows both carry the escrow's value
 }
 
 /* Shell */
