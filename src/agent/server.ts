@@ -207,6 +207,18 @@ function limit(req: IncomingMessage, name: string, max: number) {
   if (hits.size > 5000) for (const [k, v] of hits) if (now - v[v.length - 1] > 60_000) hits.delete(k)
 }
 
+// Key actions come from this agent's own page only. A web page open elsewhere can still send a request to 127.0.0.1
+// (CSRF), and a hostile DNS name can resolve to it (DNS rebinding): the Host must be this agent's own, the Origin too
+// when the browser sends one, and the body JSON, since a cross-origin JSON POST needs a preflight this server never grants.
+const OWN_HOSTS = [`127.0.0.1:${PORT}`, `localhost:${PORT}`]
+function ownPage(req: IncomingMessage) {
+  const origin = req.headers.origin
+  const json = (req.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase() === 'application/json'
+  if (!OWN_HOSTS.includes(req.headers.host ?? '') || (origin !== undefined && !OWN_HOSTS.some((h) => origin === `http://${h}`)) || !json) {
+    throw new HttpError(403, 'Settlement actions are only accepted from the agent\'s own page on this machine.')
+  }
+}
+
 async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', 'http://localhost')
   const handler = routes[routeKey(req.method ?? 'GET', url.pathname)]
@@ -217,6 +229,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   }
   // Settlement and try anyway act with our keys: tunnel traffic (it carries cf-connecting-ip) may only read them.
   if (req.method === 'POST' && url.pathname.startsWith('/api/') && req.headers['cf-connecting-ip']) throw new HttpError(403, 'Settlement actions are only accepted on the machine running the agent.')
+  if (req.method === 'POST' && url.pathname.startsWith('/api/')) ownPage(req)
   limit(req, 'api', 300)
   if (req.method === 'POST' && url.pathname === '/start_job') limit(req, 'start_job', 10)
   const { body, status } = await handler(url, req)
