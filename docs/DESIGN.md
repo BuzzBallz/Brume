@@ -147,7 +147,8 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 | leg 1 expiring | live countdown on `leg1.validToMs` (about 20 min after prepare) in the signing and send steps |
 | leg 1 expired | the first step still waiting turns into "Expired": "Leg 1 expired before it was sent. Prepare it again: both sides sign the new hashes." + Prepare again (re-runs `POST /api/proposal` with the same share) |
 | sending | spinner in place of the icon, tx hash + Cexplorer link as soon as known |
-| confirmed | check, block / slot |
+| pending | accepted but no `block` yet: "pending, not yet in a block" with the hash linked; the step reads "Waiting for confirmation" and the UI polls the txlog every 2 s |
+| confirmed | check, "confirmed in block N" (`block.height`); the send step is done only when both legs have a block |
 | refused or failed | `--bad` icon and the reason worded by where it was decided (claims rule: only phase 2 is the validator): `stage: evaluate` "refused when evaluated, before submission"; `refusal.phase` 2 "the validator refused it"; phase 1 "the ledger refused it: <ledgerError>" (e.g. the leg-2 replay, `BadInputsUTxO`). Then what to do next (start over on the next bank escrow) |
 
 **CIP-30 (S-3)**: no wallet detected (button absent, file drop only) · connecting · wrong network (`getNetworkId() !== 0`: refused before anything is signed; CIP-30 cannot tell preprod from preview) · confirm in your wallet (polling holds so the button is not re-rendered) · signature declined (`TxSignError` 2: message kept across re-renders, nothing sent) · wallet lacks the key (`TxSignError` 1) · access refused (`APIError` -3). The buyer signs leg 2, the seller leg 1, always `partialSign = true`. Waiting steps also show a live elapsed counter (live mode).

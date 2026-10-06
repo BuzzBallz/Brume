@@ -5,6 +5,7 @@ const ROLES = ['buyer', 'seller', 'admin']
 const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
 const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', txlog: 'txlog' }
 const USDM = 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d' // = USDM in shared/constants.ts
+const TUSDM = '16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d' // preprod test USDM in the bank escrows (stream A, 6 Oct); to move into shared/constants.ts
 const EXPLORER = 'https://preprod.cexplorer.io/tx/' // DESIGN §10.2: format confirmed by eye on the first real tx
 const POLL_MS = 2000
 
@@ -375,7 +376,9 @@ function sendButton(row, rerun) {
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
-const outcome = e => e.block ? `confirmed in block ${e.block.height.toLocaleString('en')}` : 'accepted'
+// An accepted entry without a block is pending: submitted, not yet confirmed (stream A, 6 Oct).
+const outcome = e => e.block ? `confirmed in block ${e.block.height.toLocaleString('en')}` : 'pending, not yet in a block'
+const pending = e => e?.status === 'accepted' && !e.block
 
 // Claims rule: only a phase-2 failure (the script failed) may be called the validator refusing. Phase 1 is a ledger rule, e.g. a spent input.
 function refusal(e) {
@@ -411,7 +414,8 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
         : [waitingFor(exiter, ctx), validity] },
     { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
       body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
-    { label: `${cap(conceder)} sends both legs`, done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
+    { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused,
+      waiting: leg1 || leg2 ? 'Waiting for confirmation' : 'Ready to send',
       body: refused
         ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
         : leg1 || leg2
@@ -477,7 +481,7 @@ function renderLog(log) {
   if (!log.length) return null
   return h('section', { class: 'log' },
     h('h2', {}, 'Transactions'),
-    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: e.status },
+    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step),
       h('span', { class: 'status' }, cap(e.status === 'accepted' ? outcome(e) : refusal(e))),
@@ -512,8 +516,9 @@ async function settleView(row) {
     if (now && label !== shown) requestAnimationFrame(() => now.scrollIntoView({ block: 'nearest' })) // only when the step changes, so polling never yanks the scroll
     shown = label
     const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
+    const confirming = mine && [mine.leg1, mine.leg2].some(leg => leg && log.some(e => e.txHash === leg.txHash && pending(e)))
     clearTimeout(timer)
-    if (live && waitingOnSignature) timer = setTimeout(poll, POLL_MS) // picks up the signed file dropped by pnpm sign
+    if (live && (waitingOnSignature || confirming)) timer = setTimeout(poll, POLL_MS) // picks up a dropped signature file, then the blocks
   }
   await rerun()
   return panel
@@ -521,7 +526,7 @@ async function settleView(row) {
 
 /* Solver: scale-free. Every figure is a share of one asset of this escrow, never a sum across assets. */
 
-const assetName = unit => unit === 'lovelace' ? 'ADA' : unit === USDM ? 'USDM' : short(unit)
+const assetName = unit => ({ lovelace: 'ADA', [USDM]: 'USDM', [TUSDM]: 'tUSDM' })[unit] ?? short(unit)
 
 // Share of each asset when the escrow's value is known (mainnet census rows); base-unit quantities otherwise.
 function perAsset(terms, value) {

@@ -340,3 +340,4 @@ button, a { touch-action: manipulation; }
 .balances .match.off { font-weight: 600; }
 .balances .match.off::before { background: var(--bad); }
 .band-none { grid-column: span 2; font-size: 14px; color: var(--ink-2); }
+.timeline li.pending .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
