@@ -44,7 +44,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [x] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [x] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages — `docs/`, live on the agent (rehearsal settle `9054b1d8…#6` from the UI), snapshot read-only on Pages from main
 - [ ] M-10 Coworker registered and listed on preprod Sokosumi (part 5c)
-- [ ] M-11 README (5 commands, mocks, tx hashes, prior art), DEMO.md, pinned fixtures (part 11)
+- [x] M-11 README (5 commands, mocks, tx hashes, prior art), DEMO.md, pinned fixtures (part 11) — B, 6 Oct: README head merged from A's draft and claims-checked twice (median 333 d at block 14031954, unproven marketplace counts left out), the UI take on `9054b1d8…#7` (block 5260711) in README and DEMO.md, Pages snapshot at tip 14033472 replaying it
 - [ ] M-12 recording + slides incl. "who pays" (part 12)
 
 **SHOULD (in this order)**
@@ -162,7 +162,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [x] B clean-clone judge run (keyless): README commands work [sonnet/high] — run from a fresh clone of b/ui with no .env, 6 Oct: check green, fixture census with both providers, live census single-provider and saying so, agent routes answering
 - [x] A S-2 own deployment + admin pair [sonnet/high + contract-reviewer] — executed 6 Oct, blocks 5259662 / 5259664 / 5259665 (§10); the contract-reviewer pass is the open item of the review line below
 - [ ] B S-3 CIP-30 only if everything above is green [sonnet/high]
-- [ ] `/code-review high` + contract-reviewer on `src/preprod`, `src/engine`, `src/agent`; claims-checker on README/deck draft — B, 6 Oct: `/code-review high` on the three folders (9 findings, 8 fixed in src/agent, the lock fixed by A in src/preprod); claims-checker on the deck and pitch (no blocker, 4 fixes applied). A, 6 Oct: contract-reviewer on `src/preprod` + `src/engine` (4 major, 7 minor; all fixed in `src/preprod` and rerun on preprod, block 5260164, except M3, a hole shown as a refusal in `docs/app.js`, for B). Still open: M3 (B), claims-checker on the final README
+- [x] `/code-review high` + contract-reviewer on `src/preprod`, `src/engine`, `src/agent`; claims-checker on README/deck draft — B, 6 Oct: `/code-review high` on the three folders (9 findings, 8 fixed in src/agent, the lock fixed by A in src/preprod); claims-checker on the deck and pitch (no blocker, 4 fixes applied). A, 6 Oct: contract-reviewer on `src/preprod` + `src/engine` (4 major, 7 minor; all fixed in `src/preprod` and rerun on preprod, block 5260164, except M3, a hole shown as a refusal in `docs/app.js`, for B). M3 fixed by B in `docs/app.js` (`5776ce3`: a hole is never shown as a refusal); claims-checker on the final README, B, 6 Oct, twice, every finding applied
 - Done when: **freeze 13:00**, main green.
 
 **M4 — Polish · Wed 13:00–17:30**: UI polish (minimalist-ui, dataviz), deck incl. who-pays slide, take 2.
