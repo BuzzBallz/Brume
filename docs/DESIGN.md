@@ -193,7 +193,7 @@ English, sentence case, plain verbs; an action keeps its name through the flow (
 4. Keyboard navigation in the list: `j` / `k` move, `Enter` opens, at M4.
 5. Mainnet escrows never show Settle or Try anyway (mainnet is read-only).
 6. Scope: this session builds `docs/` only. `src/agent`, `shared/` and M0 belong to the back-end session; the routes in §8 are requests to it.
-7. The admin-refusal control (`WithdrawDisputed` after the concession) runs on our own deployment (S-2): its escrows are listed in their own group, "Our deployment", and every view of them carries that label.
+7. The admin-refusal control (`WithdrawDisputed` after the concession) runs on our own deployment (S-2): its escrows are listed in their own group, "Our deployment", and every view of them carries that label. Every log entry whose `scriptHash` is not the shared V1 script (`bd2adb68…6c0`) is tagged "our own deployment" (history, send step, Try anyway), so a run on our copy is never read as the deployed bytes.
 
 ## 11. Gallery picks (via [Component Gallery](https://component.gallery))
 

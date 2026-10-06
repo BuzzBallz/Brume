@@ -6,6 +6,7 @@ const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result subm
 const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', txlog: 'txlog' }
 const USDM = 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d' // = USDM in shared/constants.ts
 const TUSDM = '16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d' // preprod test USDM in the bank escrows (stream A, 6 Oct); to move into shared/constants.ts
+const SCRIPT_HASH = 'bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0' // = SCRIPT_HASH in shared/constants.ts: the shared V1 script, same bytes on mainnet and preprod
 const EXPLORER = 'https://preprod.cexplorer.io/tx/' // DESIGN §10.2: format confirmed by eye on the first real tx
 const POLL_MS = 2000
 
@@ -99,6 +100,8 @@ function escrowFromUrl() {
 const chip = state => h('span', { class: `chip state-${state}` }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), STATE_LABEL[state] ?? 'Datum not decodable')
 const txLink = hash => h('a', { class: 'mono', href: EXPLORER + hash, target: '_blank', rel: 'noopener', title: hash }, short(hash))
 const txRef = e => e.status === 'accepted' ? txLink(e.txHash) : h('span', { class: 'mono', title: e.txHash }, short(e.txHash)) // a refused tx never reaches the chain
+// A run against any other script is our own deployment (S-2), never to be read as the deployed bytes.
+const ownTag = e => e?.scriptHash && e.scriptHash !== SCRIPT_HASH ? [' ', h('span', { class: 'tag', title: `script ${e.scriptHash}` }, 'our own deployment')] : null
 
 // A Settle poll rebuilds the button, so the copied state lives here: a rebuilt button shows it without replaying the fade.
 let copied = null // { text, timer }
@@ -198,8 +201,8 @@ function tryAnyway(row, v, anchor) {
       const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`]
       const matched = (e.status === 'accepted') === (e.expected === 'accept')
       out.replaceChildren(matched
-        ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result)
-        : h('p', { class: 'error observed' }, `Engine predicted ${predicted}, but `, result))
+        ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result, ownTag(e))
+        : h('p', { class: 'error observed' }, `Engine predicted ${predicted}, but `, result, ownTag(e)))
     } catch (x) {
       out.replaceChildren(h('p', { class: 'error' }, x.message))
       btn.disabled = false
@@ -434,7 +437,7 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
         ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: `, h('span', { 'data-cue': e.block && `block ${e.step}` }, outcome(e)), ', ',
-              h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash))))]
+              h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash)), ownTag(e)))]
           : submitted
             ? [h('p', {}, 'Submitted to the agent. Waiting for the first leg to appear on preprod.')]
             : [sendButton(row, rerun), validity] },
@@ -545,7 +548,7 @@ function renderLog(log) {
     h('h2', {}, 'Transactions'),
     h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
-      h('span', {}, e.step),
+      h('span', {}, e.step, ownTag(e)),
       h('span', { class: 'status' }, cap(e.status === 'accepted' ? outcome(e) : refusal(e))),
       txRef(e)))))
 }

@@ -369,3 +369,4 @@ span[data-cue] { display: inline-block; }
 @keyframes brume-fade { from { opacity: 0; } }
 
 .timeline li.pending .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
+.tag { display: inline-block; margin-left: 4px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 14px; color: var(--ink-2); white-space: nowrap; }
