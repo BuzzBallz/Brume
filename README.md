@@ -1,8 +1,55 @@
 # Brume
 
-TOKEN2049 Origins, Cardano track, team BuzzBallz. Brume reads escrows held by the deployed V1 payment-escrow validator and shows what each party can do with them right now.
+**Only its arbitrator can split a disputed escrow, and no arbitration has happened since 27 November 2025 (Koios, through block 14033013). Brume builds the transaction pair that lets the two parties do it without one.**
 
-Input: an escrow UTxO reference. Output: for each of the 7 redeemers and each of buyer, seller and admin, whether the validator's source says the action can succeed now. No model decides anything: every verdict comes from the validator's guards, read from its source (rung R4) until a guard has been exercised on preprod (rung R5).
+On 10 August 2026 Masumi published [*The Return Counter Nobody Built*](https://www.masumi.network/blogs/the-return-counter-nobody-built). It opens: "Everyone spent 18 months building the checkout for AI agents. Nobody built the return counter."
+
+On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with their arbitration window open for a median of **333 days** (census at block 14031954). Across all **120** arbitrations in the contract's lifetime, the seller received **nothing** in every one (PLAN §10 D14, and [the annex](paper/PAPER.pdf)).
+
+TOKEN2049 Origins, Cardano track, team BuzzBallz.
+
+## What Brume does
+
+Give it one escrow. It answers three questions.
+
+1. **What can each party do right now?** A 7 × 3 grid: seven redeemers against buyer, seller and admin, with the guard that blocks each forbidden cell. Every verdict comes from the validator's guards, read from its source (rung R4) until a guard has been exercised on preprod (rung R5).
+2. **Which splits are worth taking?** Bands and break-evens from the measured arbitration history and a bound on the arbiter's rate. Break-evens, never a recommended split.
+3. **How do the two parties execute one?** A transaction pair in which the buyer signs the exit before the seller concedes, so once the seller has conceded, the buyer can no longer refuse the agreed split. Refusing would mean racing it, which we have not measured.
+
+It is built as a MIP-003 agent for the Masumi marketplace (registered on the preprod registry, not yet visible on Sokosumi) and as a web UI over the same engine.
+
+## What Brume is not
+
+- **Not an arbiter.** No model decides anything and no party uploads evidence. No text anywhere decides an amount, so there is nothing to prompt-inject.
+- **Not a new escrow.** We work on the contract that is already deployed and already holding the money: a new deployment cannot reach the 61 escrows on mainnet.
+- **Not a claim that the contract is broken.** The validator's source says the contract can pay a split: in V1 the dispute branch constrains no output, and in V2 the split is two explicit fields in the redeemer. What neither version has is a way for the two parties to commit to an agreed split **without the admin set**. That is the only thing we build.
+
+## The result, in one paragraph
+
+From a disputed escrow, the seller's own `AuthorizeRefund` empties the result hash and moves the state to `RefundRequested`. The validator's source says the arbitration branch needs both a `Disputed` state and a non-empty result hash, so after that concession, on an escrow past its result deadline (all 61 are), the admin set has no branch left. On our own deployment of the same code, the admin's `WithdrawDisputed` after a concession was refused by the validator (phase 2, *The admin pair* below). The remaining move is the buyer's `WithdrawRefund`, which, the validator's source says, constrains no output: the buyer can pay the seller an agreed share. Nothing makes them, which is why the exit is signed first.
+
+**We never split a `Disputed` escrow.** Only `WithdrawDisputed` does that, and it needs the admin keys. We operate on the state the seller's own concession creates.
+
+The full derivation, both theorems, the fee-incidence result and the quantitative model are in [the annex (PDF, 7 pages)](paper/PAPER.pdf), which GitHub renders in the browser. Its LaTeX source is beside it in `paper/PAPER.tex`.
+
+## The evidence, up front
+
+Ten settlements on preprod, both legs of each in one block: nine indexed in `fixtures/preprod/README.md` §1, and the take on `9054b1d8…#7` under *Transactions sent*. For six of them, twelve legs, the witness walk (`fixtures/preprod/witnesses-*.json`) read each leg's CBOR back from the chain, checked its hash, and found every vkey witness hashing to the buyer or the seller of that escrow's own datum: **no admin key in any of them**.
+
+One to read, a token pot in **block 5259570**:
+
+| Leg | Redeemer | Transaction | |
+|---|---|---|---|
+| 1 | `AuthorizeRefund` | `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8` | the seller signs, the pot stays at the script |
+| 2 | `WithdrawRefund` | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` | the buyer signs: 12 tADA + 6 tUSDM to the buyer, 8 tADA + 4 tUSDM to the seller |
+
+Others run 60/40, 70/30 and 25/75 (buyer/seller). Every settlement above runs on the **same script hash** as the mainnet escrows (`bd2adb68…`): the same bytes that hold the mainnet value.
+
+**What we do not claim.** Pre-signing removes a refusal. It does not remove a front-run, and front-running is **not measured**: a rival exit, checked valid before each contended run, never landed, but no run gave it a clean window. The solver prices the front-run at its worst case. Details under *Leg timing*.
+
+## Who it is for
+
+Agents on Masumi are paid through its escrow contracts: V1 holds the 61 on mainnet, and which version Sokosumi pays into is still open. The 61 belong to a small, closed set of buyers and sellers. The step where an exit has to work is enterprises buying agent work directly. Brume is hired per job, like any agent; the business we would build on it is basis points on every escrow at creation, priced like a payment guarantee, not a fee on the rare dispute.
 
 This README states what exists today. The status table says what does not.
 
@@ -171,7 +218,7 @@ Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f97
 
 ## Prior art
 
-Checked by hand on 6 Oct, named here first: Kleros Escrow v2, Win-Win Dispute Resolution (Catalyst F6), AI Arbiter, Hokan, and the projects that ship their own escrow contract. Each builds its own escrow or a better judge.
+Checked by hand on 6 Oct, named here first: Kleros Escrow v2, Win-Win Dispute Resolution (Catalyst F6), AI Arbiter, Hokan, and the projects that ship their own escrow contract. Each builds its own escrow or a better judge. Simpuru ([github.com/Simpuru-xyz/simpuru](https://github.com/Simpuru-xyz/simpuru), created 6 Oct, in this track) deploys Masumi's V2 validator unchanged with its own arbiter key: it replaces the V1 arbitrator, which has not acted since 27 November 2025, with its own, and a new deployment cannot reach the 61 escrows on mainnet. Brume lets the two parties settle without one on the escrows that exist.
 
 ## Layout
 
