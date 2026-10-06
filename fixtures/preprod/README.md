@@ -55,8 +55,9 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-9054b1d8…_6.json` | stream B's UI rehearsal through the agent (B's machine) | 5259766 | 5 tADA + 2.5 tUSDM / 15 tADA + 7.5 tUSDM |
 | `txlog-9e7c0991…_0.json` | Integration 1 dry run through stream B's agent API (A's machine) | 5259954 | 12 tADA + 1.2 tUSDM / 8 tADA + 0.8 tUSDM |
 | `txlog-824bbdd3…_0.json` | `pnpm demo:preprod`, from nothing in one command | 5260101 | 6 / 4 tADA |
+| `txlog-3165d9de…_0.json` | `pnpm demo:preprod` rerun on the code fixed after the contract review | 5260164 | 6 / 4 tADA |
 
-On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and `824bbdd3`, where the demo checks it itself) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
+On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and the demo runs `824bbdd3` and `3165d9de`, which check it themselves) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
 Rerun (needs `PREPROD_BUYER_SKEY`, `PREPROD_SELLER_SKEY` and a Disputed escrow of yours): `pnpm sign --prepare <ref> --share 0.4`, then `pnpm sign --role buyer <file>`, then `pnpm sign --role seller <file>`. Readback of a settled log: `node src/preprod/readback.ts <ref>`.
 
@@ -118,11 +119,22 @@ Rerun: `node src/preprod/race.ts <Disputed ref of yours> --share 0.4 --run k`.
 
 ## Not here yet
 
-- **Path A settlement** (buyer first): priced by the solver, shown in the UI's solver panel, not built in `src/preprod`, never run (PLAN M-5).
+- **Path A settlement** (buyer first): priced by the solver, shown as a comparison in the UI, not built and never run, by decision (PLAN §10, D16).
 
 ## Every transaction, per file
 
 Generated from the logs (step, role, the engine's prediction, result, block, full hash).
+
+### `txlog-3165d9decd15b3f264c5e1a7f21d115ce54b98c2e87b2f40fddbb57adae23329_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| lock 1 fixture escrow(s) | - | - | accepted | 5260159 | `7e2ae5753baae4d2a3f81605574279fb21ce46d0e5fb59d55b358cb908586f1c` |
+| SetRefundRequested (buyer raises) | buyer | accept | accepted | 5260161 | `3165d9decd15b3f264c5e1a7f21d115ce54b98c2e87b2f40fddbb57adae23329` |
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `10344c3a3dda06b18b483d881e5c2edc7bd02d27a0a3a83e30659d600bd65e4f` |
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260164 | `424d7940866f12f7a51afcba345efd73822c6ba9b0289bc33e4e848111c86c90` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260164 | `883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820` |
 
 ### `txlog-5aee2110a6a7c407a24258899ed051aa6c878c8cfe7105c2674c3ce79b071386_0.json`
 
