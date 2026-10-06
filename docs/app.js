@@ -3,7 +3,7 @@
 const REDEEMERS = ['Withdraw', 'SetRefundRequested', 'UnSetRefundRequested', 'WithdrawRefund', 'WithdrawDisputed', 'SubmitResult', 'AuthorizeRefund'] // = REDEEMER in shared/types.ts
 const ROLES = ['buyer', 'seller', 'admin']
 const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
-const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', txlog: 'txlog' }
+const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', settle: 'proposal', txlog: 'txlog' }
 const USDM = 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d' // = USDM in shared/constants.ts
 const TUSDM = '16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d' // preprod test USDM in the bank escrows (stream A, 6 Oct); to move into shared/constants.ts
 const SCRIPT_HASH = 'bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0' // = SCRIPT_HASH in shared/constants.ts: the shared V1 script, same bytes on mainnet and preprod
@@ -24,11 +24,12 @@ const LIVE = {
   grid: ref => `/api/grid?ref=${enc(ref)}`,
   solver: ref => `/api/solver?ref=${enc(ref)}`,
   proposal: ref => `/api/proposal/${enc(ref)}`,
+  settle: ref => `/api/proposal/${enc(ref)}`, // the whole answer: { proposal, sending, error }
   txlog: ref => `/api/txlog?ref=${enc(ref)}`,
 }
 
 // A 404 on these means "nothing yet" (no proposal, no run, empty bank), not a failed read.
-const NOTHING_YET = { proposal: null, txlog: [], bank: [] }
+const NOTHING_YET = { proposal: null, settle: null, txlog: [], bank: [] }
 
 // ponytail: snapshot and mock hold one escrow per kind; per-ref files once the list shows more than the hero escrow.
 async function load(kind, ref, net) {
@@ -386,7 +387,8 @@ function sendButton(row, rerun) {
     btn.disabled = true
     btn.textContent = 'Sending…'
     // The agent answers 202 at once and submits in the background (1–2 min); progress arrives through GET /api/txlog.
-    try { await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun({ submitted: true }) }
+    // 202 {status: 'sending'}: the send runs in the background; 200 {status: 'done', txlog}: it already ended.
+    try { const answer = await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun({ submitted: true, txlog: answer?.txlog }) }
     catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
   } }, 'Send both legs')
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
@@ -413,7 +415,7 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
   const leg1 = entry('leg1')
   const leg2 = entry('leg2')
   const refused = [leg1, leg2].find(e => e?.status === 'refused')
-  const submitted = !leg1 && !leg2 && wait.submittedAt // 202 received, no leg in the txlog yet: no second Send button
+  const submitted = !leg1 && !leg2 && (wait.submittedAt || wait.sending) // a send is running, no leg in the txlog yet: no second Send button
   const validTo = live && !leg1 && !submitted && proposal?.leg1?.validToMs // countdown only matters until leg 1 is sent
   const validity = validTo ? h('p', { class: 'hint' }, countdown(validTo, () => rerun())) : null
   const steps = [
@@ -452,6 +454,8 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
     const stuck = steps.findIndex((s, i) => i >= 2 && !s.done)
     if (stuck >= 0) Object.assign(steps[stuck], { error: true, errorLabel: 'Expired', body: prepareAgain(row, proposal, rerun) })
   }
+  // A send that failed after its 202: the agent's sentence, shown as is.
+  if (wait.sendError && !steps[4].done) Object.assign(steps[4], { error: true, errorLabel: 'Send failed', body: [h('p', {}, wait.sendError)] })
   return steps
 }
 
@@ -567,9 +571,14 @@ async function settleView(row) {
     if (wait.busy && Date.now() - wait.busySince < 60_000) timer = setTimeout(poll, POLL_MS)
     else rerun().catch(() => { if (panel.isConnected) timer = setTimeout(poll, POLL_MS) }) // a failed read retries next cycle
   }
-  const rerun = async ({ submitted } = {}) => {
+  const rerun = async ({ submitted, txlog } = {}) => {
     if (submitted) wait.submittedAt = Date.now()
-    const [proposal, log] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
+    if (txlog) wait.doneLog = txlog
+    const [answer, fetched] = await Promise.all([load('settle', row.ref), load('txlog', row.ref)])
+    const proposal = answer?.proposal ?? null
+    // A 'done' submit answer counts until the txlog file carries the same entries; earlier runs in the file stay listed.
+    const log = [...fetched, ...(wait.doneLog ?? []).filter(d => !fetched.some(e => e.txHash === d.txHash && e.step === d.step))]
+    Object.assign(wait, { sending: !!answer?.sending, sendError: answer?.error ?? null }) // survives a reload, unlike submittedAt
     const mine = proposal?.escrowRef === row.ref ? proposal : null
     const steps = settleSteps(row, mine, log, rerun, band, wait)
     const waiting = steps.find(s => !s.done)?.label ?? null
