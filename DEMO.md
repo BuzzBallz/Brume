@@ -40,3 +40,5 @@ Open `http://127.0.0.1:8787/?escrow=a7084c50029798fc0530b6c9abc2bf3e203b23e11102
 ## Say, and do not say
 
 Say "the validator's source says" for any guard not yet exercised on preprod. Counts and clocks, never a sum of the frozen value, no fiat. The solver is per unit of escrow value. Never "cannot be raced": the race is not measured.
+
+A replay of a leg whose input is already spent is refused by the ledger (phase 1), so say "the ledger refused it". Only a refusal in phase 2, after the script ran, is "the validator refuses". A transaction log entry without a block is pending, not confirmed.
