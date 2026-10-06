@@ -302,3 +302,25 @@ body {
   @starting-style { opacity: 0; transform: scale(0.97); }
 }
 @media (prefers-reduced-motion: reduce) { .pop:popover-open { transition: opacity 150ms ease; } }
+
+/* Phone: platform baseline (mobile-native skill) */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+button, a { touch-action: manipulation; }
+.btn, .cell, .seg a { user-select: none; -webkit-user-select: none; }
+.cell-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 900px) {
+  /* Grid: three columns share the width; long redeemer names wrap instead of pushing the table off screen */
+  .grid { width: 100%; table-layout: fixed; border-spacing: 4px; margin: 0 -4px; }
+  .grid thead td { width: 38%; }
+  .grid tbody th { white-space: normal; padding-right: 4px; font-size: 14px; }
+  .cell { width: 100%; padding: 0 8px; gap: 6px; }
+  /* Solver bands: label on its own line, then the bar and its value; the axis sits under the bars */
+  .band-grid { grid-template-columns: 1fr auto; gap: 4px 12px; }
+  .band-label { grid-column: 1 / -1; margin-top: 8px; }
+  .band-grid > span:empty { display: none; }
+  /* Transactions: hash and status drop under the step name */
+  .timeline li { grid-template-columns: 16px 1fr; gap: 2px 12px; }
+  .timeline li > :nth-child(n + 3) { grid-column: 2; }
+  .cmd code { overflow-wrap: anywhere; }
+}

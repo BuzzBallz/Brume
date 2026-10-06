@@ -213,7 +213,7 @@ function cell(v, i, row) {
   return h('td', {}, h('button', {
     class: v.allowed ? 'cell can' : 'cell', type: 'button', style: `--i:${i}`, 'aria-haspopup': 'dialog',
     onclick: e => openPop(e.currentTarget, v, row),
-  }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), v.allowed ? 'can' : (v.failed[0] ?? 'not permitted')))
+  }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), h('span', { class: 'cell-text' }, v.allowed ? 'can' : (v.failed[0] ?? 'not permitted'))))
 }
 
 function renderGrid(grid, row) {
@@ -222,7 +222,7 @@ function renderGrid(grid, row) {
     h('caption', {}, 'What each party can do now', grid && h('small', {}, `Verdicts at ${utc(grid.atMs)}`)),
     h('thead', {}, h('tr', {}, h('td'), ROLES.map(r => h('th', { scope: 'col' }, cap(r))))),
     h('tbody', {}, REDEEMERS.map((name, i) => h('tr', {},
-      h('th', { scope: 'row' }, h('span', { class: 'idx mono' }, i), name),
+      h('th', { scope: 'row' }, h('span', { class: 'idx mono' }, i), name.split(/(?=[A-Z])/).flatMap((part, k) => k ? [h('wbr'), part] : [part])), // narrow screens break at the camel-case humps
       ROLES.map((role, j) => cell(byKey.get(`${name}/${role}`), i * 3 + j, row))))),
   )
 }
