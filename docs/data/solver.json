@@ -38,19 +38,19 @@
     "horizonDays": 7,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.93517101421892,
+    "sellerShareMax": 0.935174536266999,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.06482898578107998,
+      "rBuyer": 0.06482546373300102,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.93517101421892
+      "sellerShareMax": 0.935174536266999
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.047714133534874865,
+      "rBuyer": 0.04771154130748875,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.9522858664651251
+      "sellerShareMax": 0.9522884586925112
      }
     }
    },
@@ -58,19 +58,19 @@
     "horizonDays": 30,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.7503213475934903,
+    "sellerShareMax": 0.7503334585221954,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.24967865240650966,
+      "rBuyer": 0.24966654147780465,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.7503213475934903
+      "sellerShareMax": 0.7503334585221954
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.18376348817119112,
+      "rBuyer": 0.18375457452766422,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.8162365118288089
+      "sellerShareMax": 0.8162454254723358
      }
     }
    },
@@ -78,19 +78,19 @@
     "horizonDays": 90,
     "feasible": true,
     "sellerShareMin": 0,
-    "sellerShareMax": 0.4224175064418193,
+    "sellerShareMax": 0.422437961481102,
     "perUnit": {
      "lovelace": {
-      "rBuyer": 0.5775824935581807,
+      "rBuyer": 0.577562038518898,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.4224175064418193
+      "sellerShareMax": 0.422437961481102
      },
      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": {
-      "rBuyer": 0.425100715258821,
+      "rBuyer": 0.4250856603499089,
       "rSeller": 0,
       "sellerShareMin": 0,
-      "sellerShareMax": 0.574899284741179
+      "sellerShareMax": 0.5749143396500911
      }
     }
    }
@@ -100,9 +100,9 @@
    "measured": false
   },
   "wait": {
-   "silentDays": 312.86618055555556,
-   "rateBoundPerYear": 3.497313806729264,
-   "meanGapDaysAtLeast": 104.4372967896715,
+   "silentDays": 312.8837615740741,
+   "rateBoundPerYear": 3.497117291772745,
+   "meanGapDaysAtLeast": 104.44316547782958,
    "dormancy": {
     "pin": {
      "height": 14031823,
@@ -118,9 +118,9 @@
     "diff": [],
     "lastActionMs": 1764282420000,
     "through": {
-     "height": 14034367,
-     "hash": "8f8652d54a5a9f7e45939034f192061dd8b3d9fbd7a48415ce79b03f8e0d65ba",
-     "timeMs": 1791314058000
+     "height": 14034453,
+     "hash": "f8be62b0e3c3e219e2e20328a5588612a367c3ddcec3b4c96853ddf6a10d1108",
+     "timeMs": 1791315577000
     },
     "status": "silent",
     "acted": []
@@ -129,116 +129,116 @@
     {
      "sellerShare": 0.05,
      "feasible": true,
-     "deadlineDays": 312.86618055555545,
-     "breakEvenDiscountAnnual": 0.20209894262671935
+     "deadlineDays": 312.883761574074,
+     "breakEvenDiscountAnnual": 0.20208650951094073
     },
     {
      "sellerShare": 0.1,
      "feasible": true,
-     "deadlineDays": 240.47576274049254,
-     "breakEvenDiscountAnnual": 0.4749003423045638
+     "deadlineDays": 240.48927589436073,
+     "breakEvenDiscountAnnual": 0.4748681382143046
     },
     {
      "sellerShare": 0.15,
      "feasible": true,
-     "deadlineDays": 198.1300829071439,
-     "breakEvenDiscountAnnual": 0.8536803193048841
+     "deadlineDays": 198.14121651273365,
+     "breakEvenDiscountAnnual": 0.8536160364358772
     },
     {
      "sellerShare": 0.2,
      "feasible": true,
-     "deadlineDays": 168.0853449254295,
-     "breakEvenDiscountAnnual": 1.3972648740969995
+     "deadlineDays": 168.09479021464733,
+     "breakEvenDiscountAnnual": 1.3971471023893862
     },
     {
      "sellerShare": 0.25,
      "feasible": true,
-     "deadlineDays": 144.78083563012606,
-     "breakEvenDiscountAnnual": 2.2083964656256905
+     "deadlineDays": 144.78897135942677,
+     "breakEvenDiscountAnnual": 2.20818630654502
     },
     {
      "sellerShare": 0.3,
      "feasible": true,
-     "deadlineDays": 125.73966509208087,
-     "breakEvenDiscountAnnual": 3.4765326034551567
+     "deadlineDays": 125.74673083302025,
+     "breakEvenDiscountAnnual": 3.4761556026410454
     },
     {
      "sellerShare": 0.35,
      "feasible": true,
-     "deadlineDays": 109.64058479263188,
-     "breakEvenDiscountAnnual": 5.57430568240924
+     "deadlineDays": 109.64674587130202,
+     "breakEvenDiscountAnnual": 5.573610054155081
     },
     {
      "sellerShare": 0.4,
      "feasible": true,
-     "deadlineDays": 95.69492711036645,
-     "breakEvenDiscountAnnual": 9.293807880639426
+     "deadlineDays": 95.70030453493395,
+     "breakEvenDiscountAnnual": 9.292459377502976
     },
     {
      "sellerShare": 0.45,
      "feasible": true,
-     "deadlineDays": 83.39398525873227,
-     "breakEvenDiscountAnnual": 16.4866646272232
+     "deadlineDays": 83.39867145139318,
+     "breakEvenDiscountAnnual": 16.483853260492005
     },
     {
      "sellerShare": 0.5,
      "feasible": true,
-     "deadlineDays": 72.39041781506303,
-     "breakEvenDiscountAnnual": 32.0266168220734
+     "deadlineDays": 72.39448567971338,
+     "breakEvenDiscountAnnual": 32.02012723557593
     },
     {
      "sellerShare": 0.55,
      "feasible": true,
-     "deadlineDays": 62.436480279761795,
-     "breakEvenDiscountAnnual": 70.8438240497969
+     "deadlineDays": 62.43998879868859,
+     "breakEvenDiscountAnnual": 70.82657031686193
     },
     {
      "sellerShare": 0.6,
      "feasible": true,
-     "deadlineDays": 53.349247277017845,
-     "breakEvenDiscountAnnual": 188.79996657965225
+     "deadlineDays": 53.35224515330688,
+     "breakEvenDiscountAnnual": 188.74402702650684
     },
     {
      "sellerShare": 0.65,
      "feasible": true,
-     "deadlineDays": 44.98980325986779,
-     "breakEvenDiscountAnnual": 660.8317406010034
+     "deadlineDays": 44.99233139046616,
+     "breakEvenDiscountAnnual": 660.5902449764428
     },
     {
      "sellerShare": 0.7,
      "feasible": true,
-     "deadlineDays": 37.25016697756884,
-     "breakEvenDiscountAnnual": 3498.582247050779
+     "deadlineDays": 37.25226019158861,
+     "breakEvenDiscountAnnual": 3496.977934304972
     },
     {
      "sellerShare": 0.75,
      "feasible": true,
-     "deadlineDays": 30.04473798171442,
-     "breakEvenDiscountAnnual": 36023.027313637176
+     "deadlineDays": 30.046426298086303,
+     "breakEvenDiscountAnnual": 36001.79579223577
     },
     {
      "sellerShare": 0.8,
      "feasible": true,
-     "deadlineDays": 23.30450929530342,
-     "breakEvenDiscountAnnual": 1189750.7464754023
+     "deadlineDays": 23.305818855220565,
+     "breakEvenDiscountAnnual": 1188815.8978960859
     },
     {
      "sellerShare": 0.85,
      "feasible": true,
-     "deadlineDays": 16.97303767389882,
-     "breakEvenDiscountAnnual": 404479482.0680609
+     "deadlineDays": 16.973991446815827,
+     "breakEvenDiscountAnnual": 404029310.5811404
     },
     {
      "sellerShare": 0.9,
      "feasible": true,
-     "deadlineDays": 11.003567443669242,
-     "breakEvenDiscountAnnual": 46749480558966.22
+     "deadlineDays": 11.004185771679811,
+     "breakEvenDiscountAnnual": 46666870884411.23
     },
     {
      "sellerShare": 0.95,
      "feasible": true,
-     "deadlineDays": 5.356933009272601,
-     "breakEvenDiscountAnnual": 7.218013120907311e+28
+     "deadlineDays": 5.357234033621962,
+     "breakEvenDiscountAnnual": 7.191112868869099e+28
     }
    ]
   }

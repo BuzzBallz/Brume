@@ -7,7 +7,7 @@
 | Input | Value |
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
-| Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`). `?source=snapshot` and Pages show tip 14034352 (141 open, 61 Disputed): say which one is on screen |
+| Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`). `?source=snapshot` and Pages show tip 14034453 (141 open, 61 Disputed): say which one is on screen |
 | `<BANK_REF>`, a preprod escrow we locked | `0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0` for the settle at 0.40 (20 tADA + 10 tUSDM). Unspent backups with the same content: `0452fc53…#1`, `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `9054b1d8…#6` (rehearsal), `#7` (first take, 0.75) and `0452fc53…#0` (take at 0.40) are spent |
 | Split proposed by the seller | 0.40 to the seller, typed in the UI (seller 8 tADA + 4 tUSDM, buyer 12 tADA + 6 tUSDM on a 20 tADA + 10 tUSDM pot). The UI prefills the top of the solver's band, 0.75 |
 | Action the engine marks impossible, for "try anyway" | buyer `WithdrawRefund` on a Disputed bank escrow (needs FundsLocked or RefundRequested): refused by the validator, phase 2, as stream A ran it on `8e0d6df4…#0` |

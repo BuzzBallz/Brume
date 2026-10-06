@@ -1,25 +1,25 @@
 {
  "witnesses": {
-  "escrowRef": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+  "escrowRef": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0",
   "adminKeys": 3,
   "legs": [
    {
     "leg": 1,
-    "txHash": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3",
+    "txHash": "5f3d960ab279f6ba4e329534aa67bfd65b2d39e81a61490ca4248dcf24c221a8",
     "block": {
-     "height": 5260711,
-     "slot": 135609721
+     "height": 5261685,
+     "slot": 135632278
     },
     "redeemer": {
      "name": "AuthorizeRefund",
      "constructor": 6
     },
     "spends": {
-     "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+     "ref": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0",
      "state": "Disputed"
     },
     "leaves": {
-     "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+     "ref": "5f3d960ab279f6ba4e329534aa67bfd65b2d39e81a61490ca4248dcf24c221a8#0",
      "state": "RefundRequested"
     },
     "requiredSigners": [
@@ -36,17 +36,17 @@
    },
    {
     "leg": 2,
-    "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+    "txHash": "5db25159151261d1c352cf5281f880bd6a809fc35415bcaa1e72c32692f8f382",
     "block": {
-     "height": 5260711,
-     "slot": 135609721
+     "height": 5261685,
+     "slot": 135632278
     },
     "redeemer": {
      "name": "WithdrawRefund",
      "constructor": 3
     },
     "spends": {
-     "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+     "ref": "5f3d960ab279f6ba4e329534aa67bfd65b2d39e81a61490ca4248dcf24c221a8#0",
      "state": "RefundRequested"
     },
     "leaves": null,
@@ -60,12 +60,12 @@
     "adminKeysSigned": [],
     "paid": {
      "buyer": {
-      "lovelace": "5000000",
-      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2500000"
+      "lovelace": "12000000",
+      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "6000000"
      },
      "seller": {
-      "lovelace": "15000000",
-      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "7500000"
+      "lovelace": "8000000",
+      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "4000000"
      }
     }
    }
