@@ -361,6 +361,10 @@ button, a { touch-action: manipulation; }
   .timeline li { grid-template-columns: 16px 1fr; gap: 2px 12px; }
   .timeline li > :nth-child(n + 3) { grid-column: 2; }
   .cmd code { overflow-wrap: anywhere; }
+  /* Balances: tighter cells so Matches stays on screen at 375 px */
+  .balances th, .balances td { padding: 6px 4px; }
+  .step-body { min-width: 0; } /* a wide table scrolls inside its wrapper, never the page */
+  .balances thead th.num { white-space: normal; }
 }
 
 .tnum { font-variant-numeric: tabular-nums; }
