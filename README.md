@@ -8,6 +8,8 @@ On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with th
 
 TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
+Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://trademark-delivery-deposits-weights.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
+
 ## What Brume does
 
 Give it one escrow. It answers three questions.
