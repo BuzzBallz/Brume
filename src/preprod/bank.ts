@@ -40,7 +40,7 @@ const save = (e: Entry[]): void => {
 }
 const pot = (ada: number, usdm: number): Asset[] => [{ unit: 'lovelace', quantity: String(ada * 1e6) }, ...(usdm > 0 ? [{ unit: TUSDM, quantity: String(usdm * 1e6) }] : [])]
 
-const { positionals, values } = parseArgs({ allowPositionals: true, options: { amount: { type: 'string', default: '90' }, usdm: { type: 'string', default: '10' }, follow: { type: 'string' } } })
+const { positionals, values } = parseArgs({ allowPositionals: true, options: { amount: { type: 'string', default: '90' }, usdm: { type: 'string', default: '10' }, follow: { type: 'string' }, owners: { type: 'string', default: 'A' }, count: { type: 'string', default: '2' }, ada: { type: 'string', default: '20' } } })
 
 async function token(amount: number): Promise<void> {
   const [buyer, seller] = [await party('buyer'), await party('seller')]
@@ -122,6 +122,28 @@ async function fast(usdm: number): Promise<void> {
   console.log(`fast fixture: lock block ${entry.block.height} → Disputed block ${e.disputedInBlock ?? '-'} in ${Math.round((Date.now() - t0) / 1000)} s`)
 }
 
+// More escrows for the takes: N in one lock tx. Stream B's (its keys are not ours) are locked directly in Disputed;
+// ours reach Disputed through a real buyer-signed dispute, as the first bank did.
+async function topup(owners: 'A' | 'B', count: number, ada: number, usdm: number): Promise<void> {
+  const [buyer, seller] = [await party('buyer'), await party('seller')]
+  const [b, s] = owners === 'B' ? [B_BUYER, B_SELLER] : [buyer.address, seller.address]
+  const state = owners === 'B' ? ('Disputed' as const) : ('ResultSubmitted' as const)
+  const req: LockRequest = { buyer: b, seller: s, amount: pot(ada, usdm), options: { state, unlock: 'future', collateralReturnLovelace: 2_000_000 } }
+  const t0 = Date.now()
+  const { entry, refs } = await lockEscrows(buyer, Array.from({ length: count }, () => req))
+  appendTxLog('bank', entry)
+  if (entry.status !== 'accepted' || !entry.block) throw new Error(`lock ${entry.status} at ${entry.stage}`)
+  const bank = load()
+  const purpose = owners === 'B' ? 'stream B take (locked directly in Disputed for the wallets of stream B)' : 'demo take (path B)'
+  const fresh: Entry[] = refs.map((ref) => ({ purpose, path: 'B', owners, value: pot(ada, usdm), ref, lockedIn: entry.txHash, lockedInBlock: entry.block?.height, state }))
+  bank.push(...fresh)
+  save(bank)
+  console.log(`lock block ${entry.block.height}: ${refs.length} escrows for stream ${owners}`)
+  if (owners === 'A') await disputeAll(fresh, buyer, t0)
+  save(load().map((x) => fresh.find((f) => f.lockedIn === x.lockedIn && (f.disputedFrom ?? f.ref) === (x.disputedFrom ?? x.ref)) ?? x))
+  for (const e of fresh) console.log(`  ${e.ref} ${e.state}`)
+}
+
 // The registry against the chain: an entry whose ref is spent is marked spent (with nothing re-pointed silently), and a
 // known successor (e.g. a dispute whose registry write was lost) can be attached with --follow <old>=<new>.
 async function reconcile(follow: string | undefined): Promise<void> {
@@ -156,6 +178,7 @@ if (cmd === 'token') await token(Number(values.amount))
 else if (cmd === 'build') await build()
 else if (cmd === 'fast') await fast(Number(values.usdm))
 else if (cmd === 'dispute') await disputeAll(load(), await party('buyer'))
+else if (cmd === 'topup') await topup(values.owners === 'B' ? 'B' : 'A', Number(values.count), Number(values.ada), Number(values.usdm))
 else if (cmd === 'reconcile') await reconcile(values.follow)
 else if (cmd === 'list') await list()
 else throw new Error('usage: bank.ts token --amount 90 | build | dispute | list')
