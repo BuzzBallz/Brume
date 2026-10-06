@@ -14,9 +14,14 @@ type Row = {
 }
 
 const PAGE = 1000
-const post = (body: unknown): RequestInit => ({
+// KOIOS_PREPROD_API_TOKEN (optional) lifts the keyless daily cap on preprod; header only, never in a URL or a log.
+const auth = (net: Network): Record<string, string> => {
+  const token = net === 'preprod' ? process.env.KOIOS_PREPROD_API_TOKEN?.trim() : undefined
+  return token ? { authorization: `Bearer ${token}` } : {}
+}
+const post = (net: Network, body: unknown): RequestInit => ({
   method: 'POST',
-  headers: { 'content-type': 'application/json', accept: 'application/json' },
+  headers: { 'content-type': 'application/json', accept: 'application/json', ...auth(net) },
   body: JSON.stringify(body),
 })
 
@@ -31,7 +36,7 @@ export async function utxosAt(net: Network, address: string, cfg: Cfg = {}): Pro
   const data: RawUtxo[] = []
   let holes = 0
   for (let offset = 0; ; offset += PAGE) {
-    const res = await request(`${base}/address_utxos?limit=${PAGE}&offset=${offset}`, post({ _addresses: [address], _extended: true }), cfg.backoffMs)
+    const res = await request(`${base}/address_utxos?limit=${PAGE}&offset=${offset}`, post(net, { _addresses: [address], _extended: true }), cfg.backoffMs)
     if (!res || res.status !== 200) {
       holes++
       break
@@ -45,7 +50,7 @@ export async function utxosAt(net: Network, address: string, cfg: Cfg = {}): Pro
 
 export async function utxo(net: Network, ref: string, cfg: Cfg = {}): Promise<Read<RawUtxo | null>> {
   const base = cfg.base ?? KOIOS[net]
-  const res = await request(`${base}/utxo_info`, post({ _utxo_refs: [ref], _extended: true }), cfg.backoffMs)
+  const res = await request(`${base}/utxo_info`, post(net, { _utxo_refs: [ref], _extended: true }), cfg.backoffMs)
   if (!res || res.status !== 200) return { data: null, holes: 1, provider: 'koios' }
   const rows = (res.body as Row[]).filter((r) => !('is_spent' in r) || !(r as Row & { is_spent: boolean }).is_spent)
   return { data: rows[0] ? toUtxo(rows[0]) : null, holes: 0, provider: 'koios' }
@@ -53,7 +58,7 @@ export async function utxo(net: Network, ref: string, cfg: Cfg = {}): Promise<Re
 
 export async function tip(net: Network, cfg: Cfg = {}): Promise<Read<Tip | null>> {
   const base = cfg.base ?? KOIOS[net]
-  const res = await request(`${base}/tip`, { headers: { accept: 'application/json' } }, cfg.backoffMs)
+  const res = await request(`${base}/tip`, { headers: { accept: 'application/json', ...auth(net) } }, cfg.backoffMs)
   const t = res?.status === 200 ? (res.body as { block_no: number; hash: string; block_time: number }[])[0] : undefined
   if (!t) return { data: null, holes: 1, provider: 'koios' }
   return { data: { height: t.block_no, hash: t.hash, timeMs: t.block_time * 1000 }, holes: 0, provider: 'koios' }
@@ -70,7 +75,7 @@ type TxRow = {
 
 export async function tx(net: Network, hash: string, cfg: Cfg = {}): Promise<Read<TxInfo | null>> {
   const base = cfg.base ?? KOIOS[net]
-  const res = await request(`${base}/tx_info`, post({ _tx_hashes: [hash], _inputs: false, _metadata: false, _assets: false, _withdrawals: false, _certs: false, _scripts: true, _bytecode: false }), cfg.backoffMs)
+  const res = await request(`${base}/tx_info`, post(net, { _tx_hashes: [hash], _inputs: false, _metadata: false, _assets: false, _withdrawals: false, _certs: false, _scripts: true, _bytecode: false }), cfg.backoffMs)
   if (!res || res.status !== 200) return { data: null, holes: 1, provider: 'koios' }
   const r = (res.body as TxRow[])[0]
   if (!r) return { data: null, holes: 0, provider: 'koios' }
