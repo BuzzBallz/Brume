@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import type { IncomingMessage } from 'node:http'
 import type { JobResult } from '../../shared/types.ts'
-import { body, HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } from './escrow.ts'
+import { PARAMS } from '../../shared/constants.ts'
+import { reach } from '../engine/reach.ts'
+import { solve, solverInputFor } from '../solver/solve.ts'
+import { body, HttpError, parseNet, parseRef, readDatum } from './escrow.ts'
 import { assertConfigured, createPayment, inputHash, PAY_WITHIN_MS, resolvePayment, resultHash, submitResult } from './payment.ts'
 import type { Payment } from './payment.ts'
 
@@ -44,17 +47,16 @@ const POLL_MS = 10_000
 const MAX_POLL_ERRORS = 5
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-// ponytail: grid and solver come from shared/mock until stream A's engine and solver land, and the result says so.
 const ORIGIN = process.env.PUBLIC_URL ?? `http://127.0.0.1:${process.env.PORT ?? 8787}`
 
 async function run(net: 'mainnet' | 'preprod', ref: string) {
-  const { datum } = await readDatum(net, ref)
-  const result: JobResult & { mock: string[] } = {
+  const { datum, value } = await readDatum(net, ref)
+  const now = Date.now()
+  const result: JobResult = {
     escrowRef: ref,
-    grid: mockGrid(ref, datum.state),
-    solver: mockSolver(ref),
+    grid: reach(datum, value, now, PARAMS, ref),
+    solver: solve(solverInputFor(ref, datum, value, now), 'B'),
     uiUrl: `${ORIGIN}/?escrow=${encodeURIComponent(ref)}`,
-    mock: ['grid', 'solver'],
   }
   return JSON.stringify(result)
 }

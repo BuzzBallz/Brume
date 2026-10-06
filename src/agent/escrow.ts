@@ -42,12 +42,6 @@ export async function body(req: IncomingMessage) {
   }
 }
 
-export const mockFile = (name: string) => JSON.parse(readFileSync(join(ROOT, 'shared/mock', `${name}.mock.json`), 'utf8'))
-
-// Stand-ins until stream A's engine and solver land: the mock's shape, retargeted at the asked escrow.
-export const mockGrid = (ref: string, state: State): Grid => ({ ...mockFile('grid').grid, ref, state })
-export const mockSolver = (ref: string): SolverOutput => ({ ...mockFile('solver').solver, ref })
-
 type DatumRead = { ref: string; datum: Datum; value: Value }
 
 // A flood of /api/datum must not become a flood of provider calls: one read per net and ref every 30 s.
@@ -76,4 +70,16 @@ async function fetchDatum(net: Network, ref: string): Promise<DatumRead> {
   } catch (e) {
     throw new HttpError(422, (e as Error).message)
   }
+}
+
+// The escrow a grid or solver call is about: ?net= when the caller knows it, else mainnet first, then preprod
+// (a tx hash lives on one network only).
+export async function escrowFor(url: URL): Promise<DatumRead> {
+  const ref = parseRef(url.searchParams.get('ref'))
+  const net = url.searchParams.get('net')
+  if (net) return readDatum(parseNet(net), ref)
+  return readDatum('mainnet', ref).catch((e) => {
+    if (e instanceof HttpError && e.status === 404) return readDatum('preprod', ref)
+    throw e
+  })
 }
