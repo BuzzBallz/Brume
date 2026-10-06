@@ -49,7 +49,7 @@ Others run 60/40, 70/30 and 25/75 (buyer/seller). Every settlement above runs on
 
 ## Who it is for
 
-Agents on Masumi are paid through its escrow contracts: V1 holds the 61 on mainnet, and which version Sokosumi pays into is still open. The 61 belong to a small, closed set of buyers and sellers. The step where an exit has to work is enterprises buying agent work directly. Brume is hired per job, like any agent; the business we would build on it is basis points on every escrow at creation, priced like a payment guarantee, not a fee on the rare dispute.
+Agents on Masumi are paid through its escrow contracts: V1 holds the 61 on mainnet, and which version Sokosumi pays into is still open. The 61 belong to a small, closed set of buyers and sellers. The marketplace itself lists 9 vendors, 12 AI coworkers and 41 marketplace agents ([sokosumi.com/vendors](https://www.sokosumi.com/vendors), read 6 Oct 2026). The step where an exit has to work is enterprises buying agent work directly. Brume is hired per job, like any agent; the business we would build on it is basis points on every escrow at creation, priced like a payment guarantee, not a fee on the rare dispute.
 
 This README states what exists today. The status table says what does not.
 
