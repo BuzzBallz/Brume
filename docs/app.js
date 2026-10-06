@@ -405,11 +405,11 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
     { label: `${cap(conceder)} proposes the split`, done: !!proposal, waiting: `Waiting for ${conceder}`,
       body: proposal
         ? [h('p', {}, `Seller receives ${pct(proposal.sellerShare)} of the value, buyer ${pct(1 - proposal.sellerShare)}.`),
-          proposal.leg1 && h('p', { class: 'hash' }, 'Leg 1 fixed, hash ', h('span', { class: 'mono', title: proposal.leg1.txHash }, short(proposal.leg1.txHash)))]
+          proposal.leg1 && h('p', { class: 'hash' }, 'Leg 1 fixed, hash ', h('span', { class: 'mono', title: proposal.leg1.txHash, 'data-cue': 'hash leg1' }, short(proposal.leg1.txHash)))]
         : [proposeForm(row, rerun, band)] },
     { label: `${cap(exiter)} pre-signs the exit (leg 2)`, done: signed(exiter), waiting: `Waiting for ${exiter}`,
       body: signed(exiter)
-        ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash }, short(proposal.leg2.txHash))),
+        ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash, 'data-cue': 'hash leg2' }, short(proposal.leg2.txHash))),
           h('p', { class: 'lock' }, 'Split locked: changing leg 1 now would void this signature.')]
         : [waitingFor(exiter, ctx), validity] },
     { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
@@ -419,7 +419,8 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
       body: refused
         ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
         : leg1 || leg2
-          ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: ${outcome(e)}, `, txLink(e.txHash)))]
+          ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: `, h('span', { 'data-cue': e.block && `block ${e.step}` }, outcome(e)), ', ',
+              h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash))))]
           : [sendButton(row, rerun), validity] },
     { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
       body: leg2?.readback ? [
@@ -450,14 +451,15 @@ function renderBalances(written, readBack) {
     [...new Set([...Object.keys(written[party] ?? {}), ...Object.keys(readBack[party] ?? {})])].map(unit => {
       const w = BigInt(written[party]?.[unit] ?? 0)
       const r = BigInt(readBack[party]?.[unit] ?? 0)
+      const cue = col => `amount ${party} ${unit} ${col}`
       return h('tr', {},
         h('td', {}, cap(party)),
         h('td', {}, unit === 'lovelace' ? 'ADA' : `${assetName(unit)} (base units)`),
-        h('td', { class: 'num mono' }, qty(unit, w)),
-        h('td', { class: 'num mono' }, qty(unit, r)),
+        h('td', { class: 'num mono', 'data-cue': cue('written') }, qty(unit, w)),
+        h('td', { class: 'num mono', 'data-cue': cue('read') }, qty(unit, r)),
         h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs'))
     }))
-  return h('div', { class: 'balances-wrap' }, h('table', { class: 'balances' },
+  return h('div', { class: 'balances-wrap', 'data-cue': 'balances' }, h('table', { class: 'balances' },
     h('thead', {}, h('tr', {}, ['Party', 'Asset', 'Written in leg 2', 'Read back', ''].map((c, i) => h('th', { scope: 'col', class: i === 2 || i === 3 ? 'num' : null }, c)))),
     h('tbody', {}, rows)))
 }
@@ -479,7 +481,7 @@ function renderSteps(steps) {
 
 // One-shot cues for a Settle step whose state changes while the same escrow stays on screen. Opening, switching, Reset
 // and the first render of a panel only seed the map; an unchanged state at a poll plays nothing.
-const brumeMotion = new Map() // "<escrowRef>:<step index>" → { state, status } at the last render
+const brumeMotion = new Map() // "<escrowRef>:<step index>" → { state, status }, "<escrowRef>:<step index>:<data-cue>" → its text, at the last render
 
 function stepCue(i, from, to) {
   if (to.status === 'Refused') return from.status === 'Refused' ? null : 'refused'
@@ -494,12 +496,26 @@ function cueStep(li, key, i, seed) {
   const was = brumeMotion.get(key)
   brumeMotion.set(key, now)
   const cue = !seed && was && stepCue(i, was, now)
-  if (!cue) return
-  li.dataset.motion = cue // li is built fresh on every render, so a cue never restarts on a rebuilt node
-  const stop = () => { clearTimeout(timer); li.removeEventListener('animationend', end); delete li.dataset.motion }
-  const end = () => { if (li.getAnimations({ subtree: true }).every(a => a.playState === 'finished')) stop() }
+  if (cue) play(li, cue)
+}
+
+// A value tagged data-cue (tx hash, block height, read-back balances) resolves once when it first appears (absent = "").
+// An amount that changes swaps its text and fades in place; no other change plays anything.
+function cueValue(el, key, seed) {
+  const was = brumeMotion.get(key) ?? ''
+  const now = el.textContent
+  brumeMotion.set(key, now)
+  if (seed || now === was) return
+  if (!was && !el.dataset.cue.startsWith('amount ')) play(el, 'in')
+  else if (was && el.dataset.cue.startsWith('amount ')) play(el, 'swap')
+}
+
+function play(el, cue) {
+  el.dataset.motion = cue // el is built fresh on every render, so a cue never restarts on a rebuilt node
+  const stop = () => { clearTimeout(timer); el.removeEventListener('animationend', end); delete el.dataset.motion }
+  const end = () => { if (el.getAnimations({ subtree: true }).every(a => a.playState === 'finished')) stop() }
   const timer = setTimeout(stop, 320)
-  li.addEventListener('animationend', end)
+  el.addEventListener('animationend', end)
 }
 
 function renderLog(log) {
@@ -537,7 +553,10 @@ async function settleView(row) {
     const waiting = steps.find(s => !s.done)?.label ?? null
     if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
-    if (!seeded || panel.isConnected) panel.querySelectorAll('.step').forEach((li, i) => cueStep(li, `${row.ref}:${i}`, i, !seeded)) // a left panel never writes
+    if (!seeded || panel.isConnected) panel.querySelectorAll('.step').forEach((li, i) => { // a left panel never writes
+      cueStep(li, `${row.ref}:${i}`, i, !seeded)
+      li.querySelectorAll('[data-cue]').forEach(el => cueValue(el, `${row.ref}:${i}:${el.dataset.cue}`, !seeded))
+    })
     seeded = true
     const now = panel.querySelector('.step.current, .step.error')
     const label = now?.querySelector('.step-label').textContent ?? null

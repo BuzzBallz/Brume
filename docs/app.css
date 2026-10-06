@@ -349,5 +349,10 @@ button, a { touch-action: manipulation; }
 .step[data-motion="refused"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; background: var(--flash-color); animation: brume-flash var(--dur-flash) var(--ease-exit) both; }
 @keyframes brume-flash { from { opacity: var(--flash-from); } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { @keyframes resolve { from { opacity: 0; } } }
+/* Settle values: data-motion is set by cueValue (app.js). Inline-block so resolve's translate applies to a span. */
+span[data-cue] { display: inline-block; }
+[data-cue][data-motion="in"] { animation: resolve var(--dur-in) var(--ease) both; }
+[data-cue][data-motion="swap"] { animation: brume-fade var(--dur-in) var(--ease) both; }
+@keyframes brume-fade { from { opacity: 0; } }
 
 .timeline li.pending .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
