@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import type { Asset, Protocol, UTxO } from '@meshsdk/core'
 import type { Network, TxLogEntry } from '../../shared/types.ts'
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import { AmbiguousSubmit, assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, seenByChain, slotAt, type Submitter } from './chain.ts'
+import { AmbiguousSubmit, markSpent, unmarkSpent, assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, seenByChain, slotAt, type Submitter } from './chain.ts'
 import { ROOT } from './env.ts'
 import { cst, mesh } from './mesh.ts'
 import type { Party } from './wallet.ts'
@@ -145,6 +145,8 @@ type LogBase = Pick<TxLogEntry, 'step' | 'network' | 'scriptHash' | 'txHash' | '
 // not seen → rethrown, and the caller must treat the tx as possibly live (never "prepare again" over it).
 export async function submitOnly(signed: Built, submitter: Submitter, base: LogBase): Promise<TxLogEntry | null> {
   try {
+    // Recorded before the call: once the bytes may have reached a node, these inputs are ours to treat as spent.
+    markSpent(cst.deserializeTx(signed.cborHex).body().inputs().toCore().map((i) => `${i.txId}#${i.index}`))
     const returned = await submitter.submitTx(signed.cborHex)
     if (returned && returned !== signed.txHash) throw new TxRuleError(`submitter returned ${returned}, expected ${signed.txHash}`)
     return null
@@ -154,6 +156,7 @@ export async function submitOnly(signed: Built, submitter: Submitter, base: LogB
       throw error
     }
     if (!(error instanceof LedgerRejection)) throw error
+    if (!/BadInputsUTxO|All inputs are spent/i.test(error.message)) unmarkSpent(cst.deserializeTx(signed.cborHex).body().inputs().toCore().map((i) => `${i.txId}#${i.index}`))
     return { ...base, status: 'refused', stage: 'submit', refusal: { phase: refusalPhase(error.message), ledgerError: error.message }, error: error.message.slice(0, 600) }
   }
 }

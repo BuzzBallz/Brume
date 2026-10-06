@@ -71,7 +71,12 @@ function guards(r: Redeemer, c: Ctx): string[] {
       if (!startedAfter(c, d.sellerCooldownTime)) failed.push(`seller cooldown until ${iso(d.sellerCooldownTime)}`)
       const beforeSubmit = endsBefore(c, d.submitResultTime)
       const beforeDispute = endsBefore(c, d.externalDisputeUnlockTime) && hasResult
-      if (!beforeSubmit && !beforeDispute) failed.push(hasResult ? `submission window closed at ${iso(d.externalDisputeUnlockTime)}` : `submission window closed at ${iso(d.submitResultTime)}`)
+      if (!beforeSubmit && !beforeDispute) {
+        // Past submit_result_time, a resubmission is open until external_dispute_unlock_time only with a result already set:
+        // after a concession it is the emptied hash, not the clock, that closes it.
+        if (endsBefore(c, d.externalDisputeUnlockTime)) failed.push(`no resubmission: the result hash is empty and submit_result_time passed (${iso(d.submitResultTime)})`)
+        else failed.push(`submission closed at external_dispute_unlock_time ${iso(d.externalDisputeUnlockTime)}`)
+      }
       break
     }
     case 'AuthorizeRefund':

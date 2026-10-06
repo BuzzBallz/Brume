@@ -34,6 +34,9 @@ test('after the seller concedes (C11): only the buyer can move the value, and th
   assert.deepEqual(admin?.failed, ['needs Disputed (is RefundRequested)', 'needs a result hash'])
   const resubmit = g.verdicts.find((v) => v.redeemer === 'SubmitResult' && v.role === 'seller')
   assert.equal(resubmit?.allowed, false)
+  // The hero's dispute window is past, so the clock closes it here; on a fixture with the window still open, the empty hash does.
+  const open = reach({ ...after, externalDisputeUnlockTime: KICKOFF + 3_600_000, sellerCooldownTime: 0 }, HERO_VALUE, KICKOFF, PARAMS)
+  assert.deepEqual(open.verdicts.find((v) => v.redeemer === 'SubmitResult' && v.role === 'seller')?.failed, [`no resubmission: the result hash is empty and submit_result_time passed (${new Date(HERO.submitResultTime).toISOString().slice(0, 16).replace('T', ' ')} UTC)`])
   assert.deepEqual(g.verdicts.find((v) => v.redeemer === 'WithdrawRefund' && v.role === 'buyer')?.outputRules, ['none: no fee output, no collateral output, the outputs are the buyer\'s to choose'])
 })
 
