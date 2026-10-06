@@ -75,24 +75,27 @@ Rules: text always wears `--ink` / `--ink-2`, never a status color. A state is n
 ## 5. Layout
 
 ```
-┌───────────────────────────────────────────────────────────────────────────────┐
-│ [cat] Brume                                   Live · preprod + mainnet   Reset │  top bar 44px
-├────────────────────────┬──────────────────────────────────────────────────────┤
-│ Mainnet · read-only    │ <ref>   Disputed   Preprod                            │
-│ ▸ <ref>  Disputed 318d │ [ Reachability | Settle | Solver ]                   │
-│   …                    │                                                      │
-│ Preprod bank           │  ✓ Seller proposes 0.40 of the value      <hash>     │
-│   <ref>  Ready         │  ● Buyer accepts and pre-signs the exit   waiting    │
-│   <ref>  Settled       │     pnpm sign --role buyer proposal.json   [Copy]    │
-│                        │  ○ Seller concedes                                   │
-│                        │  ○ Both legs sent                                    │
-│                        │  ○ Balances                                          │
-├────────────────────────┴──────────────────────────────────────────────────────┤
-│ Source: agent (live) · 2nd provider skipped (hole) · holes 0 · slot S         │  provenance footer
-└───────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [cat] Brume                                                            Live, partly mock   [Reset] │
+│ Mock data for: grid, solver. Hand-made for building, not evidence.                                 │
+├──────────────────────────┬─────────────────────────────────────────────────────────────────────────┤
+│ Mainnet, read-only       │ <ref…ref> [Copy] ● Disputed Preprod   [Settle | Reachability | Solver]  │
+│ 61 disputed of 141 open  │                                                                         │
+│   <ref…ref>   ● Disputed │  ✓ Buyer raises the dispute                                       Done  │
+│   …                      │  ✓ Seller proposes the split                                      Done  │
+│ Preprod bank             │  ◐ Buyer pre-signs the exit (leg 2)                  Waiting for buyer  │
+│ 6 escrows we locked      │    pnpm sign --role buyer proposal.json  [Copy]                         │
+│ ▸ <ref…ref>   ● Disputed │    Waiting for the signed file, 0:42                                    │
+│   <ref…ref>   ● Disputed │    [Sign with <wallet>]    Leg 1 valid for 19:18.                       │
+│                          │  ○ Seller signs the concession (leg 1)                Cannot start yet  │
+│                          │  ○ Seller sends both legs                             Cannot start yet  │
+│                          │  ○ Balances read back from the second indexer         Cannot start yet  │
+├──────────────────────────┴─────────────────────────────────────────────────────────────────────────┤
+│ Source: koios   2nd provider: skipped, counted as a hole   Holes: 1   Tip block N                  │
+└────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7×3 grid or the five settle steps fit without scrolling. Below 900 px the list collapses above the detail. Mainnet escrows open on Reachability and Solver only: the Settle tab and every action are absent, not disabled.
+Left-aligned throughout. List 340 px, detail fills the rest. The view switch sits at the right end of the title row, so at 1280×720 the full 7×3 grid (with its popover) or the six settle steps fit without scrolling. Preprod escrows open on Settle; mainnet escrows open on Reachability and have no Settle view and no actions (absent, not disabled). Below 900 px the list stacks above the detail, the grid's three columns share the width, and the balances table drops its Before column. The amber band appears only when some data is mock; the footer always carries the provenance.
 
 ## 6. Screen and component inventory
 
