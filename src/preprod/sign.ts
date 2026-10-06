@@ -50,7 +50,7 @@ export function parse(argv: string[]): Args {
   let share: number | undefined
   if (values.share !== undefined) {
     if (mode === 'accept') throw new SettleError('An accept repeats the share on the table: no --share.')
-    if (mode !== 'prepare' && mode !== 'offer' && mode !== 'counter') throw new SettleError(`--share is for --prepare, --offer and --counter, not ${flag(mode)}.`)
+    if (mode !== 'prepare' && mode !== 'offer' && mode !== 'counter' && !(mode === 'file' && values.role === 'buyer')) throw new SettleError(`--share is for --prepare, --offer and --counter, or --role buyer <file> to require that share, not ${flag(mode)}.`)
     share = Number(values.share)
     if (!(share > 0 && share < 1)) throw new SettleError('--share is a seller share strictly between 0 and 1.')
   }
@@ -84,6 +84,13 @@ async function prepareShare(ref: string, given: number | undefined): Promise<{ s
   if (!o?.accepted || o.sellerShare === undefined) throw new SettleError(`The negotiation of ${ref} is not accepted (${o ? verdict(o) : 'empty'}): accept it, or pass --share.`)
   if (!o.fresh) throw new SettleError(`The negotiation of ${ref} was accepted at ${o.sellerShare}, but its accept expired at ${iso(o.last.expiresMs)}: negotiate again, or pass --share.`)
   return { share: o.sellerShare, from: `the accepted negotiation, head ${o.head}` }
+}
+
+// The accepted share of a verified, fresh negotiation of this escrow, or undefined when there is none on file.
+async function agreedShare(ref: string): Promise<number | undefined> {
+  if (!existsSync(negotiationFile(ref))) return undefined
+  const o = await negotiated(ref)
+  return o?.accepted && o.fresh ? o.sellerShare : undefined
 }
 
 async function main(a: Args): Promise<void> {
@@ -121,7 +128,10 @@ async function main(a: Args): Promise<void> {
     const file = a.target
     const proposal = JSON.parse(readFileSync(file, 'utf8')) as Proposal
     if (a.role === 'buyer') {
-      writeFileSync(file, JSON.stringify(await sign('buyer', proposal), null, 2) + '\n')
+      // The share the buyer agreed to: --share, else the accepted, fresh negotiation on file. Shown before signing either way.
+      const agreed = a.share ?? (await agreedShare(proposal.escrowRef))
+      console.log(`seller share ${proposal.sellerShare}, the buyer receives ${JSON.stringify(proposal.payout.buyer)}${agreed === undefined ? ' (no agreed share given: pass --share to require it)' : `, checked against the agreed ${agreed}`}`)
+      writeFileSync(file, JSON.stringify(await sign('buyer', proposal, agreed), null, 2) + '\n')
       console.log(`buyer signed leg 2 ${proposal.leg2?.txHash} in ${file}`)
       console.log(`next: pnpm sign --role seller ${file}`)
     } else {

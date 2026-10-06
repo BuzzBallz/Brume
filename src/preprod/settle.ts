@@ -172,10 +172,12 @@ async function prepareLocked(escrowRef: string, sellerShare: number): Promise<Pr
   return proposal
 }
 
-// File-drop signature. Only the buyer signs here; the seller's signature is part of submit().
-export async function sign(role: Role, proposal: Proposal): Promise<Proposal> {
+// File-drop signature. Only the buyer signs here; the seller's signature is part of submit(). The seller share is the
+// seller's own field: with expectShare (the share the buyer agreed to), a proposal at any other share is refused.
+export async function sign(role: Role, proposal: Proposal, expectShare?: number): Promise<Proposal> {
   if (role !== 'buyer') throw new SettleError('The seller signs leg 1 only inside submit, after checking the buyer\'s signature on leg 2.')
   if (!proposal.leg2) throw new SettleError('This proposal has no exit leg to sign.')
+  if (expectShare !== undefined && proposal.sellerShare !== expectShare) throw new SettleError(`This proposal gives the seller ${proposal.sellerShare}, not the agreed ${expectShare}: not signing it.`)
   if (Date.now() > (proposal.leg1?.validToMs ?? 0)) throw new SettleError(`Leg 1 expired at ${sgt(proposal.leg1?.validToMs ?? 0)}: prepare again.`)
   const buyer = await party('buyer')
   if (buyer.pkh !== proposalPkh(proposal, 'buyer')) throw new SettleError('This key is not the buyer\'s for leg 2.')
