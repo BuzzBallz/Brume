@@ -1,0 +1,124 @@
+{
+  "label": "the seller-first settlement, read from the chain: redeemers, spent UTxOs, outputs, required signers and witnesses, against the deployed admin key hashes",
+  "escrowRef": "47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50#0",
+  "parties": {
+    "buyer": "9adb56dae8da114db6efe0df2005ffb3af0087a3e31616e79139d14b",
+    "seller": "0fea86eb64d44dc0fe9a14cf31d41ab81f5e89a9d8f6e5c01f86347e"
+  },
+  "legs": [
+    {
+      "leg": 1,
+      "txHash": "8b672673d3fc4973ed0a3db57efca416c5741a82bce1c350fd2ffbedd3e2f4fe",
+      "block": {
+        "height": 5260621,
+        "slot": 135607549
+      },
+      "redeemer": {
+        "name": "AuthorizeRefund",
+        "constructor": 6,
+        "spends": "47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50#0"
+      },
+      "escrowBefore": {
+        "ref": "47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50#0",
+        "state": "Disputed"
+      },
+      "escrowAfter": {
+        "ref": "8b672673d3fc4973ed0a3db57efca416c5741a82bce1c350fd2ffbedd3e2f4fe#0",
+        "state": "RefundRequested"
+      },
+      "outputs": [
+        {
+          "address": "addr_test1wz7j4kmg2cs7yf92uat3ed4a3u97kr7axxr4avaz0lhwdsqukgwfm",
+          "party": "script",
+          "value": {
+            "lovelace": "10000000"
+          }
+        },
+        {
+          "address": "addr_test1qq874phtvn2yms87ng2v7vw5r2up7h5f48v0dewqr7rrglhhth932n60f2ury5ru4tgwc7dy8yuw4asqzms3mah2d5lqntj6gx",
+          "party": "seller",
+          "value": {
+            "lovelace": "12020842"
+          }
+        }
+      ],
+      "requiredSigners": [
+        {
+          "keyHash": "0fea86eb64d44dc0fe9a14cf31d41ab81f5e89a9d8f6e5c01f86347e",
+          "party": "seller"
+        }
+      ],
+      "witnesses": [
+        {
+          "keyHash": "0fea86eb64d44dc0fe9a14cf31d41ab81f5e89a9d8f6e5c01f86347e",
+          "party": "seller"
+        }
+      ],
+      "adminKeysSigned": [],
+      "collateral": [
+        "d1331e54b38bb18a00f8c64f095dc77e4aca5742ce9bfdcecafa4d078ec3a92c#2"
+      ]
+    },
+    {
+      "leg": 2,
+      "txHash": "07298001424908cb3ee0aca58ff14be616a1a1d85174cd68e7a6d08a3f5bc6ef",
+      "block": {
+        "height": 5260621,
+        "slot": 135607549
+      },
+      "redeemer": {
+        "name": "WithdrawRefund",
+        "constructor": 3,
+        "spends": "8b672673d3fc4973ed0a3db57efca416c5741a82bce1c350fd2ffbedd3e2f4fe#0"
+      },
+      "escrowBefore": {
+        "ref": "8b672673d3fc4973ed0a3db57efca416c5741a82bce1c350fd2ffbedd3e2f4fe#0",
+        "state": "RefundRequested"
+      },
+      "escrowAfter": null,
+      "outputs": [
+        {
+          "address": "addr_test1qzddk4k6ardpzndkalsd7gq9l7e67qy85033v9h8jyuazje3g056px80h6etwzyhjwlyyj20v0mhls8xn8dk4lvxewcsppwy65",
+          "party": "buyer",
+          "value": {
+            "lovelace": "6000000"
+          }
+        },
+        {
+          "address": "addr_test1qq874phtvn2yms87ng2v7vw5r2up7h5f48v0dewqr7rrglhhth932n60f2ury5ru4tgwc7dy8yuw4asqzms3mah2d5lqntj6gx",
+          "party": "seller",
+          "value": {
+            "lovelace": "4000000"
+          }
+        },
+        {
+          "address": "addr_test1qq874phtvn2yms87ng2v7vw5r2up7h5f48v0dewqr7rrglhhth932n60f2ury5ru4tgwc7dy8yuw4asqzms3mah2d5lqntj6gx",
+          "party": "seller",
+          "value": {
+            "lovelace": "11590215"
+          }
+        }
+      ],
+      "requiredSigners": [
+        {
+          "keyHash": "9adb56dae8da114db6efe0df2005ffb3af0087a3e31616e79139d14b",
+          "party": "buyer"
+        }
+      ],
+      "witnesses": [
+        {
+          "keyHash": "9adb56dae8da114db6efe0df2005ffb3af0087a3e31616e79139d14b",
+          "party": "buyer"
+        },
+        {
+          "keyHash": "0fea86eb64d44dc0fe9a14cf31d41ab81f5e89a9d8f6e5c01f86347e",
+          "party": "seller"
+        }
+      ],
+      "adminKeysSigned": [],
+      "collateral": [
+        "883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820#2"
+      ]
+    }
+  ]
+}

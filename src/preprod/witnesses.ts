@@ -104,8 +104,9 @@ async function walkLeg(leg: 1 | 2, txHash: string, parties: { buyer: string; sel
   }
 }
 
-export async function walkSettlement(escrowRef: string): Promise<{ escrowRef: string; parties: { buyer: string; seller: string }; legs: LegWalk[] }> {
-  const log = JSON.parse(readFileSync(txLogFile(escrowRef), 'utf8')) as TxLogEntry[]
+// logFile: the run's log when it is not the escrow's own (the first spike logged under txlog-spike-<ref>.json).
+export async function walkSettlement(escrowRef: string, logFile: string = txLogFile(escrowRef)): Promise<{ escrowRef: string; parties: { buyer: string; seller: string }; legs: LegWalk[] }> {
+  const log = JSON.parse(readFileSync(logFile, 'utf8')) as TxLogEntry[]
   const leg1 = log.find((e) => e.step.startsWith('AuthorizeRefund (leg 1)') && e.block)
   const leg2 = log.find((e) => e.step.startsWith('WithdrawRefund (leg 2') && e.block)
   if (!leg1 || !leg2) throw new Error(`${escrowRef}: no confirmed leg 1 and leg 2 in its log`)
@@ -184,11 +185,14 @@ export function witnessSummary(escrowRef: string): Promise<WitnessSummary> {
 }
 
 if (process.argv[1]?.endsWith('witnesses.ts')) {
+  // <escrowRef>, or <escrowRef>=<log file under fixtures/preprod/> when the run logged under another name.
   const refs = process.argv.slice(2)
-  if (!refs.length) throw new Error('usage: node src/preprod/witnesses.ts <escrowRef> [...]')
+  if (!refs.length) throw new Error('usage: node src/preprod/witnesses.ts <escrowRef>[=<log file>] [...]')
   const tada = (v: Value): string => Object.entries(v).map(([u, q]) => (u === 'lovelace' ? `${Number(q) / 1e6} tADA` : `${Number(q) / 1e6} ${u.slice(-10) === '745553444d' ? 'tUSDM' : u.slice(0, 8) + '…'}`)).join(' + ')
-  for (const ref of refs) {
-    const w = await walkSettlement(ref)
+  for (const arg of refs) {
+    const [ref, logName] = arg.split('=')
+    if (logName !== undefined && !/^txlog-[\w.-]+\.json$/.test(logName)) throw new Error(`${logName}: a txlog-*.json file name under fixtures/preprod/`)
+    const w = await walkSettlement(ref, logName ? join(ROOT, 'fixtures', 'preprod', logName) : undefined)
     const file = join(ROOT, 'fixtures', 'preprod', `witnesses-${ref.replace('#', '_')}.json`)
     mkdirSync(join(file, '..'), { recursive: true })
     writeFileSync(file, JSON.stringify({ label: 'the seller-first settlement, read from the chain: redeemers, spent UTxOs, outputs, required signers and witnesses, against the deployed admin key hashes', ...w }, null, 2) + '\n')
