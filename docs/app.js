@@ -12,14 +12,29 @@ const source = params.get('source') ?? (location.hostname.endsWith('github.io') 
 const live = source === 'live'
 const $ = id => document.getElementById(id)
 
+// Routes served by src/agent/server.ts; bank and txlog are requested from the back end (DESIGN §8).
+const enc = encodeURIComponent
+const LIVE = {
+  census: () => '/api/census',
+  bank: () => '/api/bank',
+  datum: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`,
+  grid: ref => `/api/grid?ref=${enc(ref)}`,
+  proposal: ref => `/api/proposal/${enc(ref)}`,
+  txlog: ref => `/api/txlog?ref=${enc(ref)}`,
+}
+
+// A 404 on these means "nothing yet" (no proposal, no run, empty bank), not a failed read.
+const NOTHING_YET = { proposal: null, txlog: [], bank: [] }
+
 // ponytail: snapshot and mock hold one escrow per kind; per-ref files once the list shows more than the hero escrow.
-async function load(kind, ref) {
+async function load(kind, ref, net) {
   const url = source === 'mock' ? `../shared/mock/${MOCK_FILE[kind]}.mock.json`
     : source === 'snapshot' ? `data/${kind}.json`
-    : `/api/${kind}${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`
+    : LIVE[kind](ref, net)
   const res = await fetch(url)
-  if (res.status === 404 && kind === 'proposal') return null // no proposal yet for this escrow
+  if (res.status === 404 && kind in NOTHING_YET) return NOTHING_YET[kind]
   if (!res.ok) throw new Error(`${url} answered HTTP ${res.status}`)
+  if (res.headers.get('x-brume-source') === 'mock') { mocked.add(kind); renderSource() }
   const json = await res.json()
   return json[kind] ?? json
 }
@@ -86,11 +101,16 @@ function copyButton(text, label = 'Copy') {
   return btn
 }
 
+const mocked = new Set() // kinds the live agent still serves from shared/mock (x-brume-source: mock)
+
 function renderSource() {
-  $('source').textContent = { live: 'Live', snapshot: 'Snapshot, read-only', mock: 'Mock data' }[source] ?? source
-  if (source === 'mock') {
+  const partly = live && mocked.size > 0
+  $('source').textContent = partly ? 'Live, partly mock' : { live: 'Live', snapshot: 'Snapshot, read-only', mock: 'Mock data' }[source] ?? source
+  if (source === 'mock' || partly) {
     $('band').hidden = false
-    $('band').textContent = 'Mock data, hand-made for building. Not evidence.'
+    $('band').textContent = partly
+      ? `Mock data for: ${[...mocked].join(', ')}. Hand-made for building, not evidence.`
+      : 'Mock data, hand-made for building. Not evidence.'
   }
 }
 
@@ -100,7 +120,7 @@ function renderList(census, bank, selected) {
   $('list').replaceChildren(
     h('h2', { class: 'group' }, 'Mainnet, read-only'),
     h('p', { class: 'meta' }, `${census.byState.Disputed} disputed of ${census.open} open`),
-    ...census.rows.map(row),
+    ...census.rows.filter(r => r.state === 'Disputed').map(row),
     h('h2', { class: 'group' }, 'Preprod bank'),
     h('p', { class: 'meta' }, `${bank.length} ${bank.length === 1 ? 'escrow' : 'escrows'} we locked`),
     ...bank.map(row),
@@ -169,7 +189,7 @@ function renderGrid(grid) {
 }
 
 async function reachView(row) {
-  const [grid, datum] = await Promise.all([load('grid', row.ref), load('datum', row.ref)])
+  const [grid, datum] = await Promise.all([load('grid', row.ref), load('datum', row.ref, row.network)])
   if (grid.ref !== row.ref) return blank('No verdicts for this escrow', 'The engine has not produced a grid for this reference in this data set.', false)
   const fields = Object.entries(datum).map(([k, v]) => [h('dt', {}, k), h('dd', { class: 'mono' }, typeof v === 'object' ? v.payment.hash : String(v))])
   return [
@@ -212,7 +232,7 @@ function sendButton(row, rerun) {
   const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
     btn.disabled = true
     btn.textContent = 'Sending…'
-    try { await post('submit', { escrowRef: row.ref }); rerun() }
+    try { await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun() }
     catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
   } }, 'Send both legs')
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)

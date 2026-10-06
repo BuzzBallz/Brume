@@ -154,13 +154,13 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | View | Consumes | Live route (proposal, B) |
 |---|---|---|
 | List | `Census` (mainnet rows, `byState`, tip, holes, 2nd provider) | `GET /api/census` |
-| Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/datum?ref=<ref>` |
+| Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/datum?net=<network>&ref=<ref>` |
 | Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` |
-| Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal?ref=<ref>` polled every 2 s while a signature is missing (404 = no proposal yet) |
-| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/submit` `{escrowRef}`; `GET /api/txlog?ref=<ref>` |
+| Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal/<ref, URL-encoded>` polled every 2 s while a signature is missing (404 = no proposal yet) |
+| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit`; `GET /api/txlog?ref=<ref>` (requested; 404 = no run yet) |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
-| Preprod bank list | `{ref, state}[]` | `GET /api/bank` |
+| Preprod bank list | `{ref, state}[]` | `GET /api/bank` (requested; 404 = empty bank) |
 | Job result link | `JobResult` (verdict + split + UI link) | `uiUrl` = `…/?escrow=<ref, URL-encoded>`; the UI also accepts the raw `#<index>` landing in the fragment |
 
 **Interface requests** (to propose in PLAN.md with a §11 entry; not applied here):
