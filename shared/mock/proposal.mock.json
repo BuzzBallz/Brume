@@ -3,14 +3,38 @@
   "proposal": {
     "escrowRef": "<preprod bank ref>",
     "network": "preprod",
+    "path": "B",
     "sellerShare": 0.4,
+    "payout": {
+      "buyer": {
+        "lovelace": "6000000"
+      },
+      "seller": {
+        "lovelace": "4000000"
+      },
+      "fee": {}
+    },
     "leg1": {
+      "redeemer": "AuthorizeRefund",
       "cborHex": "84a4…",
-      "txHash": "0000000000000000000000000000000000000000000000000000000000000000"
+      "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "validFromMs": 1791262072000,
+      "validToMs": 1791263422000,
+      "inputs": [
+        "<preprod bank ref>",
+        "<seller utxo S1>"
+      ]
     },
     "leg2": {
+      "redeemer": "WithdrawRefund",
       "cborHex": "84a5…",
-      "txHash": "1111111111111111111111111111111111111111111111111111111111111111"
+      "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "validFromMs": 1791262072000,
+      "validToMs": 1791265822000,
+      "inputs": [
+        "0000000000000000000000000000000000000000000000000000000000000000#0",
+        "<seller utxo S2>"
+      ]
     },
     "signedBy": [
       "buyer"

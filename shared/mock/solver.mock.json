@@ -31,18 +31,35 @@
       {
         "horizonDays": 7,
         "sellerShareMin": 0,
-        "sellerShareMax": 0.5
+        "sellerShareMax": 0.9352,
+        "perUnit": {
+          "lovelace": { "rBuyer": 0.0648, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.9352 },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.0477, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.9523 }
+        }
       },
       {
         "horizonDays": 30,
         "sellerShareMin": 0,
-        "sellerShareMax": 0.5
+        "sellerShareMax": 0.7504,
+        "perUnit": {
+          "lovelace": { "rBuyer": 0.2496, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.7504 },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.1837, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.8163 }
+        }
       },
       {
         "horizonDays": 90,
         "sellerShareMin": 0,
-        "sellerShareMax": 0.5
+        "sellerShareMax": 0.4226,
+        "perUnit": {
+          "lovelace": { "rBuyer": 0.5774, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.4226 },
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": { "rBuyer": 0.425, "rSeller": 0, "sellerShareMin": 0, "sellerShareMax": 0.575 }
+        }
       }
-    ]
+    ],
+    "arbitrationLeak": {
+      "lovelace": 0,
+      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": 0.264
+    },
+    "frontRunP": { "used": 1, "measured": false }
   }
 }
