@@ -119,10 +119,11 @@
         "quantity": "10000000"
       }
     ],
-    "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#5",
+    "ref": "20735c8a88b0e2dcba89de66fa205059880f45807e19ca3a7ffccd763f4036ea#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed"
+    "state": "RefundRequested",
+    "concededFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#5"
   },
   {
     "purpose": "stream B demo 1 (locked directly in Disputed for B's wallets)",
