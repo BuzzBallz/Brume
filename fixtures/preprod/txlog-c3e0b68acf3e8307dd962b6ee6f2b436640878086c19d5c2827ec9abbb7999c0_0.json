@@ -1,0 +1,20 @@
+[
+  {
+    "step": "try anyway: WithdrawRefund by the buyer (engine: needs FundsLocked or RefundRequested (is Disputed); needs an empty result hash)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "7b501a19e699405fcad115f517f9cc4050b3982d97f46426ad3e03eb3301819b",
+    "atMs": 1791294952450,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 2,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol version is: Version 11\\\\nScriptInfo: SpendingScript (TxOutRef {txOutRefId = c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0, txOutRefIdx = 0}) (Just (Datum {getDatum = Constr 0 [Constr 0 [Constr 0 [B \\\\\\\">\\\\\\\\141\\\\\\\\SINs\\\\\\\\236\\\\\\\\215\\\\\\\\128\\\\\\\\208r\\\\\\\\133}%\\\\\\\\190\\\\\\\\&8\\\\\\\\te'\\\\\\\\214P\\\\\\\\210\\\\\\\\128\\\\\\\\199E\\\\\\\\212&\\\\\\\\140n\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\SUB$p8\\\\\\\\\\\\\\\\\\\\\\\\254\\\\\\\\228\\\\\\\\212\\\\\\\\229\\\\\\\\148v\\\\\\\\181\\\\\\\\DC1\\\\\\\\237\\\\\\\\189q\\\\\\\\DC3\\\\\\\\198\\\\\\\\190\\\\\\\\SI\\\\\\\\184\\\\\\\\233j\\\\\\\\198\\\\\\\\138W\\\\\\\\DC17\\\\\\\"]]]],Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\217mA\\\\\\\\DC2\\\\\\\\149\\\\\\\\189\\\\\\\\&80\\\\\\\\171De\\\\\\\\245\\\\\\\\142\\\\\\\\&4F\\\\\\\\169\\\\\\\\&9\\\\\\\\192e:|\\\\\\\\ETBS\\\\\\\\DC4\\\\\\\\n\\\\\\\\168tg\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\159\\\\\\\\159\\\\\\\\214\\\\\\\\&9r\\\\\\\\170y\\\\\\\\194\\\\\\\\\\\\\\\\\\\\\\\\202$\\\\\\\\162\\\\\\\\240\\\\\\\\169\\\\\\\\193\\\\\\\\222\\\\\\\\194V\\\\\\\\NULN\\\\\\\\DLE\\\\\\\\146~\\\\\\\\206\\\\\\\\r\\\\\\\\181vK\\\\\\\"]]]],B \\\\\\\"brume-bank\\\\\\\",B"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol vers"
+  }
+]
