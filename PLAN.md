@@ -48,7 +48,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [ ] M-12 recording + slides incl. "who pays" (part 12)
 
 **SHOULD (in this order)**
-- [ ] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing
+- [x] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing — ONE run, 6 Oct, `fixtures/preprod/race-18268b5a…_0.json` (§10)
 - [x] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession + one refusal per other unavailable branch (A) — pair done 6 Oct, blocks 5259662 (accepted) / 5259664 → refused (phase 2); other branches: C11 controls on the shared script
 - [ ] S-3 CIP-30 browser signing (upgrade of the file-drop path; only if core done)
 - [ ] S-4 solver hazard term (option to wait, one-sided arrival bound)
@@ -217,6 +217,8 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - **First refusal by the deployed bytes (A4 done-when):** the engine predicted the buyer cannot take `WithdrawRefund` while `Disputed`; built and sent anyway (`tryAnyway`, no evaluation, the node ran the script), it was refused in phase 2 (`ValidationTagMismatch (IsValid True) … PlutusFailure`) on bank escrow `8e0d6df4…#0`. Rejected from the mempool, no collateral taken.
 - A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
+
+**S-1 race, measured ONCE, 6 Oct** (`fixtures/preprod/race-18268b5a…_0.json`): seller-first legs as the product sends them, against the buyer's best honest shot — its own `WithdrawRefund` taking the whole pot, pre-built from leg 1's hash (which it knows from the leg 2 it signed) and fired on first sight of leg 1. Leg 1 accepted by Koios at +414 ms, leg 2 by the same endpoint at +711 ms; the rival watched Blockfrost's mempool, which never showed the Koios-submitted leg 1 before its block, saw it at +49.1 s and was refused by the ledger (`BadInputsUTxO`: leg 1's output already spent by leg 2). Both legs in block 5259678. **Sayable:** "in one measured run the pre-signed exit landed in the same block as the concession, 0.7 s behind it, and a competing exit fired on first sight of the concession was refused". **Not sayable:** any probability, "cannot be raced", or that a rival on the same node would lose. The solver keeps p at its worst case (1).
 
 **C11 executed on the shared script, 6 Oct** (`fixtures/preprod/txlog-c11-8e0d6df4…_0.json`): on a bank escrow, the seller's `AuthorizeRefund` alone (no exit signed), then every branch the engine says is gone, sent anyway: `SubmitResult` (seller), `AuthorizeRefund` again (seller), `SetRefundRequested` (buyer) — **all three refused by the validator** (phase 2); then the buyer's `WithdrawRefund` — accepted (block 5259675). With the admin pair below, C11 is R5 for every branch but `Withdraw` (not sent: its mandatory tagged outputs, not the state guard, would decide), which stays R4. `UnSetRefundRequested` stays open to the buyer, as the source says.
 
