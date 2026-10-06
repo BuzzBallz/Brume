@@ -1,0 +1,67 @@
+{
+  "label": "Masumi agent registrations on mainnet: live registry NFTs and their 721 metadata, searched for dispute-related words",
+  "network": "mainnet",
+  "tipBefore": {
+    "height": 14033540,
+    "hash": "867efdfb2c29a78f9f150178a1b2a9391aa9c916d805aa29716fcad2a2091dd6",
+    "timeMs": 1791296055000
+  },
+  "policySource": "masumi-payment-service config: REGISTRY_POLICY_ID_MAINNET (V1), REGISTRY_POLICY_ID_V2_MAINNET (V2)",
+  "method": "Koios policy_asset_list ordered by asset_name (live = total_supply > 0), then asset_info in batches of 20; minting_tx_metadata label 721 of the latest mint, lowercased JSON text search",
+  "words": [
+    "dispute",
+    "refund",
+    "split",
+    "mediation",
+    "arbitration",
+    "arbiter",
+    "escrow"
+  ],
+  "holes": 0,
+  "registries": [
+    {
+      "version": "V1",
+      "policy": "ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b9",
+      "minted": 265,
+      "live": 189,
+      "read": 189,
+      "with721": 189,
+      "holes": 0,
+      "mentions": {
+        "dispute": [],
+        "refund": [],
+        "split": [],
+        "mediation": [],
+        "arbitration": [],
+        "arbiter": [],
+        "escrow": [
+          "f6991d762e2f6e7e35447d74e570791adfc7f70ce8159232199f941e3579cad3"
+        ]
+      },
+      "context": {
+        "escrow": [
+          " graphic design, book generation, nft art, and\",\" marketing campaigns. on-chain escrow via masumi.\"],\"agentpricing\":{\"pricingtype\":\"fixed\",\""
+        ]
+      }
+    },
+    {
+      "version": "V2",
+      "policy": "67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b",
+      "minted": 26,
+      "live": 26,
+      "read": 26,
+      "with721": 26,
+      "holes": 0,
+      "mentions": {
+        "dispute": [],
+        "refund": [],
+        "split": [],
+        "mediation": [],
+        "arbitration": [],
+        "arbiter": [],
+        "escrow": []
+      },
+      "context": {}
+    }
+  ]
+}
