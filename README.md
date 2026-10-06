@@ -14,10 +14,10 @@ This README states what exists today. The status table says what does not.
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
-| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod, see Transactions sent |
+| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 9 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed on preprod, exported to `fixtures/masumi/test-purchase.json` |
 | Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000000`); not yet visible on the marketplace |
-| Transactions | every preprod run is listed below with its hashes and blocks |
+| Transactions | listed below with hashes and blocks; the full index, all 9 settles included, is `fixtures/preprod/README.md` |
 
 ## Run it
 
@@ -63,11 +63,13 @@ The two providers agree: 141 refs on each, the same values, the same inline datu
 
 The solver over all 61 Disputed escrows is in `fixtures/solver-61-14032495.json` (stream A, mainnet tip 14032495, `node src/solver/all.ts`). On path B the band is feasible at every horizon for 61 of 61, and the 30-day band is 0 to 75 % of the value to the seller on every one: the ADA, of which arbitration gave the buyer 100 %, binds everywhere. Path A is feasible at 30 days for 16 of 61; the other 45 would need the seller to top up the fee. The same file cross-checks the engine on all 61: the seller can concede now, then the buyer can exit, and the admin set cannot arbitrate.
 
+The solver also shows the option to wait as break-evens, never as a value (PLAN §10 D17). No arbitration since 27 November 2025, verified through block 14033013 on one provider (`fixtures/solver-61-14033013.json`); at 95 %, the arbiter acts at most once every 104 days on average, and nothing puts a floor under that. For a buyer who would wait at most 30 days, any seller share up to 75 % beats waiting, even at that bound. A 25 % seller share beats waiting for a buyer who would stop within 144 days, or who discounts at 222 %/yr or more. These are break-evens, not a recommended split: the chain bounds the arbiter, it cannot measure the buyer's patience.
+
 The decoder is checked three ways in `src/census/census.test.ts`: against Koios's own decoding of a real mainnet datum, on a set of corrupted datums that must fail (truncated, trailing byte, state as an integer, unknown state, 11 and 15 fields), and on the census arithmetic.
 
 Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals, a third read at an earlier tip.
 
-The Pages snapshot in `docs/data/` is a separate, later read, at tip 14033047. It also replays the settled UI rehearsal on bank escrow `9054b1d8…#6`, with its run log and read-back balances.
+The Pages snapshot in `docs/data/` is a separate, later read, at tip 14033251: 168 open, 61 Disputed, 0 holes, no difference between the two providers. It also replays the settled UI rehearsal on bank escrow `9054b1d8…#6`, with its run log and read-back balances.
 
 ## Mocks
 
@@ -93,9 +95,11 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 `HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. It was exercised once: a test purchase of 2 tADA from our own local payment service's purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes. The buyer locked the funds in `6b359cff0b44064b5e4fc3b5da8e79850b04a46be507b3e6cc596f1f8c770b0c` (block 5259425) and the agent's result was submitted in `eaaf7c516ecf9f6cdb8ef9fdc674a54b2c109e7553a4d1a8da1cc33564fad1f6` (block 5259429). Both run on the Masumi payment contract, not the V1 escrow. The record is exported from the service's database to `fixtures/masumi/test-purchase.json` (public fields only). Withdrawal of the funds after the unlock time was not observed.
 
+A provider that rate-limits or fails (HTTP 429 or 5xx) is answered as a 503 hole, in one sentence: nothing was built or sent. A witness set that is not valid CBOR, or not signed by the expected key, is a 400 with its reason.
+
 ## Transactions sent (preprod, 6 Oct 2026)
 
-Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles; all nine are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
 
 A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
 - **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
@@ -153,7 +157,7 @@ Front-running is **not measured**, and we make no safety claim about it. A rival
 
 ### Setup transactions
 
-Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d`) to 5259737, and raised to Disputed by their buyer between 5259535 and 5259739. Three were locked directly in Disputed. The A2 spike escrow was locked at 5259457 and raised at 5259468. All entries are in `fixtures/preprod/bank.json` and `txlog-bank.json`; wallet splits and funding are in `txlog-wallet-*.json`.
+Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d`) to 5260008, and raised to Disputed by their buyer between 5259535 and 5259916. Three were locked directly in Disputed. The A2 spike escrow was locked at 5259457 and raised at 5259468. All entries are in `fixtures/preprod/bank.json` and `txlog-bank.json`; wallet splits and funding are in `txlog-wallet-*.json`, the latest being the seller's split `7033b725d83f4b903a8d54a91d8a6a237ce0e58fc80e2c402f073c22eb43d7f5` (block 5260615).
 
 ## Limits and rules we hold
 
