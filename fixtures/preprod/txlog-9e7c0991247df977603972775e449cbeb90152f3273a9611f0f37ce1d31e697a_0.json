@@ -3,8 +3,8 @@
     "step": "AuthorizeRefund (leg 1)",
     "network": "preprod",
     "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-    "txHash": "764f803f96fc4f0c950d1dd0f00bb98437f3bab2a6ff3f9478d0e2ce09a507db",
-    "atMs": 1791268438964,
+    "txHash": "a6e624e5ebe3ca6db80abdaf8d8f8537aaf74823c13bc094ddae23934b54e246",
+    "atMs": 1791275615526,
     "via": "koios",
     "redeemer": "AuthorizeRefund",
     "role": "seller",
@@ -12,17 +12,17 @@
     "status": "accepted",
     "stage": "confirm",
     "block": {
-      "height": 5259631,
-      "hash": "e8863858e418109e6a05bf8c876ea6f28ada419eeb3ac87c7c32e368a57fa8eb",
-      "slot": 135585247
+      "height": 5259954,
+      "hash": "cf58a8dde075ed3c2eed6a2d581de6f839ac0f9cc7fccafca8cd7d5c28ee7487",
+      "slot": 135592429
     }
   },
   {
     "step": "WithdrawRefund (leg 2, pre-signed)",
     "network": "preprod",
     "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-    "txHash": "ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee",
-    "atMs": 1791268439632,
+    "txHash": "87b4bffa372b25879da8f92ac2d58e64573a8470a770691618baa0432adeefe3",
+    "atMs": 1791275615983,
     "via": "koios",
     "redeemer": "WithdrawRefund",
     "role": "buyer",
@@ -30,19 +30,21 @@
     "status": "accepted",
     "stage": "confirm",
     "block": {
-      "height": 5259631,
-      "hash": "e8863858e418109e6a05bf8c876ea6f28ada419eeb3ac87c7c32e368a57fa8eb",
-      "slot": 135585247
+      "height": 5259954,
+      "hash": "cf58a8dde075ed3c2eed6a2d581de6f839ac0f9cc7fccafca8cd7d5c28ee7487",
+      "slot": 135592429
     },
     "readback": {
       "provider": "blockfrost",
       "validContract": true,
       "balances": {
         "buyer": {
-          "lovelace": "14000000"
+          "lovelace": "12000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "1200000"
         },
         "seller": {
-          "lovelace": "6000000"
+          "lovelace": "8000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "800000"
         }
       }
     }
@@ -51,8 +53,8 @@
     "step": "replay leg 2 (same bytes)",
     "network": "preprod",
     "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-    "txHash": "ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee",
-    "atMs": 1791268455547,
+    "txHash": "87b4bffa372b25879da8f92ac2d58e64573a8470a770691618baa0432adeefe3",
+    "atMs": 1791275651889,
     "via": "koios",
     "redeemer": "WithdrawRefund",
     "role": "seller",

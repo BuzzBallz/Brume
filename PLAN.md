@@ -36,11 +36,11 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 **MUST (demo path)**
 - [x] M-1 keyless read layer, 429 retry/backoff, hole counter (part 1)
 - [x] M-2 16-field V1 decoder + `census:mainnet` from the UTxO set, two providers (part 2; README evidence, not on camera)
-- [ ] M-3 reachability engine 7×3 (part 3)
-- [ ] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4)
-- [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5)
+- [x] M-3 reachability engine 7×3 (part 3) — `src/engine`, every redeemer × role tested; predicted refusals refused on preprod (§10); run on the 61 mainnet Disputed escrows (`fixtures/solver-61-14032495.json`)
+- [x] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4) — 26 escrows locked, 18 disputed by a real buyer-signed `SetRefundRequested` (`fixtures/preprod/bank.json`, `txlog-bank.json`)
+- [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5) — [x] path B: leg 2 signed before leg 1 exists, both legs in one block on 5 settles and 5 race runs, replay refused (phase 1), balances read back on the second indexer (§10, `fixtures/preprod/README.md`). **Open: path A fallback** — priced by the solver and shown in the UI's solver panel, but `src/preprod` cannot settle it, nothing reads `SETTLE_PATH`, and the bank's path A escrow went to the C11 `Withdraw` control
 - [x] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal) — and C11 below
-- [ ] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8)
+- [x] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8) — `src/solver`, hand-computed cases pass; run over the 61 (§10)
 - [x] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
 - [ ] M-10 Coworker registered and listed on preprod Sokosumi (part 5c)
@@ -48,11 +48,11 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [ ] M-12 recording + slides incl. "who pays" (part 12)
 
 **SHOULD (in this order)**
-- [x] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing — ONE run, 6 Oct, `fixtures/preprod/race-18268b5a…_0.json` (§10)
+- [x] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing — 5 runs, 6 Oct, 4 of them contended (`fixtures/preprod/race-*.json`): same block 5 of 5; front-run still unmeasured, the solver keeps p = 1 (§10)
 - [x] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession (A) — pair done 6 Oct, blocks 5259662 (accepted) / 5259664 → refused (phase 2). The other unavailable branches are the C11 controls on the shared script (§10: SetRefundRequested clean; the two seller branches re-run with the guard isolated)
 - [ ] S-3 CIP-30 browser signing (upgrade of the file-drop path; only if core done)
 - [ ] S-4 solver hazard term (option to wait, one-sided arrival bound)
-- [ ] S-5 `verify <txhash>` judge script; solver over all 61 as fixture
+- [ ] S-5 `verify <txhash>` judge script (B); [x] solver over all 61 as fixture (A, `fixtures/solver-61-14032495.json`, §10)
 - [ ] S-6 CIP-8 signed proposal/accept (part 6)
 - [ ] S-7 x402 payment via the **hosted** facilitator (optional, never a gate)
 
@@ -140,7 +140,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [x] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A — **PASSED 13:50 SGT, path B**: leg 2 signed against leg 1's future output, both legs in block 5259491, replay refused (phase 1). `fixtures/preprod/txlog-spike-6d3b12d4…_0.json`
 - [x] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
 - [x] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
-- [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
+- [x] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high] — file-drop settle in block 5259570; `tryAnyway` refused in phase 2 (§10); the same calls run from stream B's agent (Integration 1 dry run, block 5259954)
 - [x] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
 - [x] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 141 open / 140 decoded reproduced against `fixtures/kickoff-2026-10-06.md`
 - [x] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
@@ -151,8 +151,8 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 *Sleep Wed 00:00–05:00. Non-negotiable.*
 
 **M2 — First complete ugly take · Wed 05:00–09:00**
-- [ ] A solver core [sonnet/high] — hand-computed case passes
-- [ ] A control "try anyway" + S-1 race measurement [sonnet/high]
+- [x] A solver core [sonnet/high] — hand-computed case passes (`src/solver/solve.test.ts`)
+- [x] A control "try anyway" + S-1 race measurement [sonnet/high] — §10
 - [ ] B solver panel + balances + tx links in UI; GitHub Pages read-only mode [sonnet/medium]
 - [x] B pin fixtures, pick `<HERO_REF>` and `<BANK_REF>`, log in §10 [haiku] — logged in §10 below and in DEMO.md
 - [ ] A+B ugly take following §2
@@ -160,7 +160,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 
 **M3 — Integration + freeze · Wed 09:00–13:00**
 - [x] B clean-clone judge run (keyless): README commands work [sonnet/high] — run from a fresh clone of b/ui with no .env, 6 Oct: check green, fixture census with both providers, live census single-provider and saying so, agent routes answering
-- [ ] A S-2 own deployment + admin pair [sonnet/high + contract-reviewer]
+- [x] A S-2 own deployment + admin pair [sonnet/high + contract-reviewer] — executed 6 Oct, blocks 5259662 / 5259664 / 5259665 (§10); the contract-reviewer pass is the open item of the review line below
 - [ ] B S-3 CIP-30 only if everything above is green [sonnet/high]
 - [ ] `/code-review high` + contract-reviewer on `src/preprod`, `src/engine`, `src/agent`; claims-checker on README/deck draft — B, 6 Oct: `/code-review high` on the three folders (9 findings, 8 fixed in src/agent, the lock fixed by A in src/preprod); claims-checker on the deck and pitch (no blocker, 4 fixes applied). Still open: contract-reviewer (A), claims-checker on the final README
 - Done when: **freeze 13:00**, main green.
@@ -218,11 +218,17 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
 
-**S-1 race, 6 Oct, 5 runs** (`fixtures/preprod/race-*.json`; 4 of the 5 contended — the run in block 5259678 was not — one of them run from the second session). **Same block, 5 of 5** (blocks 5259678, 5259750, 5259751, 5259754, 5259799): leg 2 accepted 503–711 ms after leg 1 was sent, both handed to one provider — **R5, sayable.** **Front-run: still unmeasured.** A rival pre-built by the buyer (its own `WithdrawRefund` taking the whole pot, evaluated as a valid exit against leg 1's pending output before each run: the positive control that a refusal is not a malformed rival) never landed, but no run gave it a clean window: run 1 watched a mempool that could not see leg 1 (first sight after the block); in runs 2–4 it saw leg 1 in Blockfrost's mempool at +314 to +1063 ms and fired through Koios, whose node had not yet received leg 1 (`BadInputsUTxO` on leg 1's own txid), and the first fixed-transport retries were cut off when the block landed (+1.1 s in run 4). **What the numbers do say:** the attack window is the seller's gap between leg 1 and leg 2 at one endpoint (249–296 ms across the contended runs) against an attacker watching that endpoint (first sight ~300 ms here) — the same order of magnitude, so **no safety claim**. **Not sayable:** "the rival was refused N/N", any probability, "cannot be raced". The solver keeps p at its worst case (1).
+**S-1 race, 6 Oct, 5 runs** (`fixtures/preprod/race-*.json`; 4 of the 5 contended — the run in block 5259678 was not — one of them run from the second session). **Same block, 5 of 5** (blocks 5259678, 5259750, 5259751, 5259754, 5259799): leg 2 accepted 503–711 ms after leg 1 was sent, both handed to one provider — **R5, sayable.** **Front-run: still unmeasured.** A rival pre-built by the buyer (its own `WithdrawRefund` taking the whole pot, evaluated as a valid exit against leg 1's pending output before each run: the positive control that a refusal is not a malformed rival) never landed, but no run gave it a clean window: the uncontended run (block 5259678) watched a mempool that could not see leg 1 (first sight after the block); in the four contended runs it saw leg 1 in Blockfrost's mempool at +314 to +1063 ms and fired through Koios, whose node had not yet received leg 1 (`BadInputsUTxO` on leg 1's own txid), and the first fixed-transport retries were cut off when the block landed (+1.1 s in run 4). **What the numbers do say:** the attack window is the seller's gap between leg 1 and leg 2 at one endpoint (249–296 ms across the contended runs) against an attacker watching that endpoint (first sight ~300 ms here) — the same order of magnitude, so **no safety claim**. **Not sayable:** "the rival was refused N/N", any probability, "cannot be raced". The solver keeps p at its worst case (1).
 
 **C11 on the shared script, first run, 6 Oct** (`fixtures/preprod/txlog-c11-8e0d6df4…_0.json`): after the seller's `AuthorizeRefund` alone, `SetRefundRequested` (buyer) was refused by the validator with the state guard as the only failing one — **clean, R5**. `SubmitResult` and `AuthorizeRefund` (seller) were also refused, but **while the seller cooldown armed by the concession was still running**, so the cooldown alone explains them: **guard not isolated, still R4** (review, 6 Oct). Then the buyer's `WithdrawRefund` — accepted (block 5259675). An isolated re-run (concession with a minimal cooldown, controls sent after it expires) is below. `Withdraw` not sent (its mandatory tagged outputs would decide): R4. The admin branch is R5 on our own deployment only; on the shared script it stays "the validator's source says".
 
 **C11 isolated re-run, 6 Oct** (`fixtures/preprod/txlog-c11-isolated-7e37dc3f…_0.json`): the concession written with the minimal seller cooldown (upper bound + 7 min + 1 min), each seller control sent only once the engine named no cooldown: `SubmitResult` (seller) refused by the validator with the emptied result hash as the only failing guard, `AuthorizeRefund` again (seller) refused with the state as the only failing guard (both phase 2); then the buyer's `WithdrawRefund`, accepted (block 5259786). **The two seller branches are now R5 on the shared script**; with `SetRefundRequested` (first run) and `WithdrawDisputed` on our own deployment, C11 is R5 for every branch but `Withdraw` (R4).
+
+**Integration 1 dry run, API level, 6 Oct ~16:45 SGT (A's machine, B's agent at b/ui c4c8bdd, `HIRE_VIA=direct`):** `GET /api/grid` and `/api/solver` on a bank escrow returned the engine's and the solver's real output; `POST /api/proposal` → `pnpm sign --role buyer` on the proposal file → `POST /api/proposal/:id/submit` answered 202 → `GET /api/txlog` showed leg 1 and leg 2 confirmed in block 5259954 and the replay refused (phase 1) (`fixtures/preprod/txlog-9e7c0991…_0.json`); `POST /api/try` on a Disputed bank escrow: refused by the validator, phase 2 (`txlog-5aee2110…_0.json`). Not covered here: the browser UI, CIP-30, the Sokosumi hire. Found: the agent needs `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER` with `HIRE_VIA=sokosumi`, while `.env.example` lists `MASUMI_PAYMENT_*`; b/ui's `bank.json` lacks the 16:20 top-up until the next merge.
+
+**Solver over the 61, 6 Oct** (`fixtures/solver-61-14032495.json`, mainnet tip 14032495, read-only, `node src/solver/all.ts`): 170 open UTxOs at that tip (141 at kickoff), 1 undecodable, **61 Disputed**. Path B band feasible at every horizon for 61/61; path A feasible at H = 30 d for 16/61, and 45/61 would need the seller to top the fee up (the collateral floor is most of the ADA). Engine cross-check on all 61: the seller can concede now (61), after the concession the buyer can exit (61), the admin set cannot arbitrate (0) and the seller can do nothing (0) — C11 on the real stock. The 30-day band is 0–75 % on every one of the 61: the ADA, of which arbitration gave the buyer 100 %, is the binding asset everywhere. Per unit of each escrow, no sum.
+
+**C11 Withdraw + C12, 6 Oct** (`fixtures/preprod/txlog-c11-withdraw-9054b1d8…_5.json`): on an escrow whose `unlock_time` had passed, after the seller's concession alone, the seller's `Withdraw` built with BOTH mandatory outputs (fee output to the fee address carrying `floor(q × 50 / 1000)` of every asset, buyer output carrying `c` lovelace, both tagged with the escrow's own output reference) — **refused by the validator** (phase 2), the engine naming only the concession's effects ("needs ResultSubmitted (is RefundRequested); needs a result hash"). **Positive control:** the same output construction on an escrow where `Withdraw` is open (ResultSubmitted, unlock_time past) — **accepted** (block 5259933), so the refusal is the guards, not a malformed tx. **C11 is now R5 for every branch** (`WithdrawDisputed` on our own deployment), and **C12's fee rule ran on the deployed bytes** (R5: 5 % of every asset to the fee address, the collateral floor lovelace-only).
 
 **Executed on OUR OWN DEPLOYMENT (S-2), 6 Oct** — the vendored V1 blueprint with the deployed fee address, fee permille and cooldown, and only the admin set changed to our admin key ×3, threshold 2: script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, address `addr_test1wrfwwtssfd45jzzp9u86eltxnqsuxkrcryteajxs4nc5qrgfenf83` (`fixtures/preprod/own-deployment.json`, log `txlog-own-deployment.json`). Two identical Disputed escrows, arbitration window open:
 - X: the admin's `WithdrawDisputed` before any concession — **accepted** (block 5259662), as the engine predicted.
@@ -273,3 +279,4 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 | Tue 13:05 | `.env.example`: key format stated (`xprv` root key); `.claude/agents/claims-checker.md`: dead 132/131 replaced by the kickoff pin | A | B, 13:30 |
 | Tue 13:25 | after independent review: `SolverOutput.path` + `Band.feasible` + `PathTerms.topUp` (bands differ by path); `arbitrationLeak` removed from the shared output (it would reach the MIP-003 result, §3 WON'T); `TxLogEntry` gets `scriptHash`, `redeemer?`, `role?`, `via?`, `block {height, hash, slot}` (replaces `blockHeight`), `refusal {phase 1\|2, ledgerError}`, `stage` required — only phase 2 is "the validator refuses"; `Reach` documents its window; the first-mover signing rule (§4); `readback.balances?` (B's request) | A | B, 13:40 |
 | Tue 14:50 | `constants.ts`: `TUSDM` (preprod USDM unit, now in the bank escrows) and `DECIMALS` { lovelace, USDM, tUSDM: 6 } for display (B's request) | A | B, 14:50 |
+| Tue 17:01 | `.env.example`: `MASUMI_PAYMENT_SERVICE_URL` / `MASUMI_PAYMENT_API_KEY` replaced by the names `src/agent/payment.ts` reads (`PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`); `HIRE_VIA` moved into that block, default `direct` (a Sokosumi hire needs the payment service, which runs on B's machine). No code read the old names | A | B, 17:00 (B's request) |

@@ -128,6 +128,7 @@ async function assemble(spec: EscrowSpend, script: Script, units?: ExUnits): Pro
   for (const o of spec.outputs) {
     if (o.address === script.address.preprod) throw new TxRuleError('extra output to the script address')
     b.txOut(o.address, o.amount)
+    if (o.datumCbor) b.txOutInlineDatumValue(o.datumCbor, 'CBOR') // Withdraw's fee and collateral outputs carry own_ref
   }
   for (const s of spec.signers) b.requiredSignerHash(s.pkh)
   b.invalidBefore(spec.window.fromSlot).invalidHereafter(spec.window.toSlot).changeAddress(spec.changeAddress)
