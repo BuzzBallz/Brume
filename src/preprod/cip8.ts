@@ -78,6 +78,9 @@ export function parseOffer(x: unknown): Offer {
   if (o.by !== 'buyer' && o.by !== 'seller') throw new SettleError('An offer is made by the buyer or the seller.')
   if (typeof o.atMs !== 'number' || !Number.isSafeInteger(o.atMs) || o.atMs <= 0) throw new SettleError('An offer\'s signing time is a time in milliseconds.')
   if (typeof o.expiresMs !== 'number' || !Number.isSafeInteger(o.expiresMs) || o.expiresMs <= o.atMs) throw new SettleError('An offer\'s expiry is a time in milliseconds, after it was signed.')
+  // The signing time is the signer's own claim: an expiry far past it would keep an accept fresh for as long as the
+  // counterparty likes, so it is bounded by the offer lifetime both sides use, plus the clock skew allowed.
+  if (o.expiresMs - o.atMs > OFFER_TTL_MS + CLOCK_SKEW_MS) throw new SettleError(`An offer expires at most ${(OFFER_TTL_MS + CLOCK_SKEW_MS) / 60_000} min after it was signed.`)
   if (o.prev !== null && (typeof o.prev !== 'string' || !HASH.test(o.prev))) throw new SettleError('An offer\'s prev is null or a 32-byte hash in hex.')
   if (typeof o.nonce !== 'string' || !NONCE.test(o.nonce)) throw new SettleError('An offer\'s nonce is 16 bytes in hex.')
   return o as Offer
