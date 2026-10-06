@@ -49,7 +49,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 
 **SHOULD (in this order)**
 - [ ] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing
-- [ ] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession + one refusal per other unavailable branch (A)
+- [x] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession + one refusal per other unavailable branch (A) — pair done 6 Oct, blocks 5259662 (accepted) / 5259664 → refused (phase 2); other branches: C11 controls on the shared script
 - [ ] S-3 CIP-30 browser signing (upgrade of the file-drop path; only if core done)
 - [ ] S-4 solver hazard term (option to wait, one-sided arrival bound)
 - [ ] S-5 `verify <txhash>` judge script; solver over all 61 as fixture
@@ -217,6 +217,11 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - **First refusal by the deployed bytes (A4 done-when):** the engine predicted the buyer cannot take `WithdrawRefund` while `Disputed`; built and sent anyway (`tryAnyway`, no evaluation, the node ran the script), it was refused in phase 2 (`ValidationTagMismatch (IsValid True) … PlutusFailure`) on bank escrow `8e0d6df4…#0`. Rejected from the mempool, no collateral taken.
 - A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
+
+**Executed on OUR OWN DEPLOYMENT (S-2), 6 Oct** — the vendored V1 blueprint with the deployed fee address, fee permille and cooldown, and only the admin set changed to our admin key ×3, threshold 2: script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, address `addr_test1wrfwwtssfd45jzzp9u86eltxnqsuxkrcryteajxs4nc5qrgfenf83` (`fixtures/preprod/own-deployment.json`, log `txlog-own-deployment.json`). Two identical Disputed escrows, arbitration window open:
+- X: the admin's `WithdrawDisputed` before any concession — **accepted** (block 5259662), as the engine predicted.
+- Y: the seller's `AuthorizeRefund` (block 5259664), then the same admin's `WithdrawDisputed` — **refused by the validator** (phase 2, `ValidationTagMismatch (IsValid True) … PlutusFailure`), as predicted: "needs Disputed (is RefundRequested); needs a result hash". Then the buyer's `WithdrawRefund` on Y — accepted (block 5259665): after the concession only the buyer moves the value.
+- Wording: "on our own deployment of the same compiled code" — R5 on our copy; on the shared script the admin branch is still "the validator's source says" (its keys are Masumi's).
 
 **Tooling traps met in A1–A2 (each fixed in `src/preprod`, each would have cost an hour later)**
 - `import … from '@meshsdk/core'` fails under Node: its ESM build pulls a libsodium file that is not shipped. Mesh is loaded through its CJS build (`src/preprod/mesh.ts`).
