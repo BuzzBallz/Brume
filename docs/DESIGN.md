@@ -147,20 +147,20 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 
 ## 8. Data contract
 
-`shared/types.ts` lands at M0; these are PLAN v3 §4 shapes, re-checked field by field at M0. In live mode the UI calls the agent's API (`src/agent`, built in the back-end session; the routes below are this side's request to it). In read-only mode the same shapes come from `docs/data/*.json`.
+`shared/types.ts` lands at M0; these are PLAN v3 §4 shapes, re-checked field by field at M0. In live mode the UI calls the agent's API (`src/agent`, built in the back-end session; the routes below are this side's request to it). In read-only mode the same shapes come from `docs/data/*.json`. Routes take the ref as a query parameter (`?ref=`, URL-encoded) because refs contain `#`. Snapshot mode reads `docs/data/<kind>.json`; mock mode reads `shared/mock/*.mock.json` and needs the repo root served (local only). Every response may be the bare object or wrapped under its kind (`{"grid": …}`), as the mocks are.
 
 **Datum, 16 fields** (SPEC-TRANSACTIONS §0, in order): `buyer`, `seller` (nested addresses), `reference_key`, `reference_signature`, `seller_nonce`, `buyer_nonce`, `collateral_return_lovelace`, `input_hash`, `result_hash`, `pay_by_time`, `submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, `seller_cooldown_time`, `buyer_cooldown_time`, `state`. Times are milliseconds. The header shows `state`, whether `result_hash` is empty, and the four clocks that gate the grid (`submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, both cooldowns) as relative time ("opened 318 days ago") with the UTC timestamp on hover; the rest sits in the datum disclosure.
 
 | View | Consumes | Live route (proposal, B) |
 |---|---|---|
-| List | escrow refs with `State` and network | `GET /api/escrows` |
-| Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/escrow/:ref` |
-| Reachability | `Grid {ref, atMs, slot, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid/:ref` |
+| List | `Census` (mainnet rows, `byState`, tip, holes, 2nd provider) | `GET /api/census` |
+| Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/datum?ref=<ref>` |
+| Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` |
 | Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal`, `GET /api/proposal/:id` (polled) |
 | Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/:id/submit` |
-| Solver | `SolverOutput` | `GET /api/solver/:ref` |
-| Job result link | `JobResult` (verdict + split + UI link) | link format `…/#ref=<ref>&view=settle` |
+| Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
+| Job result link | `JobResult` (verdict + split + UI link) | `uiUrl` = `…/?escrow=<ref, URL-encoded>`; the UI also accepts the raw `#<index>` landing in the fragment |
 
 **Interface requests** (to propose in PLAN.md with a §11 entry; not applied here):
 1. `TxLogEntry.status` is `accepted | refused`; the UI needs `submitted | confirmed | refused` plus `slot?` to draw sending vs confirmed.
