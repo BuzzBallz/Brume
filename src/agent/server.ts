@@ -5,7 +5,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { extname, join, normalize } from 'node:path'
 import type { Census } from '../../shared/types.ts'
 import { runCensus } from '../census/census.ts'
-import { HttpError, mockFile, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
+import { body, HttpError, mockFile, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
 import { mip003 } from './mip003.ts'
 
 const PORT = Number(process.env.PORT ?? 8787)
@@ -22,10 +22,18 @@ function getCensus() {
 }
 
 // ponytail: grid, solver, try and the settle flow stay on shared/mock until stream A's engine, solver and preprod land; each is one line to swap.
-const MOCK_ROUTES = ['GET /api/grid', 'GET /api/solver', 'POST /api/try', 'POST /api/proposal', 'GET /api/proposal/:id', 'POST /api/proposal/:id/submit']
+const MOCK_ROUTES = ['GET /api/grid', 'GET /api/solver', 'POST /api/try', 'POST /api/proposal', 'GET /api/proposal/:id', 'POST /api/proposal/:id/witness', 'POST /api/proposal/:id/submit']
 
 type Handler = (url: URL, req: IncomingMessage) => Promise<{ body: unknown; mock?: boolean }> | { body: unknown; mock?: boolean }
 const mock = (body: unknown) => ({ body, mock: true })
+
+// First-mover rule (PLAN §4): a leg-2 witness is stored; a leg-1 witness is never stored, it goes out as an immediate submit.
+const witnessed = new Map<string, Set<string>>()
+const proposalFor = (ref: string) => {
+  const m = mockFile('proposal')
+  return { ...m, proposal: { ...m.proposal, signedBy: [...(witnessed.get(ref) ?? [])] } }
+}
+const refOfPath = (url: URL) => decodeURIComponent(url.pathname.split('/')[3] ?? '')
 const routes: Record<string, Handler> = {
   ...mip003,
   'GET /api/census': async () => ({ body: { census: await getCensus() } }),
@@ -34,7 +42,16 @@ const routes: Record<string, Handler> = {
   'GET /api/solver': () => mock(mockFile('solver')),
   'POST /api/try': () => mock(mockFile('txlog').txlog.find((e: { status: string }) => e.status === 'refused')),
   'POST /api/proposal': () => mock(mockFile('proposal')),
-  'GET /api/proposal/:id': () => mock(mockFile('proposal')),
+  'GET /api/proposal/:id': (url) => mock(proposalFor(refOfPath(url))),
+  'POST /api/proposal/:id/witness': async (url, req) => {
+    const { role, leg } = await body(req)
+    if (role !== 'buyer' && role !== 'seller') throw new HttpError(400, 'role must be buyer or seller')
+    if (leg !== 1 && leg !== 2) throw new HttpError(400, 'leg must be 1 or 2')
+    if (leg === 1) return mock(mockFile('txlog'))
+    const ref = refOfPath(url)
+    witnessed.set(ref, (witnessed.get(ref) ?? new Set()).add(role))
+    return mock(proposalFor(ref))
+  },
   'POST /api/proposal/:id/submit': () => mock(mockFile('txlog')),
 }
 

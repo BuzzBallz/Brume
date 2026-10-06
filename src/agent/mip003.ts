@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { IncomingMessage } from 'node:http'
 import type { JobResult } from '../../shared/types.ts'
-import { HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } from './escrow.ts'
+import { body, HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } from './escrow.ts'
 import { assertConfigured, createPayment, inputHash, resolvePayment, resultHash, submitResult } from './payment.ts'
 import type { Payment } from './payment.ts'
 
@@ -13,21 +13,6 @@ const INPUT_SCHEMA = {
     { id: 'escrowRef', type: 'string', name: 'Escrow UTxO reference', data: { description: '<tx hash>#<index> of a V1 escrow output' } },
     { id: 'network', type: 'option', name: 'Network', data: { description: 'mainnet is read-only', values: ['mainnet', 'preprod'] } },
   ],
-}
-
-async function body(req: IncomingMessage) {
-  const chunks: Buffer[] = []
-  let size = 0
-  for await (const c of req) {
-    size += c.length
-    if (size > 65_536) throw new HttpError(413, 'body too large')
-    chunks.push(c)
-  }
-  try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'))
-  } catch {
-    throw new HttpError(400, 'body is not JSON')
-  }
 }
 
 // HIRE_VIA=sokosumi: start_job opens a payment at the Masumi payment service and the job runs once the funds are locked. direct (default): no payment, for scripted calls.

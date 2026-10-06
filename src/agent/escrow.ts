@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import type { IncomingMessage } from 'node:http'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { V1_ADDRESS } from '../../shared/constants.ts'
@@ -24,6 +25,21 @@ export const parseRef = (ref: unknown) => {
 export const parseNet = (net: unknown): Network => {
   if (net !== 'mainnet' && net !== 'preprod') throw new HttpError(400, 'net must be mainnet or preprod')
   return net
+}
+
+export async function body(req: IncomingMessage) {
+  const chunks: Buffer[] = []
+  let size = 0
+  for await (const c of req) {
+    size += c.length
+    if (size > 65_536) throw new HttpError(413, 'body too large')
+    chunks.push(c)
+  }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'))
+  } catch {
+    throw new HttpError(400, 'body is not JSON')
+  }
 }
 
 export const mockFile = (name: string) => JSON.parse(readFileSync(join(ROOT, 'shared/mock', `${name}.mock.json`), 'utf8'))
