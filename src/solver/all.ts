@@ -1,6 +1,7 @@
 // S-5: the solver over every Disputed V1 escrow on mainnet, pinned to a tip. Keyless and read-only (Koios). For each:
 // the band per horizon on path B (the product's path) and path A, and the engine's cross-check that the band is
-// executable: the seller can concede now, and after the concession only the buyer can move the value (C11).
+// executable: the seller can concede now, and after the concession only the buyer can move the value (C11; it holds
+// past submit_result_time, as for all 61: before it a seller SubmitResult would write a hash and return to Disputed).
 // Per unit of each escrow's value; never a dollar figure, and no sum across escrows is computed.
 // D9 + S-4: the arbiter's dormancy is checked live at the census tip, its full receipt goes into the fixture, and so does
 // the path-B break-even curve, which is the same for every escrow (ADA binds on each, one arbiter, one T).
