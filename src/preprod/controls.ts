@@ -62,18 +62,20 @@ function continuationFor(r: Redeemer, raw: string, w: TxWindow): DatumPatch | nu
   }
 }
 
-// Only escrows we locked (fixtures/preprod/bank.json): a control never touches anyone else's escrow.
+// Only escrows we locked: the bank (fixtures/preprod/bank.json) or a `pnpm demo:preprod` run (out/demo/escrows.json).
+// A control never touches anyone else's escrow.
 function inBank(ref: string): boolean {
-  const file = join(ROOT, 'fixtures', 'preprod', 'bank.json')
-  if (!existsSync(file)) return false
-  const bank = JSON.parse(readFileSync(file, 'utf8')) as { ref: string; disputedFrom?: string }[]
-  return bank.some((e) => e.ref === ref || e.disputedFrom === ref)
+  return [join(ROOT, 'fixtures', 'preprod', 'bank.json'), join(ROOT, 'out', 'demo', 'escrows.json')].some((file) => {
+    if (!existsSync(file)) return false
+    const list = JSON.parse(readFileSync(file, 'utf8')) as { ref: string; disputedFrom?: string }[]
+    return list.some((e) => e.ref === ref || e.disputedFrom === ref)
+  })
 }
 
 export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Role, logAs: string = escrowRef): Promise<TxLogEntry> {
   if (role === 'admin') throw new SettleError('The admin keys of the shared escrow are not ours: the admin control runs on our own deployment.')
   // Withdraw has two mandatory datum-tagged outputs; without them the script refuses for that reason, not the predicted one.
-  if (!inBank(escrowRef)) throw new SettleError('Try anyway runs only on our own bank escrows (fixtures/preprod/bank.json).')
+  if (!inBank(escrowRef)) throw new SettleError('Try anyway runs only on escrows we locked (the bank, or a demo:preprod run).')
   const escrow = await escrowAt(escrowRef)
   const raw = escrow.output.plutusData as string
   const d = readDatum(raw)
