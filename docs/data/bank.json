@@ -1,11 +1,51 @@
 {
  "bank": [
   {
+   "ref": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+   }
+  },
+  {
    "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
    "state": "Disputed",
    "value": {
     "lovelace": "20000000",
     "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+   }
+  },
+  {
+   "ref": "c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#0",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2000000"
+   }
+  },
+  {
+   "ref": "c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#1",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2000000"
+   }
+  },
+  {
+   "ref": "c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#2",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2000000"
+   }
+  },
+  {
+   "ref": "c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#3",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2000000"
    }
   }
  ]

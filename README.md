@@ -67,7 +67,7 @@ The decoder is checked three ways in `src/census/census.test.ts`: against Koios'
 
 Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals, a third read at an earlier tip.
 
-The Pages snapshot in `docs/data/` is a separate, later read, at tip 14032497.
+The Pages snapshot in `docs/data/` is a separate, later read, at tip 14033047. It also replays the settled UI rehearsal on bank escrow `9054b1d8…#6`, with its run log and read-back balances.
 
 ## Mocks
 
