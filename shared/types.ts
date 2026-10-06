@@ -92,7 +92,26 @@ export type SolverInput = {
   dormancyDays: number
   horizonsDays: number[]
   frontRunP: number | null // null until 5b measures it; solver shows the worst case
+  dormancy?: Dormancy // the D9 receipt dormancyDays was computed from (solverInputFor always sets it)
 }
+
+// D9: the arbiter's silence, claimed only through a block someone read, never extrapolated to the wall clock.
+export type Dormancy = {
+  lastActionMs: number // newest WithdrawDisputed known: ARBITER_LAST_ACTION_MS (C3) unless a newer one was found
+  pin: { height: number; hash: string; timeMs: number } // silent through here: K30 lifetime walk + kickoff read
+  through: { height: number; hash: string; timeMs: number } // silent through this block: the pin, or the live tip read BEFORE the walk
+  method: 'pin' | 'live'
+  status: 'silent' | 'unverified' | 'acted' // unverified: a live check with any hole, a failed control or a provider diff; T then stays at the pin
+  providers: Provider[] // providers whose walk since the pin was complete (0 holes, both controls fired)
+  holes: number
+  acted: { txHash: string; height: number; timeMs: number; validContract: boolean }[] // WithdrawDisputed since the pin, phase-2-failed attempts included
+  diff: string[] // script-spend tx hashes seen by one provider only
+}
+// S-4: break-evens only, never a value of waiting. On the output's path, the scalar (binding-asset) point for one seller share.
+// deadlineDays: the longest a buyer may be willing to wait for this share to beat arbitration at the 95 % rate bound (null: any wait).
+// breakEvenDiscountAnnual: the effective annual rate (decimal) at or above which the share beats waiting forever (null: no rate does).
+export type WaitPoint = { sellerShare: number; feasible: boolean; deadlineDays: number | null; breakEvenDiscountAnnual: number | null }
+export type WaitTerms = { silentDays: number; rateBoundPerYear: number; meanGapDaysAtLeast: number; dormancy: Dormancy; curve: WaitPoint[] }
 // topUp: what the exiting party must add from its own inputs (path A when c is most of the ADA: the fee's lovelace).
 export type PathTerms = { fee: Value; exposedParty: 'buyer' | 'seller'; exposedFloor: Value; defectorKeeps: Value; topUp: Value }
 // Everything is per unit of that asset's locked quantity. Assets differ (C9: buyer took 100 % of the ADA, 73.6 % of the token).
@@ -112,6 +131,7 @@ export type SolverOutput = {
   pathB: PathTerms
   bands: Band[]
   frontRunP: { used: number; measured: boolean }
+  wait?: WaitTerms // optional so mocks compile; solve() always fills it
 }
 
 export type TxLogEntry = {

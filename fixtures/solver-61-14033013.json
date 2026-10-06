@@ -1,0 +1,3371 @@
+{
+  "label": "Solver over every Disputed V1 escrow on mainnet, read-only. Per unit of each escrow; no dollar figure, no sum across escrows.",
+  "tip": {
+    "before": {
+      "height": 14033013,
+      "hash": "238f24135a0c0473dab50650c7e5be206769bd9ef9aae78d5a7fd455d2d2b977",
+      "slot": 199719630,
+      "time": "2026-10-06T11:25:21.000Z"
+    },
+    "after": {
+      "height": 14033013,
+      "hash": "238f24135a0c0473dab50650c7e5be206769bd9ef9aae78d5a7fd455d2d2b977"
+    }
+  },
+  "evaluatedAt": "2026-10-06T11:25:21.000Z",
+  "openUtxos": 170,
+  "undecodable": 1,
+  "disputed": 61,
+  "checks": {
+    "pathBFeasibleAllHorizons": 61,
+    "pathAFeasibleAtH30": 16,
+    "pathANeedsTopUp": 45,
+    "sellerCanConcedeNow": 61,
+    "afterConcessionBuyerCanExit": 61,
+    "afterConcessionAdminCanArbitrate": 0,
+    "afterConcessionSellerCanAnything": 0
+  },
+  "pathBSellerShareMaxAtH30": {
+    "min": 0.7501,
+    "max": 0.7501
+  },
+  "dormancy": {
+    "pin": {
+      "height": 14031823,
+      "hash": "c0b028db36a5ff6e40a3f84cd76299ff5e703712f9480b79c661d5a5f7ff1cdc",
+      "timeMs": 1791262108000
+    },
+    "method": "live",
+    "providers": [
+      "koios"
+    ],
+    "holes": 0,
+    "diff": [],
+    "lastActionMs": 1764282420000,
+    "through": {
+      "height": 14033013,
+      "hash": "238f24135a0c0473dab50650c7e5be206769bd9ef9aae78d5a7fd455d2d2b977",
+      "timeMs": 1791285921000
+    },
+    "status": "silent",
+    "acted": [],
+    "checkedAt": "2026-10-06T11:25:37.691Z",
+    "walks": [
+      {
+        "provider": "koios",
+        "tip": {
+          "height": 14033013,
+          "hash": "238f24135a0c0473dab50650c7e5be206769bd9ef9aae78d5a7fd455d2d2b977",
+          "timeMs": 1791285921000
+        },
+        "txs": 40,
+        "spendsByRedeemer": {
+          "SubmitResult": 29,
+          "WithdrawRefund": 1
+        },
+        "holes": 0,
+        "controls": {
+          "decode": true,
+          "listing": true
+        },
+        "errors": [],
+        "spends": [
+          {
+            "txHash": "3fbca46507e1b7c9a50a168843a27460343b933a35816562b51bbf7121082f42",
+            "height": 14032060,
+            "timeMs": 1791266613000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "2430654cd9322cc2ed947098b6d6faaaa34c9229a747cb0fbbbadc9ae297b327",
+            "height": 14032067,
+            "timeMs": 1791266707000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "4af65395473fad333da92bf187b88e8f2f9605c2f56372f66b6684524aadffc6",
+            "height": 14032067,
+            "timeMs": 1791266707000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "665d750731f9efbc041c72be545a91018a68942eb4a968b82123328527019ebe",
+            "height": 14032067,
+            "timeMs": 1791266707000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "cb680d0534c2d825a409c0cbf3efbcb78cafdbcc98e4fc92d4d914b481f19f84",
+            "height": 14032067,
+            "timeMs": 1791266707000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "07e4d4ad21245653543ae4394cdc9280811c30105a52108d2805f99698547603",
+            "height": 14032068,
+            "timeMs": 1791266725000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "dbfe89133f56d3ed2e88f6f1be99a6acb18f5f534e5b47a6fb1800350f27c8eb",
+            "height": 14032068,
+            "timeMs": 1791266725000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "61e325d105a4a12fe7d16274b65b060bd0e9fb2a8d82204f8cb279a7e8765437",
+            "height": 14032072,
+            "timeMs": 1791266768000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "89cd4cf8d6927c5af18e94f942a3b0c06ba1ab9e922fb56b1856d0029628bd81",
+            "height": 14032072,
+            "timeMs": 1791266768000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "45d6fe4dd725db085228ff03d04c627c0bc51540058f242e8def59afa14e9ef5",
+            "height": 14032074,
+            "timeMs": 1791266816000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "9e9990232b65d592237134dd6372ae710ced9ea04db4e5ebecd33f10dd5143b4",
+            "height": 14032074,
+            "timeMs": 1791266816000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "ba9af6f9a7276b97bb1b7adc9b38831d4fe40a5240afe0f42c9b2b1021ee88ff",
+            "height": 14032074,
+            "timeMs": 1791266816000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "bc43f2474fbfc40bdbafcace1aac9bff3de05d81669c5346bcdfeab7e1d50e19",
+            "height": 14032076,
+            "timeMs": 1791266831000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "140038a5c68c902e2069b7c78354486b76ac1ac97c8703eef0dbf6d4ecdd9249",
+            "height": 14032081,
+            "timeMs": 1791266866000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "e93daed65595db5685a96b672241388bcb330b0dfa6a13677be6eaf02ec02ba2",
+            "height": 14032081,
+            "timeMs": 1791266866000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "8af8335dba2586c7c536fda8823886c1a18c52bcdccca7452f9d495c0a0ae022",
+            "height": 14032082,
+            "timeMs": 1791266872000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "58affb8063a92d95334e4c693cc9e15bf7cd62124161a0aeacc4b3eb282f9b37",
+            "height": 14032085,
+            "timeMs": 1791266902000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "9e962cae12e13a597cedcaea7b212aade050c7d2a1404516d5df09b0f48c6a83",
+            "height": 14032087,
+            "timeMs": 1791266920000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "f842eb0c533ea566140e8159230c091cb2698d9f3f9df83d1e133cf378143976",
+            "height": 14032089,
+            "timeMs": 1791266952000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "1533aa037c23906266c4c325310f12e6e9fed4092bf3b2bb49ec144c0ac30818",
+            "height": 14032090,
+            "timeMs": 1791266973000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "ab38dcf55d69b690a60befab61878f46995020387881bacf07914d3e836b72e2",
+            "height": 14032094,
+            "timeMs": 1791267025000,
+            "redeemer": 3,
+            "validContract": true
+          },
+          {
+            "txHash": "c542e23802d97dbecba52bd4401591ba026f335d7aab56e860deea1025b5f80b",
+            "height": 14032095,
+            "timeMs": 1791267067000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "8a76334d3fa5387581072c8e3498538f69f29ed515f222056ebca078a8d20dff",
+            "height": 14032100,
+            "timeMs": 1791267136000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "137f696655ffa1fa6cf75495532d54cf5708f1425eb217d18b9f75bc0baee55c",
+            "height": 14032102,
+            "timeMs": 1791267188000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "bcfe2690e22b147392a93d190513ee20f6441d3b32a0eaadf10b82c404421e54",
+            "height": 14032102,
+            "timeMs": 1791267188000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "9e3aee0db5762c6c6cac15d08f85553e829c5d2f0ac2d503d6632ee419241dd4",
+            "height": 14032112,
+            "timeMs": 1791267371000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "5f7292d5c35d3bd7e50cde5ee7635905e3528d1f781b4b549b29e51ab41eb902",
+            "height": 14032124,
+            "timeMs": 1791267677000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "13bd06d1c07e7fb79f9c4dd0abf05da8b62265b5f806b199bd2b2fbccc0be217",
+            "height": 14032137,
+            "timeMs": 1791267900000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "ea1260fcd916e2c73fd86e2b306afc8e2729f6c4b9a0b8ea2e9aaaedd02b71e4",
+            "height": 14032170,
+            "timeMs": 1791268609000,
+            "redeemer": 5,
+            "validContract": true
+          },
+          {
+            "txHash": "c26271025184240d73fb0eca4ba03b1a77e0bfebaf45fdd8e0e84ce5d3b055e5",
+            "height": 14032369,
+            "timeMs": 1791272905000,
+            "redeemer": 5,
+            "validContract": true
+          }
+        ]
+      }
+    ],
+    "skipped": [
+      "blockfrost: BLOCKFROST_MAINNET_PROJECT_ID is not set, so the claim rests on one provider"
+    ]
+  },
+  "waitB": {
+    "silentDays": 312.54052083333335,
+    "rateBoundPerYear": 3.500957923785787,
+    "meanGapDaysAtLeast": 104.32858890375758,
+    "sameForAll": 61,
+    "curve": [
+      {
+        "sellerShare": 0.05,
+        "feasible": true,
+        "deadlineDays": 312.54052083333323,
+        "breakEvenDiscountAnnual": 0.2023295220675752
+      },
+      {
+        "sellerShare": 0.1,
+        "feasible": true,
+        "deadlineDays": 240.22545358289622,
+        "breakEvenDiscountAnnual": 0.4754976531663381
+      },
+      {
+        "sellerShare": 0.15,
+        "feasible": true,
+        "deadlineDays": 197.92385100426188,
+        "breakEvenDiscountAnnual": 0.8548727664598059
+      },
+      {
+        "sellerShare": 0.2,
+        "feasible": true,
+        "deadlineDays": 167.91038633245904,
+        "breakEvenDiscountAnnual": 1.3994498476874926
+      },
+      {
+        "sellerShare": 0.25,
+        "feasible": true,
+        "deadlineDays": 144.6301345008743,
+        "breakEvenDiscountAnnual": 2.212296091022925
+      },
+      {
+        "sellerShare": 0.3,
+        "feasible": true,
+        "deadlineDays": 125.60878375382472,
+        "breakEvenDiscountAnnual": 3.483529355163912
+      },
+      {
+        "sellerShare": 0.35,
+        "feasible": true,
+        "deadlineDays": 109.52646084889196,
+        "breakEvenDiscountAnnual": 5.587218560761837
+      },
+      {
+        "sellerShare": 0.4,
+        "feasible": true,
+        "deadlineDays": 95.59531908202189,
+        "breakEvenDiscountAnnual": 9.318846176401165
+      },
+      {
+        "sellerShare": 0.45,
+        "feasible": true,
+        "deadlineDays": 83.30718117519044,
+        "breakEvenDiscountAnnual": 16.5388798001218
+      },
+      {
+        "sellerShare": 0.5,
+        "feasible": true,
+        "deadlineDays": 72.31506725043715,
+        "breakEvenDiscountAnnual": 32.14718923632031
+      },
+      {
+        "sellerShare": 0.55,
+        "feasible": true,
+        "deadlineDays": 62.37149068328853,
+        "breakEvenDiscountAnnual": 71.16452441231041
+      },
+      {
+        "sellerShare": 0.6,
+        "feasible": true,
+        "deadlineDays": 53.29371650338758,
+        "breakEvenDiscountAnnual": 189.84028722028893
+      },
+      {
+        "sellerShare": 0.65,
+        "feasible": true,
+        "deadlineDays": 44.94297375977154,
+        "breakEvenDiscountAnnual": 665.325974044926
+      },
+      {
+        "sellerShare": 0.7,
+        "feasible": true,
+        "deadlineDays": 37.21139359845479,
+        "breakEvenDiscountAnnual": 3528.465853422034
+      },
+      {
+        "sellerShare": 0.75,
+        "feasible": true,
+        "deadlineDays": 30.013464671802843,
+        "breakEvenDiscountAnnual": 36419.015226322445
+      },
+      {
+        "sellerShare": 0.8,
+        "feasible": true,
+        "deadlineDays": 23.280251831584724,
+        "breakEvenDiscountAnnual": 1207220.1366965794
+      },
+      {
+        "sellerShare": 0.85,
+        "feasible": true,
+        "deadlineDays": 16.955370584652123,
+        "breakEvenDiscountAnnual": 412918818.28081155
+      },
+      {
+        "sellerShare": 0.9,
+        "feasible": true,
+        "deadlineDays": 10.992113924753278,
+        "breakEvenDiscountAnnual": 48308145877356.25
+      },
+      {
+        "sellerShare": 0.95,
+        "feasible": true,
+        "deadlineDays": 5.35135702367817,
+        "breakEvenDiscountAnnual": 7.735483174684085e+28
+      }
+    ]
+  },
+  "escrows": [
+    {
+      "ref": "e1f2e89d47302eb4f67fa8fb3291a3fa1e0471abd043746bf1effd3a4ecb978a#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a071bb465dbaf33ca82c31abf42bf42ef48b2f9d19c50343a4d525e34d0d8d5f#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "47fdaf2eaa8dbeeff81395a4607c495344920ca94051feddfe4a371248819c10#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "3d8315e004eb778615a565f300dba5d8dbdd9276e781d5bb64f9e04a925da965#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "e6cb624cc5745138452604bb49943d9e862394939fb41fbf70ce9a9fd036c7c8#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "422888d5af4f9df93577d7633d8318f8a3d97d2111b3b1fc4f38b8a2d92592c8#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "1da065ac7b41131a654dc3805271095d533ddaffd57adf587ac709ee6e45226e#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "c7e5a062c572b30f69e22e3adf5e038a06d80cdff3d6d199345656a212e6f843#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "f0559afd0f0cf14b253bebfd004fe390de8704058be0b92cd67c6a48d32f507b#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a933f6b1caeea3ad5b0765ed7cecac860672e9008350dfc031e4a95cf6598e7a#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a607280be442c044f730806dcd0fbdfbdb1b4b4d6de2009c48e130919ab99740#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "08f584bb9e219ae9363bad29bbfa1f9a4f504f54d8d0a84df80d7fc0c5168d5b#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a286a4e5468b0157ccca2564d3524b112b76776f13f51f5dd61faa8d91e498c8#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "1f54f8b6924baf78524cb027be5673bebf6b3c988b528bedda739642cedf785d#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "0ec7f0c39e67aebe0a78f37f655b58e1fdf2305b0b74a2262b83e30ea966254a#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "f9887ecbc5dcea61451d613a846b34f54aab556c107a570ee3c3f8119f0f250f#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "f4f0f278a30dcd291acec911dd47af5120a1b7a6bf81e1d4f7c1c5cd7ffd07eb#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "2d34fddaefe2c7ba11c59cfa8f61770accc40836afdd4aff78dd8bd045a82429#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "2f30a185f7393ca994bb6462ecc1a0d39c522fc89964dc39a6d1aaf011c05fec#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.4003,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "61db8eb855c2a718e98b16cde7c00bf642ed7d6fe6c4f6b5aa2b8926eed46fe5#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.0459,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.0459,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.0459,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "336395"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "b063143f28bd3efdb735cf5ffc1d74c83c47fd3dcf0293be077264dbf74099b2#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "da5a8ab5c952e651913492e9e86f18eb6356f177957e463fc2e18bc1e6df531e#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "11d16c1054fb144a4b45523d29b8055e15a35ed875b4176b2b46a7bf9944da76#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "1916734c0e64e6beefb3b5d07d56e1e5ce7d756a3514d92c745409dcffccf1c3#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "d8ad1f2da4ba9abaeb668d6cfd5452bfeff14979a13d618e57acf1a4dc69e155#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "c895eb678ecd5017a88b892f1fa633e2dac03dd5569c21717087156e98da8f90#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "60336ec8adac246667b83a47b3933e3502b87395e83bbfc561dcb66ff1090141#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "645c157eb7b5b0eabde69ae1098dffe9bddde74923bd7371b4efe8b91e195248#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "9f84d9feb627a6be4cc0fae39130e5a3b367a62d837bbd4ed140cfcf63d87fbb#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "fcdcb359f03eac4036c1a532e6ec5ca8780b4538b6aed3ad2fe3ccfcd03eced5#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "c2babc4c3902e7f7ef3a1d8904f684be5cd7fd4c7f214221f58ca77912c48415#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "0a1ab7b8dcf720cdc75da34a4c6a4b5ef1543df4e432f4ce5420901e99da6d0f#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "dc42c2eefc2291bc77156e3aeb75e43cf724b99b4524bdc97703d845f7c287e4#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "525c42547bc1b87c25465999e00242876fe76aa396fc8d44365da7f2cd03278f#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "de64f48450090894376f0eb2c613f7d4c7ff06c751de6c5e54f91ad49bd40446#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "f4e2bbd858f1d95f31713fe32ff16514213ed5e7012cf10e5627de9095672411#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "1cf20947013faef95aa400782306129e49b4f6bc148680618a91a920ecd3153b#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a7e74f9ba668302a6d1be7c6518ca15487c95c6b22d2104e6b26e86654d84475#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "eb647821e680c7d81f7defae0e33f9c92494c2239a05a71d86162121cf770e72#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "ceadd121065329f4e2fcddd1506ca4648b459a2676d9f91d6fc67a34796d1456#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a6c6e7299db193cb8e14adc586b692f1c8000c71a973ff095660fdc70b011329#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "a9e9dd4d15f47adf5ddfc105ed5e953f144c57469b0a5071d03866fdb0c201a2#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "2791df6e9a105c2a2a4d7d57e10326ca81545b8b584b0510c0f9a5f1bc1a431c#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "bc4328fc861bbe2629575305b879cecc6cff2eded596f46806ad74ff5dc14c9b#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "ba8684c65aa46b79a9a2e7a1f0014950846412897610c13e254076573a7e0bf8#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "129be5fabfa1e0e285cc01570f38a329d3b85ffd8a391840218e8063c4633beb#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "25260378c84dc2d960afc8c6e0740a2c7eaeca410df1940ebd63f5aa12bce446#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "07bcc445ff653112bda87acae5a9a1dd4736653892bf2f3873b8c14cefa2eb4c#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "4157dc1697f44617644d7fc518e9ba798c1198cd1e4b0478e3b7862e01e67865#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "bfc0fab703e104b5286f14083e50b0fdafe0eefa55f6d1294218cb0bded49a27#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "451f11e6a2f99e08990c636e88815d561cc86a1eb90dcd4a6e7fa3c914f7fa6f#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "588575735b068b58231349fb6bb2b4a77c2a1300afdc2fc0e303b410bb7bda63#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "26a5a173116a6e8224c11a8a5557a06e14d12e77c0bbdabb7400126d620913a8#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "1dfee2d9ab3b8cf10473591167980f37e7477bccd777f2a35706ab5a172d0d1d#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "96128cb9f765d1ce36241d9813236c3f4c636be5a0155809d9926f93178fe8ca#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "d9a20ee0bd5d23572179e96e3d819246d904b2ffd5a523d563f97104f5f07cde#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "c0742fc16f41add7d877422ffd401cdc11d573c796f945e453a82d8ed1b0e58b#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.8851,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7001,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "03ee633f3551ca9ea21f4090af99291d4d68890fddb034f9c5f387840b8456c1#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "97cf0361d4910d610e36928350b00c4b4967532e2da4e450a527399083b5dca7#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": 0.8851,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7001,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.372,
+          "feasible": true
+        }
+      ],
+      "pathATopUp": {},
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    },
+    {
+      "ref": "02ce18bf214e2a12af4073edaee4af9e15001cd5aa24815cd968985833c98778#0",
+      "units": 2,
+      "bandB": [
+        {
+          "h": 7,
+          "max": 0.9351,
+          "feasible": true
+        },
+        {
+          "h": 30,
+          "max": 0.7501,
+          "feasible": true
+        },
+        {
+          "h": 90,
+          "max": 0.422,
+          "feasible": true
+        }
+      ],
+      "bandA": [
+        {
+          "h": 7,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 30,
+          "max": -0.05,
+          "feasible": false
+        },
+        {
+          "h": 90,
+          "max": -0.05,
+          "feasible": false
+        }
+      ],
+      "pathATopUp": {
+        "lovelace": "201492"
+      },
+      "engine": {
+        "sellerCanConcedeNow": true,
+        "afterConcession": {
+          "buyerCanExit": true,
+          "adminCanArbitrate": false,
+          "sellerCanAnything": false
+        }
+      }
+    }
+  ]
+}
