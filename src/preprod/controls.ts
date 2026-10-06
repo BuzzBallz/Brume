@@ -4,6 +4,7 @@
 import { randomBytes } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import type { UTxO } from '@meshsdk/core'
 import type { Redeemer, Role, TxLogEntry, Value } from '../../shared/types.ts'
 import { FEE_ADDRESS, PARAMS, SCRIPT_HASH, TUSDM as TUSDM_UNIT } from '../../shared/constants.ts'
 import { AmbiguousSubmit, liveUtxos, preprodSubmitter, SubmitTransportError } from './chain.ts'
@@ -12,10 +13,16 @@ import { buildEscrowSpend } from './escrow.ts'
 import { lockEscrows } from './bankops.ts'
 import { ROOT } from './env.ts'
 import { escrowAt, lovelace, pureAda, refOf } from './fixture.ts'
-import { bech32Of, upsertTxLog, SettleError } from './settle.ts'
+import { bech32Of, reservedUtxos, upsertTxLog, SettleError } from './settle.ts'
 import { addWitness, confirmTx, cooldownFrom, submitAndConfirm, submitOnly, txWindow, type TxWindow } from './tx.ts'
 import { party } from './wallet.ts'
-import { reach } from '../engine/reach.ts'
+import { reach, WINDOW_AFTER_MS, WINDOW_BEFORE_MS } from '../engine/reach.ts'
+
+// Never a UTxO an in-flight proposal's legs need (D13 across proposals): the reservation outlives the 15 min spent ledger.
+const free = (us: UTxO[]): UTxO[] => {
+  const reserved = reservedUtxos()
+  return us.filter((u) => !reserved.has(refOf(u)))
+}
 
 // Enough for the V1 script to run to its failure; the fee is paid on it, and nothing is charged if the node refuses.
 const TRY_BUDGET = { mem: 6_000_000, steps: 2_500_000_000 }
@@ -87,11 +94,13 @@ export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Rol
   const p = await party(role)
   if (d[role].payment.hash !== p.pkh) throw new SettleError(`This ${role} key is not the escrow's ${role}.`)
 
-  const utxos = await liveUtxos(p.address)
+  const utxos = free(await liveUtxos(p.address))
   const collateral = pureAda(utxos).find((u) => lovelace(u) >= 5_000_000n)
   const funding = pureAda(utxos).find((u) => collateral && refOf(u) !== refOf(collateral) && lovelace(u) >= 5_000_000n)
   if (!collateral || !funding) throw new SettleError(`The ${role} needs two pure-ADA UTxOs of at least 5 tADA.`)
-  const window = txWindow(now)
+  // The tx's window is the engine's own envelope (±152 s, nudged outward to whole slots), never narrower: a time guard
+  // the engine says fails on that envelope also fails on this window, so a predicted refusal is not undone by 2 s.
+  const window = txWindow(now, WINDOW_BEFORE_MS, WINDOW_AFTER_MS)
   const patch = continuationFor(redeemer, raw, window)
   const built = await buildEscrowSpend({
     network: 'preprod', window, escrow, redeemer, signers: [p], funding: [funding], collateral, unevaluated: TRY_BUDGET,
@@ -132,7 +141,7 @@ async function concedeAlone(ref: string, logAs: string, minimalCooldown = false)
   const seller = await party('seller')
   const escrow = await escrowAt(ref)
   const raw = escrow.output.plutusData as string
-  const utxos = pureAda(await liveUtxos(seller.address)).filter((u) => lovelace(u) >= 5_000_000n)
+  const utxos = pureAda(free(await liveUtxos(seller.address))).filter((u) => lovelace(u) >= 5_000_000n)
   if (utxos.length < 2) throw new SettleError('The seller needs two pure-ADA UTxOs of at least 5 tADA.')
   const window = txWindow(Date.now())
   const built = await buildEscrowSpend({
@@ -155,7 +164,7 @@ async function concedeAlone(ref: string, logAs: string, minimalCooldown = false)
 async function buyerExit(ref: string, logAs: string): Promise<TxLogEntry> {
   const buyer = await party('buyer')
   const escrow = await escrowAt(ref)
-  const utxos = pureAda(await liveUtxos(buyer.address)).filter((u) => lovelace(u) >= 5_000_000n)
+  const utxos = pureAda(free(await liveUtxos(buyer.address))).filter((u) => lovelace(u) >= 5_000_000n)
   if (utxos.length < 2) throw new SettleError('The buyer needs two pure-ADA UTxOs of at least 5 tADA.')
   const built = await buildEscrowSpend({
     network: 'preprod', window: txWindow(Date.now()), escrow, redeemer: 'WithdrawRefund', signers: [buyer], funding: [utxos[0]], collateral: utxos[1],
@@ -229,7 +238,7 @@ async function withdrawOpen(logAs: string): Promise<TxLogEntry> {
   const d = readDatum(escrow.output.plutusData as string)
   const cell = reach(d, Object.fromEntries(escrow.output.amount.map((a) => [a.unit, a.quantity])), Date.now(), PARAMS, refs[0]).verdicts.find((v) => v.redeemer === 'Withdraw' && v.role === 'seller')
   if (!cell?.allowed) throw new SettleError(`the engine does not predict Withdraw open here: ${cell?.failed.join('; ')}`)
-  const utxos = pureAda(await liveUtxos(seller.address)).filter((u) => lovelace(u) >= 5_000_000n)
+  const utxos = pureAda(free(await liveUtxos(seller.address))).filter((u) => lovelace(u) >= 5_000_000n)
   const built = await buildEscrowSpend({
     network: 'preprod', window: txWindow(Date.now()), escrow, redeemer: 'Withdraw', signers: [seller], funding: [utxos[0]], collateral: utxos[1],
     outputs: withdrawOutputs(escrow, d, seller.address), changeAddress: seller.address,

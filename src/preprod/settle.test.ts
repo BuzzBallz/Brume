@@ -401,12 +401,12 @@ test('witness: an expired proposal is refused before any key is read', async () 
 })
 
 test('lock: a dead owner\'s or an expired lock is stale; a live one blocks, with its owner named', async () => {
-  const { lock, isStale, LOCK_MAX_AGE_MS } = await import('./settle.ts')
+  const { lock, isStale, LOCK_STALE_MS } = await import('./settle.ts')
   const { hostname } = await import('node:os')
   const now = Date.now()
   assert.equal(isStale({ pid: process.pid, host: hostname(), atMs: now }, now), false) // this process: alive
   assert.equal(isStale({ pid: 2 ** 22 + 12345, host: hostname(), atMs: now }, now), true) // no such process
-  assert.equal(isStale({ pid: process.pid, host: 'another-host', atMs: now - LOCK_MAX_AGE_MS - 1 }, now), true) // too old
+  assert.equal(isStale({ pid: process.pid, host: 'another-host', atMs: now - LOCK_STALE_MS - 1 }, now), true) // not refreshed for 2 min, whatever the pid
   assert.equal(isStale({ pid: 1, host: 'another-host', atMs: now }, now), false) // another host, recent: respected
   assert.equal(isStale(null, now), true)
   const ref = 'ee'.repeat(32) + '#9'
@@ -415,4 +415,51 @@ test('lock: a dead owner\'s or an expired lock is stale; a live one blocks, with
   release()
   const again = lock(ref) // released: free again
   again()
+})
+
+test('upsertTxLog: a pending acceptance gives way to a front-run, an expiry alert or a phase-2 failure; a tx in a block is final', async () => {
+  const { upsertTxLog, txLogFile } = await import('./settle.ts')
+  const { rmSync } = await import('node:fs')
+  const ref = 'fd'.repeat(32) + '#7'
+  const base = { step: 'WithdrawRefund (leg 2, pre-signed)', network: 'preprod' as const, scriptHash: '', txHash: 'ab'.repeat(32), atMs: 1, expected: 'accept' as const }
+  const block = { height: 1, hash: 'cd'.repeat(32), slot: 1 }
+  try {
+    upsertTxLog(ref, { ...base, status: 'accepted', stage: 'submit', error: 'sending; retried until it lands or expires' })
+    const fr = upsertTxLog(ref, { ...base, status: 'refused', stage: 'submit', error: 'FRONT-RUN: leg 1\'s escrow output was spent by x' })
+    assert.equal(fr.status, 'refused') // returned as written, so landLeg2 stops on it
+    upsertTxLog(ref, { ...base, status: 'accepted', stage: 'submit', error: 'sending' })
+    upsertTxLog(ref, { ...base, status: 'refused', stage: 'submit', error: 'ALERT: leg 2 not in a block before it expired' })
+    upsertTxLog(ref, { ...base, status: 'accepted', stage: 'submit', error: 'sending' })
+    const p2 = upsertTxLog(ref, { ...base, status: 'refused', stage: 'confirm', block, refusal: { phase: 2, ledgerError: 'valid_contract=false (collateral consumed)' } })
+    assert.equal(p2.status, 'refused')
+    upsertTxLog(ref, { ...base, status: 'accepted', stage: 'confirm', block })
+    const kept = upsertTxLog(ref, { ...base, status: 'refused', stage: 'submit', error: 'All inputs are spent' }) // a resubmission
+    assert.equal(kept.status, 'accepted')
+    assert.equal(upsertTxLog(ref, { ...base, status: 'accepted', stage: 'submit', error: 'sending' }).block?.height, 1) // no downgrade to a marker
+    const rb = upsertTxLog(ref, { ...base, status: 'accepted', stage: 'confirm', block, readback: { provider: 'koios', validContract: true } })
+    assert.equal(rb.readback?.provider, 'koios') // a confirmed entry is still enriched
+    const log = JSON.parse(readFileSync(txLogFile(ref), 'utf8')) as unknown[]
+    assert.equal(log.length, 1)
+  } finally {
+    rmSync(txLogFile(ref), { force: true })
+  }
+})
+
+test('lock: a dead owner\'s lock is taken over; release never removes a lock another process holds', async () => {
+  const { lock } = await import('./settle.ts')
+  const { hostname } = await import('node:os')
+  const { writeFileSync, rmSync } = await import('node:fs')
+  const ref = 'fe'.repeat(32) + '#3'
+  const file = join(ROOT, 'out', 'seller', `${ref.replace('#', '_')}.lock`)
+  try {
+    writeFileSync(file, JSON.stringify({ pid: 2 ** 22 + 4321, host: hostname(), atMs: Date.now(), id: 'dead' }))
+    const release = lock(ref) // the dead owner's lock is moved aside and replaced
+    assert.notEqual((JSON.parse(readFileSync(file, 'utf8')) as { id: string }).id, 'dead')
+    writeFileSync(file, JSON.stringify({ pid: process.pid, host: 'another-host', atMs: Date.now(), id: 'other' }))
+    release() // not ours any more: left in place
+    assert.equal((JSON.parse(readFileSync(file, 'utf8')) as { id: string }).id, 'other')
+    assert.throws(() => lock(ref), /already running \(process \d+ on another-host/)
+  } finally {
+    rmSync(file, { force: true })
+  }
 })

@@ -6,6 +6,7 @@
 // Files: out/proposals/<hash>_<index>.json is the proposal the parties pass around (never a signed leg 1);
 // out/seller/<hash>_<index>.json is the seller's own record (what it built), never shared;
 // fixtures/preprod/txlog-<hash>_<index>.json is the run log, one entry per (step, tx), updated pending → confirmed.
+import { randomBytes } from 'node:crypto'
 import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { hostname } from 'node:os'
 import { join } from 'node:path'
@@ -37,14 +38,15 @@ const writeJson = (file: string, v: unknown): void => {
 }
 const sgt = (ms: number): string => new Date(ms + 8 * 3_600_000).toISOString().slice(11, 19) + ' SGT'
 
-// One entry per (step, txHash): a pending entry is replaced by its confirmation, never duplicated. An entry the chain
-// accepted is never downgraded by a later refusal of the same tx (a resubmission of a tx already in the mempool or a block
-// is refused for its spent inputs). Written to a temp file then renamed, so a reader never sees half a log.
+// One entry per (step, txHash): a pending entry is replaced by its confirmation, never duplicated. A tx in a block is
+// final for its entry: nothing without a block (a resubmission refused for its spent inputs, a "sending" marker) replaces
+// it. Anything else replaces what was there, so a pending acceptance gives way to every definite outcome: a front-run, an
+// expiry alert, a phase-2 failure on chain. Written to a temp file then renamed, so a reader never sees half a log.
 export function upsertTxLog(escrowRef: string, entry: TxLogEntry): TxLogEntry {
   const file = txLogFile(escrowRef)
   const log: TxLogEntry[] = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : []
   const i = log.findIndex((e) => e.step === entry.step && e.txHash === entry.txHash)
-  if (i >= 0 && log[i].status === 'accepted' && entry.status === 'refused' && entry.expected !== 'refuse') return log[i]
+  if (i >= 0 && log[i].block && !entry.block) return log[i]
   if (i >= 0) log[i] = entry
   else log.push(entry)
   mkdirSync(join(file, '..'), { recursive: true })
@@ -99,16 +101,31 @@ export function splitPot(amount: Asset[], share: number): { buyer: Asset[]; sell
 }
 const toValue = (assets: Asset[]): Value => Object.fromEntries(assets.map((a) => [a.unit, a.quantity]))
 
-type SellerRecord = { escrowRef: string; leg1Hash: string; leg2Hash: string; leg2Funding: string[]; leg1Funding?: string[]; buyerPkh?: string /* read from the chain datum at prepare() */; leg1Seller?: string /* CIP-30 witness set, kept here only */ }
+type SellerRecord = { escrowRef: string; leg1Hash: string; leg2Hash: string; leg2Funding: string[]; leg1Funding?: string[]; buyerPkh?: string /* read from the chain datum at prepare() */; pot?: Asset[] /* the escrow's value on chain at prepare() */; leg1Seller?: string /* CIP-30 witness set, kept here only */ }
 
 export async function prepare(escrowRef: string, sellerShare: number): Promise<Proposal> {
+  const release = lock(escrowRef) // never rewrites the seller record while a send of this escrow reads it
+  try {
+    return await prepareLocked(escrowRef, sellerShare)
+  } finally {
+    release()
+  }
+}
+async function prepareLocked(escrowRef: string, sellerShare: number): Promise<Proposal> {
   const seller = await party('seller')
   const escrow = await escrowAt(escrowRef)
   const raw = escrow.output.plutusData as string
   const d = readDatum(raw)
   if (d.state !== 'Disputed' || !d.resultHash) throw new SettleError(`This escrow is ${d.state}: the seller-first exit starts from Disputed with a result.`)
   if (d.seller.payment.hash !== seller.pkh) throw new SettleError('This seller key is not the escrow\'s seller.')
-  if (existsSync(pendingFile(escrowRef))) throw new SettleError(`A concession for this escrow is already in flight: pnpm sign --resend ${escrowRef}`)
+  if (existsSync(pendingFile(escrowRef))) {
+    const pending = JSON.parse(readFileSync(pendingFile(escrowRef), 'utf8')) as { leg1: string; leg2ValidToMs: number }
+    if (Date.now() <= pending.leg2ValidToMs) throw new SettleError(`A concession for this escrow is already in flight: pnpm sign --resend ${escrowRef}`)
+    // Both legs have expired. A leg 1 that never reached a block exposed nothing: the record is cleared and the escrow,
+    // still Disputed, can be prepared again. One in a block is a concession whose exit did not land: never cleared.
+    if (await blockfrostGet(`/txs/${pending.leg1}`)) throw new SettleError('An earlier concession of this escrow is on chain and its exit expired unlanded: see its log.')
+    rmSync(pendingFile(escrowRef), { force: true })
+  }
   const reserved = reservedUtxos(escrowRef)
   const sellerUtxos = pureAda(await liveUtxos(seller.address)).filter((u) => lovelace(u) >= 5_000_000n && !reserved.has(`${u.input.txHash}#${u.input.outputIndex}`))
   if (sellerUtxos.length < 2) throw new SettleError('The seller needs two separate pure-ADA UTxOs of at least 5 tADA: leg 1 never spends leg 2\'s.')
@@ -144,7 +161,7 @@ export async function prepare(escrowRef: string, sellerShare: number): Promise<P
     signedBy: [],
   }
   // A new prepare replaces the previous proposal for this escrow (new hashes, signatures reset).
-  writeJson(sellerRecordFile(escrowRef), { escrowRef, leg1Hash: leg1.txHash, leg2Hash: leg2.txHash, leg2Funding: [`${s2.input.txHash}#${s2.input.outputIndex}`], leg1Funding: [`${s1.input.txHash}#${s1.input.outputIndex}`], buyerPkh: d.buyer.payment.hash } satisfies SellerRecord)
+  writeJson(sellerRecordFile(escrowRef), { escrowRef, leg1Hash: leg1.txHash, leg2Hash: leg2.txHash, leg2Funding: [`${s2.input.txHash}#${s2.input.outputIndex}`], leg1Funding: [`${s1.input.txHash}#${s1.input.outputIndex}`], buyerPkh: d.buyer.payment.hash, pot: escrow.output.amount } satisfies SellerRecord)
   writeJson(proposalFile(escrowRef), proposal)
   return proposal
 }
@@ -156,6 +173,7 @@ export async function sign(role: Role, proposal: Proposal): Promise<Proposal> {
   if (Date.now() > (proposal.leg1?.validToMs ?? 0)) throw new SettleError(`Leg 1 expired at ${sgt(proposal.leg1?.validToMs ?? 0)}: prepare again.`)
   const buyer = await party('buyer')
   if (buyer.pkh !== proposalPkh(proposal, 'buyer')) throw new SettleError('This key is not the buyer\'s for leg 2.')
+  await checkForBuyer(proposal)
   const signed = await addWitness({ cborHex: proposal.leg2.cborHex, txHash: proposal.leg2.txHash }, buyer)
   return { ...proposal, leg2: { ...proposal.leg2, cborHex: signed.cborHex }, signedBy: [...new Set<Role>([...proposal.signedBy, 'buyer'])] }
 }
@@ -218,6 +236,10 @@ export async function checkBeforeConcession(proposal: Proposal, record: SellerRe
   if (mesh.resolveTxHash(leg1.cborHex) !== record.leg1Hash || mesh.resolveTxHash(leg2.cborHex) !== record.leg2Hash) throw new SettleError('A leg\'s body was changed after it was prepared.')
   if (!hasValidWitness(leg2.cborHex, record.buyerPkh ?? proposalPkh(proposal, 'buyer'))) throw new SettleError('Leg 2 must be signed by the buyer before the seller signs leg 1.')
   if (!refs(leg2.cborHex, 'inputs').includes(`${leg1.txHash}#0`)) throw new SettleError('Leg 2 does not spend leg 1\'s escrow output.')
+  // Leg 2 was evaluated against an assumed leg-1 output: leg 1's real output 0 must be that, the whole pot (read from the
+  // chain at prepare) kept at the script.
+  const out0 = cst.deserializeTx(leg1.cborHex).body().outputs()[0]
+  if (out0?.address().toBech32() !== V1_ADDRESS.preprod || (record.pot && !sameAssets(valueOf(out0), record.pot))) throw new SettleError('Leg 1 does not keep the whole pot at the escrow: prepare again.')
   const t1 = ttlMs(leg1.cborHex), t2 = ttlMs(leg2.cborHex)
   if (t1 - nowMs < MIN) throw new SettleError(`Leg 1 expired at ${sgt(t1)}: prepare again.`)
   if (t2 - t1 < CONFIRM_MARGIN_MS) throw new SettleError('Leg 2 must stay valid well after leg 1: prepare again.')
@@ -231,6 +253,68 @@ export async function checkBeforeConcession(proposal: Proposal, record: SellerRe
     if (i.address !== sellerAddress) throw new SettleError('Leg 2 must be funded by the seller alone.')
   }
   for (const r of leg1In) if (!info.get(r) || info.get(r)?.spent) throw new SettleError('An input of leg 1 is already spent: prepare again.')
+}
+
+// A body output's value as assets, and two asset lists compared unit by unit.
+function valueOf(o: ReturnType<ReturnType<ReturnType<typeof cst.deserializeTx>['body']>['outputs']>[number]): Asset[] {
+  const v = o.amount().toCore()
+  const out: Asset[] = [{ unit: 'lovelace', quantity: v.coins.toString() }]
+  for (const [unit, q] of v.assets ?? new Map()) out.push({ unit: String(unit), quantity: q.toString() })
+  return out
+}
+const assetMap = (a: Asset[]): Map<string, bigint> => {
+  const m = new Map<string, bigint>()
+  for (const x of a) m.set(x.unit, (m.get(x.unit) ?? 0n) + BigInt(x.quantity))
+  return m
+}
+function sameAssets(a: Asset[], b: Asset[]): boolean {
+  const [x, y] = [assetMap(a), assetMap(b)]
+  return [...new Set([...x.keys(), ...y.keys()])].every((u) => (x.get(u) ?? 0n) === (y.get(u) ?? 0n))
+}
+
+// What the buyer signs (file drop: sign(); the agent calls it before offering a CIP-30 signature). A proposal is the
+// seller's file: only the two bodies count, read against the chain. Leg 1 must be the concession of THIS escrow as the
+// chain holds it (state RefundRequested, the whole pot kept at the script); leg 2 must spend leg 1's output 0 and nothing
+// under the buyer's payment key, and pay the buyer's key at least the agreed part of every asset, the part the share
+// gives on the pot read from the chain.
+export async function checkForBuyer(proposal: Proposal): Promise<void> {
+  const { leg1, leg2 } = proposal
+  if (!leg1 || !leg2) throw new SettleError('This proposal is missing a leg.')
+  const leg1Hash = mesh.resolveTxHash(leg1.cborHex)
+  if (leg1Hash !== leg1.txHash || mesh.resolveTxHash(leg2.cborHex) !== leg2.txHash) throw new SettleError('A leg\'s hash does not match its body.')
+  const escrow = await escrowAt(proposal.escrowRef)
+  const d = readDatum(escrow.output.plutusData as string)
+  if (d.state !== 'Disputed') throw new SettleError(`This escrow is ${d.state}, not Disputed: nothing to sign.`)
+  const buyerKey = d.buyer.payment.hash
+  const body1 = cst.deserializeTx(leg1.cborHex).body()
+  if (!refs(leg1.cborHex, 'inputs').includes(proposal.escrowRef)) throw new SettleError('Leg 1 does not spend this escrow.')
+  const out0 = body1.outputs()[0]
+  const cont = out0?.datum()?.asInlineData()?.toCbor()
+  if (!out0 || !cont || out0.address().toBech32() !== V1_ADDRESS.preprod || !sameAssets(valueOf(out0), escrow.output.amount)) throw new SettleError('Leg 1 does not keep the whole pot at the escrow.')
+  const c = readDatum(cont)
+  if (c.state !== 'RefundRequested' || c.resultHash !== '' || c.buyer.payment.hash !== buyerKey || c.seller.payment.hash !== d.seller.payment.hash) throw new SettleError('Leg 1 is not this escrow\'s concession.')
+  const own = [...refs(leg2.cborHex, 'inputs'), ...refs(leg2.cborHex, 'collateral')].filter((r) => r !== `${leg1Hash}#0`)
+  if (own.length === refs(leg2.cborHex, 'inputs').length + refs(leg2.cborHex, 'collateral').length) throw new SettleError('Leg 2 does not spend leg 1\'s escrow output.')
+  const info = await utxoInfo(own)
+  for (const r of own) {
+    const i = info.get(r)
+    if (!i) throw new SettleError('An input of leg 2 cannot be read on chain: not signing it.')
+    if (mesh.deserializeAddress(i.address).pubKeyHash === buyerKey) throw new SettleError('Leg 2 spends one of the buyer\'s own UTxOs: not signing it.')
+  }
+  const want = assetMap(splitPot(escrow.output.amount, proposal.sellerShare).buyer)
+  const stated = assetMap(Object.entries(proposal.payout.buyer).map(([unit, quantity]) => ({ unit, quantity })))
+  if (![...new Set([...want.keys(), ...stated.keys()])].every((u) => (want.get(u) ?? 0n) === (stated.get(u) ?? 0n))) throw new SettleError('The stated payout is not the share applied to the pot.')
+  const paid = new Map<string, bigint>()
+  for (const o of cst.deserializeTx(leg2.cborHex).body().outputs()) {
+    let key: string | undefined
+    try {
+      key = mesh.deserializeAddress(o.address().toBech32()).pubKeyHash
+    } catch {
+      key = undefined
+    }
+    if (key === buyerKey) for (const a of valueOf(o)) paid.set(a.unit, (paid.get(a.unit) ?? 0n) + BigInt(a.quantity))
+  }
+  for (const [unit, q] of want) if ((paid.get(unit) ?? 0n) < q) throw new SettleError(`Leg 2 pays the buyer less than the agreed ${q} of ${unit === 'lovelace' ? 'lovelace' : unit.slice(0, 12) + '…'}: not signing it.`)
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -253,8 +337,9 @@ async function leg1Spender(leg1Hash: string): Promise<'unspent' | 'unknown' | st
 }
 
 // One pass of sending leg 2 until an endpoint takes it. Every read here can fail: a failure is a hole, retried, never
-// a reason to stop driving the exit once the concession may be live.
-async function driveLeg2(escrowRef: string, leg1Hash: string, leg2: Built, validToMs: number): Promise<TxLogEntry> {
+// a reason to stop driving the exit once the concession may be live. carriedBy: the endpoint that took the bytes (not
+// one that later refused a resubmission), so the read-back runs on the other one.
+async function driveLeg2(escrowRef: string, leg1Hash: string, leg2: Built, validToMs: number): Promise<{ entry: TxLogEntry; carriedBy?: Submitter['via'] }> {
   const subs = submitters()
   let last = ''
   for (let attempt = 0; Date.now() < validToMs - MIN; attempt++) {
@@ -262,13 +347,15 @@ async function driveLeg2(escrowRef: string, leg1Hash: string, leg2: Built, valid
     const base = { ...leg2Base(leg2.txHash, s.via), atMs: Date.now() }
     try {
       const r = await submitOnly(leg2, s, base)
-      if (!r) return { ...base, status: 'accepted', stage: 'submit', error: 'submitted, not in a block yet: pending' }
+      if (!r) return { entry: { ...base, status: 'accepted', stage: 'submit', error: 'submitted, not in a block yet: pending' }, carriedBy: s.via }
       const text = r.refusal?.ledgerError ?? ''
-      if (await blockfrostGet(`/txs/${leg2.txHash}`)) return { ...base, status: 'accepted', stage: 'submit', error: 'already in a block' }
+      if (await blockfrostGet(`/txs/${leg2.txHash}`)) return { entry: { ...base, status: 'accepted', stage: 'submit', error: 'already in a block' } }
       const spender = await leg1Spender(leg1Hash)
-      if (spender === leg2.txHash) return { ...base, status: 'accepted', stage: 'submit', error: 'leg 1 output spent by leg 2: pending its block' }
+      if (spender === leg2.txHash) return { entry: { ...base, status: 'accepted', stage: 'submit', error: 'leg 1 output spent by leg 2: pending its block' } }
       if (spender !== 'unspent' && spender !== 'unknown') {
-        return upsertTxLog(escrowRef, { ...r, error: `FRONT-RUN: leg 1's escrow output was spent by ${spender}, not by leg 2.` })
+        const frontRun: TxLogEntry = { ...r, error: `FRONT-RUN: leg 1's escrow output was spent by ${spender}, not by leg 2.` }
+        upsertTxLog(escrowRef, frontRun)
+        return { entry: frontRun }
       }
       if (/BadInputsUTxO|All inputs are spent|UnknownInput/i.test(text)) {
         last = 'leg 1 output not visible on that node yet'
@@ -278,22 +365,25 @@ async function driveLeg2(escrowRef: string, leg1Hash: string, leg2: Built, valid
         upsertTxLog(escrowRef, { ...base, status: 'accepted', stage: 'submit', error: `retrying; ALERT: leg 2 refused once: ${last}` })
       }
     } catch (error: unknown) {
-      if (error instanceof TxRuleError) throw error // a bug in our own build, not a hole
+      // Every failure here is a hole, including an endpoint answering 200 with another hash (TxRuleError from
+      // submitOnly): the bytes may be live, so leg 2 keeps being driven.
       last = error instanceof Error ? error.message.slice(0, 200) : String(error)
     }
     await sleep(5_000)
   }
-  return upsertTxLog(escrowRef, { ...leg2Base(leg2.txHash), status: 'refused', stage: 'submit', error: `ALERT: leg 2 not accepted before it expired (${sgt(validToMs)}); last: ${last}` })
+  return { entry: upsertTxLog(escrowRef, { ...leg2Base(leg2.txHash), status: 'refused', stage: 'submit', error: `ALERT: leg 2 not accepted before it expired (${sgt(validToMs)}); last: ${last}` }) }
 }
 
 // Leg 2 is resent until it is in a block or expires: a mempool acceptance can still be dropped.
 async function landLeg2(escrowRef: string, leg1Hash: string, leg2: Built, validToMs: number): Promise<TxLogEntry> {
   upsertTxLog(escrowRef, { ...leg2Base(leg2.txHash), status: 'accepted', stage: 'submit', error: 'sending; retried until it lands or expires' })
+  let carrier: Submitter['via'] | undefined
   while (Date.now() < validToMs - MIN) {
-    const r = await driveLeg2(escrowRef, leg1Hash, leg2, validToMs)
+    const { entry: r, carriedBy } = await driveLeg2(escrowRef, leg1Hash, leg2, validToMs)
     if (r.status !== 'accepted') return r
-    upsertTxLog(escrowRef, r)
-    const c = await confirmTx({ ...leg2Base(leg2.txHash, r.via), atMs: r.atMs }, 120_000)
+    carrier ??= carriedBy
+    upsertTxLog(escrowRef, { ...r, via: carrier ?? r.via })
+    const c = await confirmTx({ ...leg2Base(leg2.txHash, carrier ?? r.via), atMs: r.atMs }, 120_000)
     if (c.block) return upsertTxLog(escrowRef, { ...c, redeemer: 'WithdrawRefund', role: 'buyer', expected: 'accept' })
   }
   return upsertTxLog(escrowRef, { ...leg2Base(leg2.txHash), status: 'refused', stage: 'submit', error: `ALERT: leg 2 not in a block before it expired (${sgt(validToMs)})` })
@@ -347,11 +437,14 @@ async function withReadback(escrowRef: string, confirmed: TxLogEntry, parties: (
   return confirmed
 }
 
-// One settlement per escrow at a time: an exclusive lock file, released on every exit path.
-// The lock names its owner (pid, host, time). A lock whose process is gone (same host), or older than the longest a
-// settlement can run (leg 2's whole window, any host), is stale: an agent that died mid-send must not block its escrow.
-export const LOCK_MAX_AGE_MS = LEG1_WINDOW_MS + LEG2_AFTER_LEG1_MS + 10 * MIN
-type LockOwner = { pid: number; host: string; atMs: number }
+// One settlement per escrow at a time: an exclusive lock file, released on every exit path, taken by prepare() and by
+// every send. The lock names its owner (pid, host, a random id) and the owner refreshes its time every 20 s while it
+// holds it. A lock is stale when its process is gone (same host) or when it has not been refreshed for 2 min (any
+// host; a pid can be reused on Windows, so the refresh, not the pid, decides): an agent that died mid-send blocks its
+// escrow for 2 min at most, well inside leg 2's window, and --resend can then take over.
+export const LOCK_HEARTBEAT_MS = 20_000
+export const LOCK_STALE_MS = 2 * MIN
+type LockOwner = { pid: number; host: string; atMs: number; id?: string }
 const alive = (pid: number): boolean => {
   try {
     process.kill(pid, 0) // signal 0: existence check only
@@ -361,38 +454,58 @@ const alive = (pid: number): boolean => {
   }
 }
 export function isStale(owner: LockOwner | null, nowMs = Date.now(), host = hostname()): boolean {
-  if (!owner || typeof owner.pid !== 'number') return true // unreadable or pre-pid lock: no owner to wait for
-  if (nowMs - owner.atMs > LOCK_MAX_AGE_MS) return true
+  if (!owner || typeof owner.pid !== 'number' || typeof owner.atMs !== 'number') return true // unreadable: no owner to wait for
+  if (nowMs - owner.atMs > LOCK_STALE_MS) return true
   return owner.host === host && !alive(owner.pid)
+}
+const readOwner = (file: string): LockOwner | null => {
+  try {
+    return JSON.parse(readFileSync(file, 'utf8')) as LockOwner
+  } catch {
+    return null
+  }
 }
 export function lock(escrowRef: string): () => void {
   mkdirSync(sellerDir(), { recursive: true })
   const file = join(sellerDir(), `${slug(escrowRef)}.lock`)
-  const me: LockOwner = { pid: process.pid, host: hostname(), atMs: Date.now() }
+  const me: LockOwner = { pid: process.pid, host: hostname(), atMs: Date.now(), id: randomBytes(8).toString('hex') }
+  const mine = (o: LockOwner | null): boolean => !!o && o.id === me.id
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const fd = openSync(file, 'wx')
       writeFileSync(fd, JSON.stringify(me))
       closeSync(fd)
+      // The refresh: rewritten whole (temp file, then rename) and only while the lock is still ours.
+      const beat = setInterval(() => {
+        if (!mine(readOwner(file))) return clearInterval(beat)
+        writeFileSync(`${file}.${me.id}`, JSON.stringify({ ...me, atMs: Date.now() }))
+        renameSync(`${file}.${me.id}`, file)
+      }, LOCK_HEARTBEAT_MS)
+      beat.unref()
       // Released only by its owner: never removes a lock another process has since taken over.
       return () => {
-        try {
-          const now = JSON.parse(readFileSync(file, 'utf8')) as LockOwner
-          if (now.pid === me.pid && now.host === me.host && now.atMs === me.atMs) rmSync(file, { force: true })
-        } catch {
-          // already gone
-        }
+        clearInterval(beat)
+        if (mine(readOwner(file))) rmSync(file, { force: true })
       }
     } catch (error: unknown) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
-      let owner: LockOwner | null = null
-      try {
-        owner = JSON.parse(readFileSync(file, 'utf8')) as LockOwner
-      } catch {
-        owner = null
-      }
+      const owner = readOwner(file)
       if (attempt === 0 && isStale(owner)) {
-        rmSync(file, { force: true }) // a dead owner's lock: taken over once
+        // Taken over by moving it aside: of two processes racing, one rename finds no file and that process retries the
+        // create, which then meets the winner's fresh lock. What was moved must be the stale lock seen above; a fresh lock
+        // created in between is put back.
+        const aside = `${file}.${me.id}.stale`
+        try {
+          renameSync(file, aside)
+        } catch {
+          continue
+        }
+        const moved = readOwner(aside)
+        if (owner && moved && moved.id !== owner.id && !isStale(moved)) {
+          renameSync(aside, file)
+          throw new SettleError(`A settlement of this escrow is already running (process ${moved.pid} on ${moved.host}, since ${sgt(moved.atMs)}): wait for it to finish.`)
+        }
+        rmSync(aside, { force: true })
         continue
       }
       throw new SettleError(`A settlement of this escrow is already running${owner ? ` (process ${owner.pid} on ${owner.host}, since ${sgt(owner.atMs)})` : ''}: wait for it to finish.`)
@@ -441,16 +554,28 @@ export async function submit(proposal: Proposal, opts: { replay?: boolean } = {}
             rmSync(pendingFile(proposal.escrowRef), { force: true })
             return [upsertTxLog(proposal.escrowRef, { ...base1, status: 'refused', stage: 'submit', error: `not sent: ${again.message.slice(0, 200)}` })]
           }
-          if (!(again instanceof AmbiguousSubmit)) throw again
-          possiblyLive = again.message
+          // Anything but a certain non-delivery may have reached a node: from here the concession is treated as live.
+          possiblyLive = again instanceof Error ? again.message : String(again)
         }
-      } else if (error instanceof AmbiguousSubmit) {
-        possiblyLive = error.message
-      } else throw error
+      } else {
+        // An ambiguous submit, a read hole while checking it, or an endpoint answering 200 with another hash: the
+        // bytes may be live, so leg 2 is driven; never a thrown error that leaves the exit unsent.
+        possiblyLive = error instanceof Error ? error.message : String(error)
+      }
     }
     if (r1) {
-      // "Inputs spent" can mean our own leg 1 is already in a mempool (a retried request): ask the chain before calling it a refusal.
-      if (/BadInputsUTxO|All inputs are spent/i.test(r1.refusal?.ledgerError ?? '') && (await seenByChain(leg1.txHash, 30_000))) {
+      // "Inputs spent" can mean our own leg 1 is already in a mempool (a retried request): ask the chain before calling it
+      // a refusal. A read hole there is no answer: the concession is treated as possibly live.
+      let ownInMempool = false
+      if (/BadInputsUTxO|All inputs are spent/i.test(r1.refusal?.ledgerError ?? '')) {
+        try {
+          ownInMempool = await seenByChain(leg1.txHash, 30_000)
+        } catch (error: unknown) {
+          ownInMempool = true
+          possiblyLive = `inputs spent and the chain could not be read: ${error instanceof Error ? error.message.slice(0, 120) : String(error)}`
+        }
+      }
+      if (ownInMempool) {
         r1 = null
       } else {
         rmSync(pendingFile(proposal.escrowRef), { force: true })

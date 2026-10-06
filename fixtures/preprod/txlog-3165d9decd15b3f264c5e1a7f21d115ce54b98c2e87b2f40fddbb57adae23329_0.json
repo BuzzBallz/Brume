@@ -1,0 +1,119 @@
+[
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "7e2ae5753baae4d2a3f81605574279fb21ce46d0e5fb59d55b358cb908586f1c",
+    "atMs": 1791280685800,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260159,
+      "hash": "c1deb4e10972ba25bb4304f8c5190a25fd97375218e179a0aec2100827a93347",
+      "slot": 135597536
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "3165d9decd15b3f264c5e1a7f21d115ce54b98c2e87b2f40fddbb57adae23329",
+    "atMs": 1791280744977,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260161,
+      "hash": "666054234fd3467f1c7bfaf6cc110d1a3706d7b8e97511e08501f3ff2d3236cf",
+      "slot": 135597601
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "try anyway: WithdrawRefund by the buyer (engine: needs FundsLocked or RefundRequested (is Disputed); needs an empty result hash)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "10344c3a3dda06b18b483d881e5c2edc7bd02d27a0a3a83e30659d600bd65e4f",
+    "atMs": 1791280826965,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 2,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol version is: Version 11\\\\nScriptInfo: SpendingScript (TxOutRef {txOutRefId = 3165d9decd15b3f264c5e1a7f21d115ce54b98c2e87b2f40fddbb57adae23329, txOutRefIdx = 0}) (Just (Datum {getDatum = Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\154\\\\\\\\219V\\\\\\\\218\\\\\\\\232\\\\\\\\218\\\\\\\\DC1M\\\\\\\\182\\\\\\\\239\\\\\\\\224\\\\\\\\223 \\\\\\\\ENQ\\\\\\\\255\\\\\\\\179\\\\\\\\175\\\\\\\\NUL\\\\\\\\135\\\\\\\\163\\\\\\\\227\\\\\\\\SYN\\\\\\\\SYN\\\\\\\\231\\\\\\\\145\\\\\\\\&9\\\\\\\\209K\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"1C\\\\\\\\233\\\\\\\\160\\\\\\\\152\\\\\\\\239\\\\\\\\190\\\\\\\\178\\\\\\\\183\\\\\\\\b\\\\\\\\151\\\\\\\\147\\\\\\\\190BIOc\\\\\\\\247\\\\\\\\DEL\\\\\\\\192\\\\\\\\230\\\\\\\\153\\\\\\\\219j\\\\\\\\253\\\\\\\\134\\\\\\\\203\\\\\\\\177\\\\\\\"]]]],Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\SI\\\\\\\\234\\\\\\\\134\\\\\\\\235d\\\\\\\\212M\\\\\\\\192\\\\\\\\254\\\\\\\\154\\\\\\\\DC4\\\\\\\\207\\\\\\\\&1\\\\\\\\212\\\\\\\\SUB\\\\\\\\184\\\\\\\\US^\\\\\\\\137\\\\\\\\169\\\\\\\\216\\\\\\\\246\\\\\\\\229\\\\\\\\192\\\\\\\\US\\\\\\\\134\\\\\\\\&4~\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\247]\\\\\\\\203\\\\\\\\NAKOOJ\\\\\\\\184\\\\\\\\&2P|\\\\\\\\170\\\\\\\\208\\\\\\\\236y\\\\\\\\164\\\\\\\\&"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol vers"
+  },
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "424d7940866f12f7a51afcba345efd73822c6ba9b0289bc33e4e848111c86c90",
+    "atMs": 1791280833730,
+    "via": "koios",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260164,
+      "hash": "d2df36dbfb532cc9ed8a9432be33b0ba7948816af5d776ee8dcc4bd491196844",
+      "slot": 135597657
+    }
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820",
+    "atMs": 1791280834249,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260164,
+      "hash": "d2df36dbfb532cc9ed8a9432be33b0ba7948816af5d776ee8dcc4bd491196844",
+      "slot": 135597657
+    },
+    "readback": {
+      "provider": "blockfrost",
+      "validContract": true,
+      "balances": {
+        "buyer": {
+          "lovelace": "6000000"
+        },
+        "seller": {
+          "lovelace": "4000000"
+        }
+      }
+    }
+  },
+  {
+    "step": "replay leg 2 (same bytes)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "883147da36ff9e4feb51cd63ebdbc7a229692971ec7d1a28fc7f784994061820",
+    "atMs": 1791280871096,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "seller",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+  }
+]
