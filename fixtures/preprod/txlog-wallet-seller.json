@@ -43,5 +43,35 @@
       "hash": "9691e8056f26b69fb05db396afb2be44cc6312c7f89e33d81ceb9c174cb3a3fe",
       "slot": 135607401
     }
+  },
+  {
+    "step": "seller → buyer 10 tUSDM",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "5ba250a377f8ebf5dc4b82ff35019f7698b3d5dd44cc2b4e12b6b8af11279f52",
+    "atMs": 1791298231767,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260964,
+      "hash": "7329a78f390f3bbde3480db813123596c6f789330ecaf9fbb62b289b3a581b9b",
+      "slot": 135615033
+    }
+  },
+  {
+    "step": "seller → buyer 4 tUSDM",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "299b466840c09fc16e2dd5355c9c1f4cde9470e43987f82d7727b226375e0cec",
+    "atMs": 1791298242401,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260966,
+      "hash": "0ae80ac3fb7b4c4261e0bd5c36350d2ac736bb962e31d389404d9a6f3eb7975e",
+      "slot": 135615061
+    }
   }
 ]

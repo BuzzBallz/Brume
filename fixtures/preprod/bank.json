@@ -37,7 +37,7 @@
     "ref": "3be437b109bdbaeb3c094773ad620e8052118344f051342bb21dcad8bbb99777#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed",
+    "state": "spent",
     "disputedFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#1",
     "disputedInBlock": 5259536
   },
@@ -161,7 +161,7 @@
     "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed"
+    "state": "spent"
   },
   {
     "purpose": "fast fixture run (spare, path B)",
@@ -517,6 +517,44 @@
     "ref": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0",
     "lockedIn": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644",
     "lockedInBlock": 5260008,
+    "state": "Disputed"
+  },
+  {
+    "purpose": "stream B take (locked directly in Disputed for the wallets of stream B)",
+    "path": "B",
+    "owners": "B",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      },
+      {
+        "unit": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+        "quantity": "10000000"
+      }
+    ],
+    "ref": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0",
+    "lockedIn": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6",
+    "lockedInBlock": 5260968,
+    "state": "Disputed"
+  },
+  {
+    "purpose": "stream B take (locked directly in Disputed for the wallets of stream B)",
+    "path": "B",
+    "owners": "B",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      },
+      {
+        "unit": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+        "quantity": "10000000"
+      }
+    ],
+    "ref": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#1",
+    "lockedIn": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6",
+    "lockedInBlock": 5260968,
     "state": "Disputed"
   }
 ]
