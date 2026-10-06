@@ -204,6 +204,7 @@ body {
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fefdfc; font-weight: 600; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .hint { font-size: 14px; color: var(--ink-2); }
+.col-note { display: block; font-weight: 400; }
 .error { margin: 8px 0 0; color: var(--ink); font-size: 14px; }
 .error::before { content: "!"; display: inline-grid; place-items: center; width: 16px; height: 16px; margin-right: 6px; border-radius: 50%; background: var(--bad); color: #fff; font-weight: 600; font-size: 12px; }
 
@@ -302,7 +303,8 @@ body {
 .foot .warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
 
 @media (max-width: 900px) {
-  body { height: auto; grid-template: "bar" 44px "band" auto "list" auto "detail" auto "foot" auto / 1fr; }
+  /* The asked escrow comes first; the list follows it */
+  body { height: auto; grid-template: "bar" 44px "band" auto "detail" auto "list" auto "foot" auto / 1fr; }
   .list { border-right: 0; border-bottom: 1px solid var(--line); }
   .detail { padding: 16px; overflow-x: auto; }
 }
