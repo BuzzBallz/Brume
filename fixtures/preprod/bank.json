@@ -499,5 +499,24 @@
     "lockedIn": "c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0",
     "lockedInBlock": 5259904,
     "state": "Disputed"
+  },
+  {
+    "purpose": "stream B take (locked directly in Disputed for the wallets of stream B)",
+    "path": "B",
+    "owners": "B",
+    "value": [
+      {
+        "unit": "lovelace",
+        "quantity": "20000000"
+      },
+      {
+        "unit": "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d",
+        "quantity": "10000000"
+      }
+    ],
+    "ref": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0",
+    "lockedIn": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644",
+    "lockedInBlock": 5260008,
+    "state": "Disputed"
   }
 ]

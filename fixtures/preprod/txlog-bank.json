@@ -487,5 +487,20 @@
     "redeemer": "SetRefundRequested",
     "role": "buyer",
     "expected": "accept"
+  },
+  {
+    "step": "lock 1 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644",
+    "atMs": 1791276943989,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260008,
+      "hash": "68b0ef39964684add866466afb58297474075f7dbd36d85beb24eafd08be9b80",
+      "slot": 135593753
+    }
   }
 ]
