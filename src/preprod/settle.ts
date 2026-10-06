@@ -496,10 +496,16 @@ export function lock(escrowRef: string): () => void {
       writeFileSync(fd, JSON.stringify(me))
       closeSync(fd)
       // The refresh: rewritten whole (temp file, then rename) and only while the lock is still ours.
+      // A failed refresh is said on stderr and retried at the next beat, never thrown: an exception in a timer would
+      // crash the process in the middle of a send. A lock left unrefreshed only goes stale, which is the safe side.
       const beat = setInterval(() => {
-        if (!mine(readOwner(file))) return clearInterval(beat)
-        writeFileSync(`${file}.${me.id}`, JSON.stringify({ ...me, atMs: Date.now() }))
-        renameSync(`${file}.${me.id}`, file)
+        try {
+          if (!mine(readOwner(file))) return clearInterval(beat)
+          writeFileSync(`${file}.${me.id}`, JSON.stringify({ ...me, atMs: Date.now() }))
+          renameSync(`${file}.${me.id}`, file)
+        } catch (error: unknown) {
+          console.error(`lock refresh of ${file} failed: ${error instanceof Error ? error.message : String(error)}`)
+        }
       }, LOCK_HEARTBEAT_MS)
       beat.unref()
       // Released only by its owner: never removes a lock another process has since taken over.
