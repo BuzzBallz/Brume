@@ -97,12 +97,13 @@
         "quantity": "10000000"
       }
     ],
-    "ref": "8e0d6df4c39144d674aab1f7a0503a26a497da964316d2831fcf58c22ec2bf57#0",
+    "ref": "fd9eb4f3ab29f6aa997289a05c252d16e43973022862c22e9e09d34b74452423#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "Disputed",
+    "state": "RefundRequested",
     "disputedFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#4",
-    "disputedInBlock": 5259543
+    "disputedInBlock": 5259543,
+    "concededFrom": "8e0d6df4c39144d674aab1f7a0503a26a497da964316d2831fcf58c22ec2bf57#0"
   },
   {
     "purpose": "fallback path A (locked directly in Disputed, unlock_time past)",

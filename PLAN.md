@@ -39,7 +39,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [ ] M-3 reachability engine 7×3 (part 3)
 - [ ] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4)
 - [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5)
-- [ ] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal)
+- [x] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal) — and C11 below
 - [ ] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8)
 - [ ] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
@@ -217,6 +217,8 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - **First refusal by the deployed bytes (A4 done-when):** the engine predicted the buyer cannot take `WithdrawRefund` while `Disputed`; built and sent anyway (`tryAnyway`, no evaluation, the node ran the script), it was refused in phase 2 (`ValidationTagMismatch (IsValid True) … PlutusFailure`) on bank escrow `8e0d6df4…#0`. Rejected from the mempool, no collateral taken.
 - A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
+
+**C11 executed on the shared script, 6 Oct** (`fixtures/preprod/txlog-c11-8e0d6df4…_0.json`): on a bank escrow, the seller's `AuthorizeRefund` alone (no exit signed), then every branch the engine says is gone, sent anyway: `SubmitResult` (seller), `AuthorizeRefund` again (seller), `SetRefundRequested` (buyer) — **all three refused by the validator** (phase 2); then the buyer's `WithdrawRefund` — accepted (block 5259675). With the admin pair below, C11 is R5 for every branch but `Withdraw` (not sent: its mandatory tagged outputs, not the state guard, would decide), which stays R4. `UnSetRefundRequested` stays open to the buyer, as the source says.
 
 **Executed on OUR OWN DEPLOYMENT (S-2), 6 Oct** — the vendored V1 blueprint with the deployed fee address, fee permille and cooldown, and only the admin set changed to our admin key ×3, threshold 2: script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, address `addr_test1wrfwwtssfd45jzzp9u86eltxnqsuxkrcryteajxs4nc5qrgfenf83` (`fixtures/preprod/own-deployment.json`, log `txlog-own-deployment.json`). Two identical Disputed escrows, arbitration window open:
 - X: the admin's `WithdrawDisputed` before any concession — **accepted** (block 5259662), as the engine predicted.
