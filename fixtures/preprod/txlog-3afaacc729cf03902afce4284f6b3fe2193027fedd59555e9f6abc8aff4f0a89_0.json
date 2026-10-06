@@ -84,6 +84,18 @@
       "height": 5260570,
       "hash": "1e79f88bf6ee2b0f34279a7180c8fb1a72dd7322652e74b232907b66a7e37ee3",
       "slot": 135606526
+    },
+    "readback": {
+      "provider": "koios",
+      "validContract": true,
+      "balances": {
+        "buyer": {
+          "lovelace": "6000000"
+        },
+        "seller": {
+          "lovelace": "4000000"
+        }
+      }
     }
   },
   {
