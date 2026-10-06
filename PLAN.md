@@ -93,7 +93,7 @@ flowchart LR
 **Datum: 16 fields, in order** (SPEC-TRANSACTIONS §0): 0 buyer (Address) · 1 seller (Address) · 2 reference_key · 3 reference_signature · 4 seller_nonce · 5 buyer_nonce · 6 collateral_return_lovelace · 7 input_hash · 8 result_hash · 9 pay_by_time · 10 submit_result_time · 11 unlock_time · 12 external_dispute_unlock_time · 13 seller_cooldown_time · 14 buyer_cooldown_time · 15 state. Public examples use 11 fields, so their indices are wrong. `buyer`/`seller` are nested Address constructors, times in ms. Redeemers are bare constructors, no fields.
 **Every tx** through one helper: default validity window ≈ now − 150 s / now + 150 s (each nudged one slot outward, converted to slots); continuation datums write cooldown = **the tx upper bound + 35 min**, never the computed minimum and never relative to now (`current_time` = upper bound feeds the cooldown); pre-signed legs carry their own window (leg 1 upper ≈ now + 20 min, `leg2.validToMs` > `leg1.validToMs` + confirmation margin), same cooldown rule; collateral provided; explicit lower bound on `must_start_after` branches, strict `must_end_before`, signer in required signers, one escrow input, ≤ 1 escrow output, no reference script; preprod-only guard.
 
-**Leg-2 construction (A confirms at 18:00).** Leg 2 spends the leg-1 output + a fee/collateral input owned by the **seller**; required signer = buyer; buyer signs first, seller adds its witness later. **The first mover signs leg 1 only inside `submit()`**, after verifying the counterparty's witness on leg 2 (in the CBOR, not `signedBy`) and that leg 2 spends `leg1.txHash#idx`; a Proposal or file never carries a signed leg 1, or its holder could submit the concession alone. Path A mirrored (buyer is the first mover, seller pre-signs Withdraw, buyer-owned funding inputs). Legs submitted chained, back to back, same node: favourable, not a guarantee (S-1 measures).
+**Leg-2 construction (confirmed by A2, 6 Oct 13:50 SGT, preprod block 5259491).** Leg 2 spends the leg-1 output + a fee/collateral input owned by the **seller**; required signer = buyer; buyer signs first, seller adds its witness later. **The first mover signs leg 1 only inside `submit()`**, after verifying the counterparty's witness on leg 2 (in the CBOR, not `signedBy`) and that leg 2 spends `leg1.txHash#idx`; a Proposal or file never carries a signed leg 1, or its holder could submit the concession alone. Path A mirrored (buyer is the first mover, seller pre-signs Withdraw, buyer-owned funding inputs). Legs submitted chained, back to back, same node: favourable, not a guarantee (S-1 measures).
 
 **Signature path.** Guaranteed: file drop. The UI writes `proposal.json` / unsigned tx; each party signs with `pnpm sign --role buyer|seller <file>`; the UI picks up the signed file. Upgrade: CIP-30 (S-3). For the recording both demo wallets are ours (stated in DEMO.md).
 
@@ -136,8 +136,8 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - Done when: first commit ≥ 12:00, `pnpm check` green, branches created.
 
 **M1 — Ugly end-to-end · Tue 13:00 → Wed 00:00 · spike gate 18:00**
-- [ ] A1 tx helper + preprod guard [opus/high] — no tx without upper bound (test)
-- [ ] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A
+- [x] A1 tx helper + preprod guard [opus/high] — no tx without upper bound (test) — `src/preprod/tx.ts`, 28 tests; first tx block 5259438
+- [x] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A — **PASSED 13:50 SGT, path B**: leg 2 signed against leg 1's future output, both legs in block 5259491, replay refused (phase 1). `fixtures/preprod/txlog-spike-6d3b12d4…_0.json`
 - [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
 - [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
@@ -203,6 +203,25 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - Q-K (A raises, B decides with A) K45 / C14 look wrong: the deployed V1 bytes ARE reproduced (see "Measured 6 Oct" below). Wording rule unchanged until the team agrees: "the validator's source says" until a guard has run on preprod.
 
 - Q-R (A raises; from the guard table, R4, not yet exercised) SPEC-VALIDATOR §5 says path A's leg 1 is reversible and keeps arbitration reachable. Past `unlock_time` (all 61 live disputed escrows) neither holds: `SetRefundRequested` needs upper < `unlock_time`, and after `UnSetRefundRequested` the state is `ResultSubmitted`, not `Disputed`. So pre-signing is as mandatory on path A as on path B. Path A bank escrows must be past `unlock_time` and past `buyer_cooldown_time` (≈ 35 min after the dispute). Correct before the solver or the pitch cites reversibility.
+
+**A2 gate decisions (written 6 Oct ~13:55 SGT, gate passed early)**
+- D13 **Input ownership and the two-UTxO rule.** Leg 2's fee and collateral inputs belong to the party that concedes in leg 1 (the seller on path B): with the buyer's own inputs, the buyer could kill leg 2 at zero cost by spending them elsewhere and keep the option to take everything later; with the seller's, the residual risk is a front-run (S-1 measures it). The buyer signs leg 2's body (required signer), the seller adds its witness over the same body, so the body is final when the buyer signs. The seller holds ≥ 2 independent UTxOs and leg 1 never spends any input or collateral leg 2 names; checked from both bodies before leg 1 is signed. The first mover signs leg 1 only inside `submit()`. Path A mirrored.
+- D14 **Solver model.** r_s = 0 (the seller received nothing in 120 of 120 arbitrations). r_b from the MEASURED split per asset: buyer 100 % of the ADA, 73.6 % of the token (not a generic π), times (1 − e^(−λ̄H)), λ̄ = ln 20 / T, T = 313 d (95 % upper bound for zero events), H ∈ {7, 30, 90} d. The 26.4 % of the token pot that reached NEITHER party in arbitration is the term that keeps settlement rational for both even if arbitration arrived for sure; it stays a solver term, never an output field. Front-run p at worst case (1) until 5b measures it.
+- D15 **Q-H slot constants** (below, measured at 0 s error) and **every script tx's integrity hash recomputed with the chain's PlutusV3 cost model** (Mesh beta.96 ships 297 entries, preprod has 350).
+
+**Executed on preprod, 6 Oct (A)** — the accept side of three guards, against the shared V1 script (`bd2adb68…`, the same bytes as mainnet). For these three branches the phrasing may now be "the deployed bytes accept"; refusal controls and the other branches are still "the validator's source says".
+- `SetRefundRequested` from `ResultSubmitted` with a result hash → `Disputed` (block 5259468; the first attempt was a phase-1 ledger refusal from Mesh's stale cost model, kept in the log).
+- `AuthorizeRefund` from `Disputed` → `RefundRequested`, result hash emptied (leg 1, block 5259491).
+- `WithdrawRefund` from `RefundRequested`, paying 40 % of the pot to the seller: no fee output, no collateral output (leg 2, block 5259491). This is C8 executed: the exit was signed against an output that did not exist yet. It removes a refusal; it says nothing about a front-run.
+- Leg 2 replayed byte for byte: refused by the ledger (phase 1, inputs spent), not by the validator.
+- Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
+
+**Tooling traps met in A1–A2 (each fixed in `src/preprod`, each would have cost an hour later)**
+- `import … from '@meshsdk/core'` fails under Node: its ESM build pulls a libsodium file that is not shipped. Mesh is loaded through its CJS build (`src/preprod/mesh.ts`).
+- Mesh's Koios provider sends an auth header that Koios refuses (403): submits are posted raw (`application/cbor`). A 403 is a hole, never a refusal.
+- Blockfrost's address listing still showed an input spent one block earlier: every UTxO we spend is cross-checked on Koios (`liveUtxos`).
+- Mesh beta.96 hashes script data with a stale PlutusV3 cost model → `ScriptIntegrityHashMismatch` on every script tx; recomputed with the chain's.
+- Mesh drops the inline datum when it turns a chained tx into Blockfrost's `additionalUtxoSet`, so leg 2 could not be evaluated; leg 2 is evaluated by our own call, twice, before leg 1 is signed.
 
 **Measured 6 Oct (A, read-only)**
 - Q-H settled: preprod slot = 86400 + (POSIX s − 1655769600), 1 s slots. Koios preprod tip block 5259347: `abs_slot − (block_time − 1655769600) = 86400`, 0 s error; epoch 317 / epoch_slot 276622 consistent.
