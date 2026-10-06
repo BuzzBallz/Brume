@@ -195,8 +195,8 @@ function tryAnyway(row, v, anchor) {
       const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`]
       const matched = (e.status === 'accepted') === (e.expected === 'accept')
       out.replaceChildren(matched
-        ? h('p', { class: 'matched' }, `Engine predicted ${predicted}, and `, result)
-        : h('p', { class: 'error' }, `Engine predicted ${predicted}, but `, result))
+        ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result)
+        : h('p', { class: 'error observed' }, `Engine predicted ${predicted}, but `, result))
     } catch (x) {
       out.replaceChildren(h('p', { class: 'error' }, x.message))
       btn.disabled = false
