@@ -4,6 +4,7 @@ const REDEEMERS = ['Withdraw', 'SetRefundRequested', 'UnSetRefundRequested', 'Wi
 const ROLES = ['buyer', 'seller', 'admin']
 const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
 const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', txlog: 'txlog' }
+const USDM = 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d' // = USDM in shared/constants.ts
 const EXPLORER = 'https://preprod.cexplorer.io/tx/' // DESIGN §10.2: format confirmed by eye on the first real tx
 const POLL_MS = 2000
 
@@ -140,8 +141,12 @@ function renderFoot(census) {
   )
 }
 
+const viewsFor = row => row.network === 'preprod'
+  ? [['settle', 'Settle'], ['reach', 'Reachability'], ['solver', 'Solver']]
+  : [['reach', 'Reachability'], ['solver', 'Solver']]
+
 function renderHead(row, view) {
-  const views = row.network === 'preprod' ? [['settle', 'Settle'], ['reach', 'Reachability']] : [['reach', 'Reachability']]
+  const views = viewsFor(row)
   return h('header', { class: 'head' },
     h('div', { class: 'title' },
       h('h1', { class: 'mono', title: row.ref }, short(row.ref)), copyButton(row.ref),
@@ -349,6 +354,58 @@ async function settleView(row) {
   return panel
 }
 
+/* Solver: scale-free. Every figure is a share of one asset of this escrow, never a sum across assets. */
+
+const assetName = unit => unit === 'lovelace' ? 'ADA' : unit === USDM ? 'USDM' : short(unit)
+
+// Share of each asset when the escrow's value is known (mainnet census rows); base-unit quantities otherwise.
+function perAsset(terms, value) {
+  const units = [...new Set([...Object.keys(value ?? {}), ...Object.keys(terms)])]
+  if (units.every(u => Number(terms[u] ?? 0) === 0)) return 'Nothing'
+  return units.map(u => {
+    const q = Number(terms[u] ?? 0)
+    if (value?.[u]) return q === 0 ? `nothing of the ${assetName(u)}` : `${pct(q / Number(value[u]))} of the ${assetName(u)}`
+    return `${q.toLocaleString('en')} ${u === 'lovelace' ? 'lovelace' : `${assetName(u)} base units`}`
+  }).join(', ')
+}
+
+function renderBands(bands) {
+  const ticks = [0, 0.25, 0.5, 0.75, 1]
+  return h('section', { class: 'bands' },
+    h('h2', {}, 'Splits both sides can accept'),
+    h('p', { class: 'hint' }, 'Seller\'s share of the escrow value, by how long the buyer is willing to wait for an arbiter.'),
+    h('div', { class: 'band-grid' },
+      bands.map(b => [
+        h('span', { class: 'band-label' }, `Buyer waits ${b.horizonDays} days`),
+        h('div', { class: 'track', title: `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)} of the value` },
+          h('span', { class: 'range', style: `left:${b.sellerShareMin * 100}%;width:${(b.sellerShareMax - b.sellerShareMin) * 100}%` })),
+        h('span', { class: 'band-value mono' }, `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)}`),
+      ]),
+      h('span'),
+      h('div', { class: 'axis', 'aria-hidden': 'true' }, ticks.map(t => h('span', { style: `left:${t * 100}%` }, pct(t)))),
+    ))
+}
+
+function renderPaths(solver, value) {
+  const paths = [['Seller concedes first', solver.pathB], ['Buyer concedes first', solver.pathA]]
+  const row = (label, cell) => h('tr', {}, h('th', { scope: 'row' }, label), paths.map(([, p]) => h('td', {}, cell(p))))
+  return h('section', { class: 'paths' },
+    h('h2', {}, 'What each exit path costs'),
+    h('table', {},
+      h('thead', {}, h('tr', {}, h('td'), paths.map(([name]) => h('th', { scope: 'col' }, name)))),
+      h('tbody', {},
+        row('Protocol fee', p => Object.keys(p.fee).length ? perAsset(p.fee, value) : 'None'),
+        row('Exposed on the second leg', p => cap(p.exposedParty)),
+        row('Least the exposed party keeps', p => perAsset(p.exposedFloor, value)),
+        row('What a defector can take', p => perAsset(p.defectorKeeps, value)))))
+}
+
+async function solverView(row) {
+  const solver = await load('solver', row.ref)
+  if (solver.ref !== row.ref) return blank('No solver output for this escrow', 'The solver has not priced this reference in this data set.', false)
+  return [renderBands(solver.bands), renderPaths(solver, row.value)]
+}
+
 /* Shell */
 
 function blank(title, text, back = true) {
@@ -370,8 +427,10 @@ async function main() {
       $('detail').replaceChildren(blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
       return
     }
-    const view = row.network === 'preprod' ? (params.get('view') ?? 'settle') : 'reach'
-    $('detail').replaceChildren(renderHead(row, view), ...[await (view === 'settle' ? settleView(row) : reachView(row))].flat())
+    const ids = viewsFor(row).map(([id]) => id)
+    const view = ids.includes(params.get('view')) ? params.get('view') : ids[0]
+    const body = await { settle: settleView, reach: reachView, solver: solverView }[view](row)
+    $('detail').replaceChildren(renderHead(row, view), ...[body].flat())
   } catch (err) {
     const hint = {
       live: 'Start the agent with pnpm agent, or open this page with ?source=snapshot.',

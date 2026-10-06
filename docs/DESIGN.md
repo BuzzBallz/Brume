@@ -103,7 +103,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | Try anyway (preprod only) | MUST M-6, M-9 | in the popover of a not-permitted cell |
 | Settle flow (6 steps) | MUST M-5, M-9 | the stepper is a real sequence (SPEC-TRANSACTIONS §4): 1 buyer raises the dispute (`SetRefundRequested`, done before the take if the bank escrow is already `Disputed`) · 2 seller proposes the split (both bodies built, leg 1 hash shown) · 3 buyer pre-signs the exit (leg 2, `WithdrawRefund`, hash shown) · 4 seller signs the concession (leg 1, `AuthorizeRefund`) · 5 seller sends both legs, in order · 6 balances read back |
 | Balances table | MUST M-9 | per party, per asset, before / after, read back |
-| Solver panel | MUST M-7, M-9 | two paths, band per unit of value, fee, exposed party, what waiting costs (H = 7 / 30 / 90), `p = 1` until S-1 |
+| Solver panel | MUST M-7, M-9 | two paths, band per unit of value, fee, exposed party, one range bar per horizon (H = 7 / 30 / 90) on a shared 0–100% axis, all visible at once; fee, floor and defector take as a share of each asset, never summed across assets; `p` not in `SolverOutput` yet |
 | Read-only mode (Pages) | MUST M-9 | same views from `docs/data/*.json`; Settle shows the recorded run with its hashes |
 | Keyboard navigation in the list | M4 polish | `j` / `k` move, `Enter` opens |
 | CIP-30 signing | SHOULD S-3 | replaces the "run this command" step; states in §7 |
@@ -196,7 +196,7 @@ Patterns only, no code copied. Chosen from the systems closest to our references
 | Settle flow, status text | [GOV.UK task list](https://design-system.service.gov.uk/components/task-list/) | one row per step, status in sentence case at the row's end; done is plain text, the step that needs someone is the only tagged one ("Waiting for buyer"); later steps read "Cannot start yet" |
 | Preprod run history | [Primer Timeline](https://primer.style/design/components/timeline), condensed | icon badge + one line + timestamp on a connector line, for sent / confirmed / refused and the replay check |
 | Escrow state and network chips | [Primer StateLabel](https://primer.style/design/components/state-label) | icon + text for `Disputed`, `Refund requested`, `Settled`, `Preprod`, `Mainnet, read-only`; our tokens, not their colors |
-| Reachability / Settle / Solver, and H = 7 / 30 / 90 | [Primer SegmentedControl](https://primer.style/design/components/segmented-control) (alt: [Carbon content switcher](https://carbondesignsystem.com/components/content-switcher/usage)) | equal segments, one selected, keyboard arrows |
+| Settle / Reachability / Solver | [Primer SegmentedControl](https://primer.style/design/components/segmented-control) (alt: [Carbon content switcher](https://carbondesignsystem.com/components/content-switcher/usage)) | equal segments, one selected, keyboard arrows |
 | Grid cell detail | popover, click-triggered (Component Gallery: popovers open on click and may hold actions; tooltips are hover-only) | needed because "Try anyway" lives inside it and hover doesn't show on video |
 | Loading | [Carbon loading pattern](https://carbondesignsystem.com/patterns/loading-pattern/) + [Geist skeleton](https://vercel.com/geist/skeleton) | skeleton for first paint at final geometry, inline spinner only inside a step that is sending |
 | Empty, agent not running, unknown ref | [Primer Blankslate](https://primer.style/design/components/blankslate), [Geist empty state](https://vercel.com/geist/empty-state) | one sentence on what happened, one action |
