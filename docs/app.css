@@ -231,6 +231,11 @@ body {
 .current .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
 .error .mark { border-color: var(--bad); background: var(--bad); }
 .error .mark::after { content: "!"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 11px; font-weight: 600; }
+/* A hole (provider down, nothing sent) is not a refusal: warn mark, ink glyph */
+.step.hole .mark { border-color: var(--warn); background: var(--warn); }
+.step.hole .mark::after { color: var(--ink); }
+.hole-note { margin: 8px 0 0; color: var(--ink); font-size: 14px; }
+.hole-note .btn { margin-left: 8px; }
 .hash a, .log a { color: var(--accent); }
 .lock { color: var(--ink-2); }
 .cmd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 8px; }
@@ -301,7 +306,7 @@ body {
   font-size: 14px;
   color: var(--ink-2);
 }
-.foot .warn::before, .meta.warn::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
+.foot .warn::before, .meta.warn::before, .hole-note::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--warn); }
 
 @media (max-width: 900px) {
   /* The asked escrow comes first; the list follows it */

@@ -50,8 +50,18 @@ async function post(path, body) {
   const res = await fetch(`/api/${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
   const text = await res.text()
   const json = text && res.headers.get('content-type')?.includes('json') ? JSON.parse(text) : null
-  if (!res.ok) throw new Error(json?.error ?? (text || `/api/${path} answered HTTP ${res.status}`))
+  if (!res.ok) throw Object.assign(new Error(json?.error ?? (text || `/api/${path} answered HTTP ${res.status}`)), { status: res.status })
   return json
+}
+
+// A 503 is a hole (the chain provider rate-limiting or down): nothing was built or sent. It reads neutral, never as a
+// refusal, with a Try again button. GET /api/proposal's `error` carries no status, so its sentence is matched instead.
+const isHole = x => x?.status === 503 || /\(a hole\)/.test(x?.message ?? x ?? '')
+function showError(p, x, retry) {
+  const hole = isHole(x)
+  p.hidden = false
+  p.className = hole ? 'hole-note' : 'error'
+  p.replaceChildren(x?.message ?? String(x), ...(hole && retry ? [' ', h('button', { class: 'btn', type: 'button', onclick: retry }, 'Try again')] : []))
 }
 
 // The preprod bank has no shared mock: in mock mode it is the escrow the mock proposal targets.
@@ -207,7 +217,8 @@ function tryAnyway(row, v, anchor) {
         ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result, ownTag(e))
         : h('p', { class: 'error observed' }, `Engine predicted ${predicted}, but `, result, ownTag(e)))
     } catch (x) {
-      out.replaceChildren(h('p', { class: 'error' }, x.message))
+      out.replaceChildren(h('p', {}))
+      showError(out.firstChild, x)
       btn.disabled = false
       btn.textContent = 'Try anyway'
     }
@@ -312,7 +323,7 @@ function prepareAgain(row, proposal, rerun) {
   const btn = h('button', { class: 'btn primary', type: 'button', onclick: async () => {
     btn.disabled = true
     try { await post('proposal', { escrowRef: row.ref, sellerShare: proposal.sellerShare }); rerun() }
-    catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false }
+    catch (x) { btn.disabled = false; showError(err, x, () => btn.click()) }
   } }, 'Prepare again')
   return [h('p', {}, 'Leg 1 expired before it was sent. Prepare it again: both sides sign the new hashes.'), h('div', {}, btn, err)]
 }
@@ -320,12 +331,11 @@ function prepareAgain(row, proposal, rerun) {
 function walletSign(wallet, role, ctx) {
   const legs = legsToSign(ctx.proposal, role).map(n => [n, ctx.proposal?.[`leg${n}`]])
   const { wait } = ctx
-  const msg = h('p', { class: 'error', hidden: !wait.errors[role] }, wait.errors[role]) // survives the 2 s re-render
+  const msg = h('p', { hidden: true })
   const fail = text => {
     wait.busy = false
     wait.errors[role] = text
-    msg.hidden = false
-    msg.textContent = text
+    showError(msg, text, () => btn.click())
     btn.disabled = false
     btn.textContent = label
   }
@@ -352,9 +362,10 @@ function walletSign(wallet, role, ctx) {
       fail(x?.code === 2 ? 'Signature declined in the wallet. Nothing was sent.'
         : x?.code === 1 ? `${wallet.name} doesn't hold the ${role}'s key for this transaction.`
         : x?.code === -3 ? `${wallet.name} refused access to this page.`
-        : x?.message ?? x?.info ?? String(x))
+        : x?.status === 503 ? x : x?.message ?? x?.info ?? String(x))
     }
   } }, label)
+  if (wait.errors[role]) showError(msg, wait.errors[role], () => btn.click()) // survives the 2 s re-render
   return [btn, msg]
 }
 
@@ -379,7 +390,7 @@ function proposeForm(row, rerun, band) {
   const form = h('form', { class: 'propose', onsubmit: async e => {
     e.preventDefault()
     try { await post('proposal', { escrowRef: row.ref, sellerShare: Number(input.value) }); rerun() }
-    catch (x) { err.hidden = false; err.textContent = x.message }
+    catch (x) { showError(err, x, () => form.requestSubmit()) }
   } },
   h('label', {}, 'Seller share', input),
   h('button', { class: 'btn primary', type: 'submit', disabled: !live }, 'Propose this split'),
@@ -391,7 +402,7 @@ function proposeForm(row, rerun, band) {
   return form
 }
 
-function sendButton(row, rerun) {
+function sendButton(row, rerun, label = 'Send both legs') {
   const err = h('p', { class: 'error', hidden: true })
   const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
     btn.disabled = true
@@ -399,8 +410,8 @@ function sendButton(row, rerun) {
     // The agent answers 202 at once and submits in the background (1–2 min); progress arrives through GET /api/txlog.
     // 202 {status: 'sending'}: the send runs in the background; 200 {status: 'done', txlog}: it already ended.
     try { const answer = await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun({ submitted: true, txlog: answer?.txlog }) }
-    catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
-  } }, 'Send both legs')
+    catch (x) { btn.disabled = false; btn.textContent = label; showError(err, x, () => btn.click()) }
+  } }, label)
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
@@ -411,8 +422,8 @@ const pending = e => e?.status === 'accepted' && !e.block
 // Claims rule: only a phase-2 failure (the script failed) may be called the validator refusing. Phase 1 is a ledger rule.
 // A sentence, never the node's raw text: that sits behind rawError().
 function refusal(e) {
-  if (e.stage === 'evaluate') return 'refused when evaluated, before submission'
   if (!e.refusal) return 'not sent (a hole)' // a network failure before any ledger check: no observation
+  if (e.stage === 'evaluate') return 'refused when evaluated, before submission'
   if (e.refusal?.phase === 2) return 'the validator refused it'
   if (e.refusal?.phase === 1 && /All inputs are spent|BadInputsUTxO/.test(`${e.error ?? ''} ${e.refusal.ledgerError ?? ''}`)) return 'the ledger refused it: its input was already spent'
   return 'the ledger refused it'
@@ -452,7 +463,7 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
         : [waitingFor(exiter, ctx), validity] },
     { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
       body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
-    { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused, errorLabel: hole(refused) ? 'Not sent' : undefined,
+    { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused, hole: hole(refused), errorLabel: hole(refused) ? 'Not sent' : undefined,
       waiting: leg1 || leg2 ? 'Waiting for confirmation' : submitted ? 'Submitted' : 'Ready to send',
       body: refused
         ? [h('p', {}, hole(refused) ? 'Not sent (a hole): nothing reached the ledger, the escrow is not spent.' : `${cap(refusal(refused))}. Start over on the next bank escrow.`), rawError(refused)]
@@ -475,7 +486,9 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
     if (stuck >= 0) Object.assign(steps[stuck], { error: true, errorLabel: 'Expired', body: prepareAgain(row, proposal, rerun) })
   }
   // A send that failed after its 202: the agent's sentence, shown as is.
-  if (wait.sendError && !steps[4].done) Object.assign(steps[4], { error: true, errorLabel: 'Send failed', body: [h('p', {}, wait.sendError)] })
+  if (wait.sendError && !steps[4].done) Object.assign(steps[4], isHole(wait.sendError)
+    ? { error: true, hole: true, errorLabel: 'Not sent', body: [h('p', {}, wait.sendError), sendButton(row, rerun, 'Try again')] }
+    : { error: true, errorLabel: 'Send failed', body: [h('p', {}, wait.sendError)] })
   return steps
 }
 
@@ -517,7 +530,7 @@ function renderSteps(steps) {
     const state = s.error ? 'error' : s.done ? 'done' : reached ? 'later' : 'current'
     if (!s.done) reached = true
     const status = { done: 'Done', current: s.waiting, later: 'Cannot start yet', error: s.errorLabel ?? 'Refused' }[state]
-    return h('li', { class: `step ${state}` },
+    return h('li', { class: `step ${state}${s.hole ? ' hole' : ''}` },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('div', { class: 'step-body' },
         h('div', { class: 'step-head' }, h('span', { class: 'step-label' }, s.label), h('span', { class: 'status' }, status)),
