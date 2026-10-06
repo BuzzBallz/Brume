@@ -48,7 +48,10 @@ type DatumRead = { ref: string; datum: Datum; value: Value }
 const DATUM_TTL_MS = 30_000
 const datumCache = new Map<string, { at: number; read: Promise<DatumRead> }>()
 
+// Mainnet escrows are read-only and slow-moving, so their reads are cached. Preprod escrows are the ones we settle:
+// they are read fresh, so a just-spent bank escrow never shows as live.
 export function readDatum(net: Network, ref: string): Promise<DatumRead> {
+  if (net === 'preprod') return fetchDatum(net, ref)
   const key = `${net}|${ref}`
   const hit = datumCache.get(key)
   if (hit && Date.now() - hit.at < DATUM_TTL_MS) return hit.read
@@ -78,8 +81,10 @@ export async function escrowFor(url: URL): Promise<DatumRead> {
   const ref = parseRef(url.searchParams.get('ref'))
   const net = url.searchParams.get('net')
   if (net) return readDatum(parseNet(net), ref)
-  return readDatum('mainnet', ref).catch((e) => {
-    if (e instanceof HttpError && e.status === 404) return readDatum('preprod', ref)
-    throw e
-  })
+  // A mainnet failure of any kind still tries preprod; if both fail, the mainnet error is the one reported unless it was a 404.
+  return readDatum('mainnet', ref).catch((mainnetError) =>
+    readDatum('preprod', ref).catch((preprodError) => {
+      throw mainnetError instanceof HttpError && mainnetError.status === 404 ? preprodError : mainnetError
+    }),
+  )
 }

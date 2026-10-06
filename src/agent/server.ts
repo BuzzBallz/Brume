@@ -48,21 +48,31 @@ const saveProposal = (p: Proposal) => {
 // Settlement writes only ever touch preprod escrows: a ref that is not one answers 400 before anything is built.
 async function preprodOnly(ref: string) {
   await readDatum('preprod', ref).catch((e) => {
-    throw e instanceof HttpError && e.status === 404 ? new HttpError(400, 'Settling and Try anyway run on preprod escrows only.') : e
+    throw e instanceof HttpError && e.status === 404 ? new HttpError(400, 'This is not an unspent preprod escrow: it has been spent, or it is on mainnet, which is read-only.') : e
   })
 }
 
 // submit() waits for both blocks (1-2 min): answer 202 once it has started, the UI follows GET /api/txlog.
-// A refusal it raises at once (a check before the concession) still comes back as the answer.
+// A run that ends within 2 s answers with its log; a refusal raised later is kept for GET /api/proposal (`error`).
 const sending = new Map<string, Promise<TxLogEntry[]>>()
+const sendErrors = new Map<string, string>()
+const sentence = (e: unknown) => (e instanceof SettleError || e instanceof HttpError ? e.message : 'internal error')
 async function startSubmit(proposal: Proposal) {
   const ref = proposal.escrowRef
   if (sending.has(ref)) throw new HttpError(409, 'A settlement of this escrow is already running: wait for it to finish.')
+  sendErrors.delete(ref)
   const run = submit(proposal).finally(() => sending.delete(ref))
   sending.set(ref, run)
-  const early = await Promise.race([run.then(() => null, (e: unknown) => e), new Promise((r) => setTimeout(() => r(null), 2000))])
-  if (early) throw early
-  run.catch((e) => console.error(e))
+  const early = await Promise.race([
+    run.then((txlog) => ({ txlog }), (error: unknown) => ({ error })),
+    new Promise<null>((r) => setTimeout(() => r(null), 2000)),
+  ])
+  if (early && 'error' in early) throw early.error
+  if (early) return { body: { escrowRef: ref, status: 'done', txlog: early.txlog } }
+  run.catch((e) => {
+    console.error(e)
+    sendErrors.set(ref, sentence(e))
+  })
   return { body: { escrowRef: ref, status: 'sending' }, status: 202 }
 }
 
@@ -96,9 +106,10 @@ const routes: Record<string, Handler> = {
     return { body: { proposal: await prepare(ref, sellerShare) } }
   },
   // `sending` survives a page reload: while it is true the UI shows the send as under way, not a Send button.
+  // `error` is the sentence of a send that failed after its 202.
   'GET /api/proposal/:id': (url) => {
     const ref = refOfPath(url)
-    return { body: { proposal: readJson(proposalFile(ref), 'no proposal for this escrow yet'), sending: sending.has(ref) } }
+    return { body: { proposal: readJson(proposalFile(ref), 'no proposal for this escrow yet'), sending: sending.has(ref), error: sendErrors.get(ref) ?? null } }
   },
   // witness() keeps a seller's leg-1 signature in the seller's own record, never in the proposal, and that signature
   // starts the send at once (first-mover rule, PLAN §4).
@@ -172,6 +183,8 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     if (req.method !== 'GET') throw new HttpError(405, 'method not allowed')
     return staticFile(url.pathname, res)
   }
+  // Settlement and try anyway act with our keys: tunnel traffic (it carries cf-connecting-ip) may only read them.
+  if (req.method === 'POST' && url.pathname.startsWith('/api/') && req.headers['cf-connecting-ip']) throw new HttpError(403, 'Settlement actions are only accepted on the machine running the agent.')
   limit(req, 'api', 300)
   if (req.method === 'POST' && url.pathname === '/start_job') limit(req, 'start_job', 10)
   const { body, status } = await handler(url, req)
