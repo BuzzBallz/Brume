@@ -168,7 +168,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 **Interface requests** (to propose in PLAN.md with a §11 entry; not applied here):
 1. `TxLogEntry.status` is `accepted | refused`; the UI needs `submitted | confirmed | refused` plus `slot?` to draw sending vs confirmed.
 2. `Proposal.signatures`: per entry `{role, leg, bodyHash, at}`, so each step knows who signed what.
-3. `readback`: `{party, asset, before, after}[]` for the balances table.
+3. `readback.balances?: {party: "buyer" | "seller" | "fee", asset: string, before: string, after: string}[]` on the leg-2 entry (asset = unit as in `Value`, quantities as decimal strings), read back from the second indexer. The UI renders the balances table when the field is present. Token decimals (USDM) belong in `shared/constants.ts`; until then tokens show in base units.
 4. Join between `Verdict` and `TxLogEntry` (`redeemer`, `role` on the entry), so a cell can show the tx that exercised it (R5).
 5. `explorerUrl(network, txHash)` in `shared/constants.ts`.
 6. A mock input for `site:data`, so `docs/data/*.json` can be produced from `shared/mock/*.mock.json` (Pages does not serve `shared/`).

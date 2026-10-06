@@ -309,9 +309,37 @@ function settleSteps(row, proposal, log, rerun, band) {
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: accepted, `, txLink(e.txHash)))]
           : [sendButton(row, rerun)] },
-    { label: 'Read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
-      body: leg2?.readback ? [h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`)] : [] },
+    { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
+      body: leg2?.readback ? [
+        h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
+        leg2.readback.balances && renderBalances(leg2.readback.balances),
+      ] : [] },
   ]
+}
+
+// One escrow's native quantities (DESIGN §10.1). ADA has 6 decimals; other tokens stay in base units until their decimals are pinned in shared/constants.ts.
+function qty(unit, q) {
+  if (unit !== 'lovelace') return q.toLocaleString('en')
+  const sign = q < 0n ? '-' : ''
+  const abs = q < 0n ? -q : q
+  return `${sign}${(abs / 1_000_000n).toLocaleString('en')}.${String(abs % 1_000_000n).padStart(6, '0')}`
+}
+
+// Carbon data-table pattern: compact rows, mono numbers right-aligned, before and after side by side.
+function renderBalances(balances) {
+  const signed = (unit, d) => `${d > 0n ? '+' : ''}${qty(unit, d)}`
+  return h('div', { class: 'balances-wrap' }, h('table', { class: 'balances' },
+    h('thead', {}, h('tr', {}, ['Party', 'Asset', 'Before', 'After', 'Change'].map((c, i) => h('th', { scope: 'col', class: i > 1 ? 'num' : null }, c)))),
+    h('tbody', {}, balances.map(b => {
+      const before = BigInt(b.before)
+      const after = BigInt(b.after)
+      return h('tr', {},
+        h('td', {}, cap(b.party)),
+        h('td', {}, b.asset === 'lovelace' ? 'ADA' : `${assetName(b.asset)} (base units)`),
+        h('td', { class: 'num mono' }, qty(b.asset, before)),
+        h('td', { class: 'num mono' }, qty(b.asset, after)),
+        h('td', { class: 'num mono' }, signed(b.asset, after - before)))
+    }))))
 }
 
 function renderSteps(steps) {
