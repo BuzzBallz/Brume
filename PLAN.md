@@ -34,14 +34,14 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 ## 3. Scope
 
 **MUST (demo path)**
-- [ ] M-1 keyless read layer, 429 retry/backoff, hole counter (part 1)
-- [ ] M-2 16-field V1 decoder + `census:mainnet` from the UTxO set, two providers (part 2; README evidence, not on camera)
+- [x] M-1 keyless read layer, 429 retry/backoff, hole counter (part 1)
+- [x] M-2 16-field V1 decoder + `census:mainnet` from the UTxO set, two providers (part 2; README evidence, not on camera)
 - [ ] M-3 reachability engine 7×3 (part 3)
 - [ ] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4)
 - [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5)
 - [ ] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal)
 - [ ] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8)
-- [ ] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
+- [x] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
 - [ ] M-10 Coworker registered and listed on preprod Sokosumi (part 5c)
 - [ ] M-11 README (5 commands, mocks, tx hashes, prior art), DEMO.md, pinned fixtures (part 11)
@@ -128,9 +128,9 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 
 **M0 — Skeleton + shared contract · Tue 12:00–13:00 · both**
 - [x] A+B: `shared/types.ts` with the 16 datum fields of §4 (A reviews) [opus/high] — A's revision logged in §11, awaiting B
-- [ ] B: `package.json` (all scripts, Mesh exact pins), `tsconfig.json`, `.gitignore`, `.env.example`, `.githooks/pre-commit` secret grep [haiku]
-- [ ] B: one real Disputed UTxO (Koios + Blockfrost) + mocks in `shared/mock/` [haiku]
-- [ ] A+B: `shared/constants.ts` [sonnet/medium]
+- [x] B: `package.json` (all scripts, Mesh exact pins), `tsconfig.json`, `.gitignore`, `.env.example`, `.githooks/pre-commit` secret grep [haiku]
+- [x] B: one real Disputed UTxO (Koios + Blockfrost) + mocks in `shared/mock/` [haiku]
+- [x] A+B: `shared/constants.ts` [sonnet/medium]
 - [x] A: kickoff freshness output → `fixtures/kickoff-2026-10-06.md` (no probe code) [haiku] — tip 14031823 → 14031828
 - [ ] B: start 5c early: Coworker API opens at 12:00; dispenser-fund the Masumi wallets [—]
 - Done when: first commit ≥ 12:00, `pnpm check` green, branches created.

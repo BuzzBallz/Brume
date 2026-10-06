@@ -10,7 +10,7 @@ This README states what exists today. The status table says what does not.
 
 | Part | State |
 |---|---|
-| Keyless read layer, 429 retry, hole counter (`src/read`) | built, tested |
+| Keyless read layer, 429 retry, hole counter (`src/read`), transaction lookup on two indexers (`pnpm verify`) | built; the read layer is tested, `verify` was run on a real V1 transaction |
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; grid, solver, try and settle routes serve mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over live data and mocks |
@@ -28,9 +28,10 @@ pnpm check                          # tsc + node --test
 pnpm census:mainnet                 # live, keyless (Koios), plus Blockfrost if a key is set; READ_SOURCE=fixture for offline
 pnpm agent                          # UI and API on http://127.0.0.1:8787 (PORT to change)
 pnpm site:data                      # snapshot docs/data/*.json for GitHub Pages
+pnpm verify <tx hash> [network]     # read a transaction on Koios and, with a key, Blockfrost; says whether they agree
 ```
 
-Commands listed in `package.json` for `engine`, `solver`, `verify`, `sign` and `demo:preprod` point at files that do not exist yet.
+Commands listed in `package.json` for `engine`, `solver`, `sign` and `demo:preprod` point at files that do not exist yet.
 
 `READ_SOURCE=fixture pnpm census:mainnet` reads `fixtures/mainnet/utxos-koios.json` and `utxos-blockfrost.json` and reprints the census below, with its two-provider comparison, with no network. A live run reads the chain again, so its tip and counts will have moved.
 
