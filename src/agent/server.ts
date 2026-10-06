@@ -9,7 +9,7 @@ import type { Census, Proposal, Redeemer, Role, TxLogEntry } from '../../shared/
 import { runCensus } from '../census/census.ts'
 import { reach } from '../engine/reach.ts'
 import { tryAnyway } from '../preprod/controls.ts'
-import { prepare, proposalFile, SettleError, submit, txLogFile, witness } from '../preprod/settle.ts'
+import { checkForBuyer, prepare, proposalFile, SettleError, submit, txLogFile, witness } from '../preprod/settle.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { body, escrowFor, HttpError, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
 import { getBank } from './bank.ts'
@@ -78,6 +78,20 @@ async function startSubmit(proposal: Proposal) {
   return { body: { escrowRef: ref, status: 'sending' }, status: 202 }
 }
 
+// checkForBuyer reads the escrow and leg 2's inputs on chain, so a polled proposal is checked once per leg-2 body
+// every 30 s. 'ok' or the readable sentence of what is wrong; null once the buyer has signed (nothing left to check).
+const buyerChecks = new Map<string, { at: number; result: Promise<string> }>()
+function buyerCheck(p: Proposal | null): Promise<string> | null {
+  if (!p?.leg2 || p.signedBy.includes('buyer')) return null
+  const key = p.leg2.txHash
+  const hit = buyerChecks.get(key)
+  if (hit && Date.now() - hit.at < 30_000) return hit.result
+  if (buyerChecks.size >= 100) buyerChecks.delete(buyerChecks.keys().next().value!)
+  const result = checkForBuyer(p).then(() => 'ok', (e: unknown) => sentence(e))
+  buyerChecks.set(key, { at: Date.now(), result })
+  return result
+}
+
 const routes: Record<string, Handler> = {
   ...mip003,
   'GET /api/census': async () => ({ body: { census: await getCensus() } }),
@@ -109,9 +123,11 @@ const routes: Record<string, Handler> = {
   },
   // `sending` survives a page reload: while it is true the UI shows the send as under way, not a Send button.
   // `error` is the sentence of a send that failed after its 202.
-  'GET /api/proposal/:id': (url) => {
+  // `buyerCheck`: what checkForBuyer finds in leg 2 against the chain ('ok' or a sentence) while the buyer has not signed.
+  'GET /api/proposal/:id': async (url) => {
     const ref = refOfPath(url)
-    return { body: { proposal: readOr(proposalFile(ref), null), sending: sending.has(ref), error: sendErrors.get(ref) ?? null } }
+    const proposal = readOr(proposalFile(ref), null) as Proposal | null
+    return { body: { proposal, sending: sending.has(ref), error: sendErrors.get(ref) ?? null, buyerCheck: (await buyerCheck(proposal)) ?? null } }
   },
   // witness() keeps a seller's leg-1 signature in the seller's own record, never in the proposal, and that signature
   // starts the send at once (first-mover rule, PLAN §4).
@@ -121,7 +137,9 @@ const routes: Record<string, Handler> = {
     if (role !== 'buyer' && role !== 'seller') throw new HttpError(400, 'role must be buyer or seller')
     if (leg !== 1 && leg !== 2) throw new HttpError(400, 'leg must be 1 or 2')
     if (typeof witnessSet !== 'string' || !/^[0-9a-f]+$/i.test(witnessSet)) throw new HttpError(400, 'witnessSet must be hex CBOR')
-    const updated = witness(readJson(proposalFile(ref), 'no proposal for this escrow yet'), role, leg, witnessSet)
+    const current: Proposal = readJson(proposalFile(ref), 'no proposal for this escrow yet')
+    if (role === 'buyer' && leg === 2) await checkForBuyer(current)
+    const updated = witness(current, role, leg, witnessSet)
     saveProposal(updated)
     if (leg === 1) return startSubmit(updated)
     return { body: { proposal: updated } }
