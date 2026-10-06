@@ -44,18 +44,20 @@ export async function body(req: IncomingMessage) {
 
 type DatumRead = { ref: string; datum: Datum; value: Value }
 
-// A flood of /api/datum must not become a flood of provider calls: one read per net and ref every 30 s.
-const DATUM_TTL_MS = 30_000
+// Every read goes through this cache, so repeated calls for one ref cost one provider call per TTL. Mainnet escrows
+// are read-only and slow-moving (30 s). Preprod escrows are the ones we settle, so theirs is short (3 s): a just-spent
+// bank escrow stops showing as live within seconds. Calls for many distinct refs are bounded by the per-IP rate limit
+// in server.ts; when the cache is full, the oldest entry goes, never the whole cache.
+const DATUM_TTL_MS: Record<Network, number> = { mainnet: 30_000, preprod: 3_000 }
+const MAX_CACHED = 500
 const datumCache = new Map<string, { at: number; read: Promise<DatumRead> }>()
 
-// Mainnet escrows are read-only and slow-moving, so their reads are cached. Preprod escrows are the ones we settle:
-// they are read fresh, so a just-spent bank escrow never shows as live.
 export function readDatum(net: Network, ref: string): Promise<DatumRead> {
-  if (net === 'preprod') return fetchDatum(net, ref)
   const key = `${net}|${ref}`
   const hit = datumCache.get(key)
-  if (hit && Date.now() - hit.at < DATUM_TTL_MS) return hit.read
-  if (datumCache.size >= 500) datumCache.clear()
+  if (hit && Date.now() - hit.at < DATUM_TTL_MS[net]) return hit.read
+  datumCache.delete(key)
+  while (datumCache.size >= MAX_CACHED) datumCache.delete(datumCache.keys().next().value!)
   const read = fetchDatum(net, ref)
   datumCache.set(key, { at: Date.now(), read })
   read.catch(() => datumCache.delete(key))
