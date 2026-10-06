@@ -108,7 +108,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | Solver panel | MUST M-7, M-9 | two paths, band per unit of value, fee, exposed party, one range bar per horizon (H = 7 / 30 / 90) on a shared 0–100% axis, all visible at once; fee, floor and defector take as a share of each asset, never summed across assets; `p` not in `SolverOutput` yet |
 | Read-only mode (Pages) | MUST M-9 | same views from `docs/data/*.json`; Settle shows the recorded run with its hashes |
 | Keyboard navigation in the list | M4 polish | `j` / `k` move, `Enter` opens |
-| CIP-30 signing | SHOULD S-3 | replaces the "run this command" step; states in §7 |
+| CIP-30 signing | SHOULD S-3 | built next to the file drop, never instead of it: a "Sign with <wallet>" button per detected wallet in the waiting step; states in §7 |
 | Hazard term, measured `p`, own-deployment pair | SHOULD S-4, S-1, S-2 | one row each in Solver / Reachability; own deployment tagged, never shown as the deployed bytes |
 | Census screen | dropped (R-14) | census lives in the README |
 
@@ -145,7 +145,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | confirmed | check, block / slot |
 | refused or failed | `--bad` icon, the node's reason rewritten to the guard it hit, raw error one click away, what to do next (retry on the next bank escrow) |
 
-**CIP-30 (S-3 only)**: wallet not connected · wrong network (wallet on mainnet: refuse, say which network is needed) · awaiting signature in the wallet · signature declined (back to the step, nothing sent).
+**CIP-30 (S-3)**: no wallet detected (button absent, file drop only) · connecting · wrong network (`getNetworkId() !== 0`: refused before anything is signed; CIP-30 cannot tell preprod from preview) · confirm in your wallet (polling holds so the button is not re-rendered) · signature declined (`TxSignError` 2: message kept across re-renders, nothing sent) · wallet lacks the key (`TxSignError` 1) · access refused (`APIError` -3). The buyer signs leg 2, the seller leg 1, always `partialSign = true`. Waiting steps also show a live elapsed counter (live mode).
 
 ## 8. Data contract
 
@@ -160,6 +160,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` `{escrowRef, redeemer, role}` → `TxLogEntry`; preprod escrows only, never offered on mainnet |
 | Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal/<ref, URL-encoded>` polled every 2 s while a signature is missing (404 = no proposal yet) |
+| Wallet signature (S-3) | witness set from `api.signTx(leg.cborHex, true)` | `POST /api/proposal/<ref>/witness` `{role, witnessSet}` (requested): the agent adds the witness to the leg and updates `signedBy` |
 | Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit`; `GET /api/txlog?ref=<ref>` (requested; 404 = no run yet) |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
 | Preprod bank list | `{ref, state}[]` | `GET /api/bank` (requested; 404 = empty bank) |

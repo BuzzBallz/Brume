@@ -246,9 +246,66 @@ async function reachView(row) {
 
 const signCommand = role => `pnpm sign --role ${role} proposal.json`
 
-function waitingFor(role) {
+// Live m:ss since the current wait began. Each re-render makes a new span; the old one stops itself once detached.
+function elapsed(wait) {
+  const el = h('span', { class: 'tnum' })
+  const tick = () => {
+    if (!el.isConnected) return clearInterval(id)
+    const s = Math.max(0, Math.floor((Date.now() - wait.since) / 1000))
+    el.textContent = `, ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  }
+  const id = setInterval(tick, 1000)
+  requestAnimationFrame(tick)
+  return el
+}
+
+// CIP-30 wallets the page can see (S-3). The file drop stays the guaranteed path; this only adds a shortcut next to it.
+const wallets = () => Object.values(window.cardano ?? {}).filter(w => w?.apiVersion && typeof w.enable === 'function')
+
+function walletSign(wallet, role, ctx) {
+  const leg = role === 'buyer' ? ctx.proposal?.leg2 : ctx.proposal?.leg1 // buyer pre-signs the exit, seller signs the concession
+  const { wait } = ctx
+  const msg = h('p', { class: 'error', hidden: !wait.errors[role] }, wait.errors[role]) // survives the 2 s re-render
+  const fail = text => {
+    wait.busy = false
+    wait.errors[role] = text
+    msg.hidden = false
+    msg.textContent = text
+    btn.disabled = false
+    btn.textContent = label
+  }
+  const label = `Sign with ${wallet.name}`
+  const btn = h('button', { class: 'btn', type: 'button', disabled: !leg, onclick: async () => {
+    btn.disabled = true
+    msg.hidden = true
+    wait.errors[role] = null
+    wait.busy = true // polling holds while the wallet is open, so this button is not re-rendered under the user
+    try {
+      btn.textContent = 'Connecting to the wallet…'
+      const api = await wallet.enable()
+      if (await api.getNetworkId() !== 0) return fail(`${wallet.name} is on mainnet. Switch it to preprod and try again. Nothing was signed.`)
+      btn.textContent = 'Confirm in your wallet…'
+      const witnessSet = await api.signTx(leg.cborHex, true)
+      btn.textContent = 'Sending the signature…'
+      await post(`proposal/${enc(ctx.row.ref)}/witness`, { role, witnessSet })
+      wait.busy = false
+      ctx.rerun()
+    } catch (x) {
+      fail(x?.code === 2 ? 'Signature declined in the wallet. Nothing was sent.'
+        : x?.code === 1 ? `${wallet.name} doesn't hold the ${role}'s key for this transaction.`
+        : x?.code === -3 ? `${wallet.name} refused access to this page.`
+        : x?.message ?? x?.info ?? String(x))
+    }
+  } }, label)
+  return [btn, msg]
+}
+
+function waitingFor(role, ctx) {
   const cmd = signCommand(role)
-  return h('div', { class: 'cmd' }, h('code', { class: 'mono' }, cmd), copyButton(cmd), h('span', { class: 'hint' }, 'Waiting for the signed file'))
+  return h('div', { class: 'cmd' },
+    h('code', { class: 'mono' }, cmd), copyButton(cmd),
+    h('span', { class: 'hint' }, 'Waiting for the signed file', live && elapsed(ctx.wait)),
+    live && wallets().map(w => walletSign(w, role, ctx)))
 }
 
 // Prefilled with the top of the solver's band at the 30-day horizon: the most the seller can ask that the buyer still accepts.
@@ -281,7 +338,8 @@ function sendButton(row, rerun) {
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
-function settleSteps(row, proposal, log, rerun, band) {
+function settleSteps(row, proposal, log, rerun, band, wait) {
+  const ctx = { row, proposal, rerun, wait }
   const signed = role => proposal?.signedBy.includes(role) ?? false
   const bothSigned = signed('buyer') && signed('seller') // nothing can be sent before both signatures exist
   const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash)
@@ -300,9 +358,9 @@ function settleSteps(row, proposal, log, rerun, band) {
       body: signed('buyer')
         ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash }, short(proposal.leg2.txHash))),
           h('p', { class: 'lock' }, 'Split locked: changing leg 1 now would void this signature.')]
-        : [waitingFor('buyer')] },
+        : [waitingFor('buyer', ctx)] },
     { label: 'Seller signs the concession (leg 1)', done: signed('seller'), waiting: 'Waiting for seller',
-      body: signed('seller') ? [] : [waitingFor('seller')] },
+      body: signed('seller') ? [] : [waitingFor('seller', ctx)] },
     { label: 'Seller sends both legs', done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
       body: refused
         ? [h('p', {}, `Refused by the node: ${refused.error ?? 'no reason given'}. Start over on the next bank escrow.`)]
@@ -374,19 +432,29 @@ async function settleView(row) {
   const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30) : null
   let sent = [] // the submit response, shown while GET /api/txlog has nothing for this escrow
   let shown = null // label of the step last scrolled into view
+  const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
+  let timer = 0 // one polling chain per panel, whoever triggers the re-render
+  const poll = () => {
+    if (!panel.isConnected) return // the view was left
+    if (wait.busy) timer = setTimeout(poll, POLL_MS)
+    else rerun()
+  }
   const rerun = async justSent => {
     if (Array.isArray(justSent)) sent = justSent
     const [proposal, fetched] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
     const log = fetched.length ? fetched : sent
     const mine = proposal?.escrowRef === row.ref ? proposal : null
-    const steps = settleSteps(row, mine, log, rerun, band)
+    const steps = settleSteps(row, mine, log, rerun, band, wait)
+    const waiting = steps.find(s => !s.done)?.label ?? null
+    if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
     const now = panel.querySelector('.step.current, .step.error')
     const label = now?.querySelector('.step-label').textContent ?? null
     if (now && label !== shown) requestAnimationFrame(() => now.scrollIntoView({ block: 'nearest' })) // only when the step changes, so polling never yanks the scroll
     shown = label
     const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
-    if (live && waitingOnSignature) setTimeout(() => panel.isConnected && rerun(), POLL_MS) // picks up the signed file dropped by pnpm sign; stops once the view is left
+    clearTimeout(timer)
+    if (live && waitingOnSignature) timer = setTimeout(poll, POLL_MS) // picks up the signed file dropped by pnpm sign
   }
   await rerun()
   return panel
