@@ -87,7 +87,7 @@ function urlFor(ref, view) {
 
 // JobResult.uiUrl puts the raw ref in the query, so its "#<index>" lands in location.hash.
 function escrowFromUrl() {
-  const e = params.get('escrow')
+  const e = new URLSearchParams(location.search).get('escrow')
   return e && !e.includes('#') && /^#\d+$/.test(location.hash) ? e + location.hash : e
 }
 
@@ -166,6 +166,7 @@ function placePop(anchor) {
   const r = anchor.getBoundingClientRect()
   const below = r.bottom + 8 + pop.offsetHeight <= innerHeight - 8
   pop.style.top = `${Math.max(8, below ? r.bottom + 8 : r.top - 8 - pop.offsetHeight)}px`
+  pop.style.transformOrigin = below ? 'top left' : 'bottom left' // grows out of the cell it describes
   pop.style.left = `${Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8))}px`
 }
 
@@ -348,7 +349,7 @@ async function settleView(row) {
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
     requestAnimationFrame(() => panel.querySelector('.step.current, .step.error')?.scrollIntoView({ block: 'nearest' }))
     const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
-    if (live && waitingOnSignature) setTimeout(rerun, POLL_MS) // picks up the signed file dropped by pnpm sign
+    if (live && waitingOnSignature) setTimeout(() => panel.isConnected && rerun(), POLL_MS) // picks up the signed file dropped by pnpm sign; stops once the view is left
   }
   await rerun()
   return panel
@@ -412,26 +413,36 @@ function blank(title, text, back = true) {
   return h('div', { class: 'blank' }, h('h2', {}, title), h('p', {}, text), back && h('a', { class: 'btn', href: urlFor() }, 'Back to the list'))
 }
 
-async function main() {
-  renderSource()
-  $('reset').addEventListener('click', () => { location.href = urlFor() })
-  $('detail').replaceChildren(renderGrid(null))
+let base = null // [census, bank], loaded once per page
+let renderSeq = 0
+
+// Reads escrow and view from the URL. animate: the grid's one orchestrated reveal, never on keyboard or history moves.
+async function render({ animate = true, focusList = false } = {}) {
+  const seq = ++renderSeq
+  if ($('pop').matches(':popover-open')) $('pop').hidePopover()
   try {
-    const [census, bank] = await Promise.all([load('census'), loadBank()])
+    base ??= await Promise.all([load('census'), loadBank()])
+    const [census, bank] = base
     const rows = [...census.rows.map(r => ({ ...r, network: 'mainnet' })), ...bank.map(r => ({ ...r, network: 'preprod' }))]
     const ref = escrowFromUrl() ?? census.rows.find(r => r.state === 'Disputed')?.ref
     renderList(census, bank, ref)
+    if (focusList) document.querySelector('.row[aria-current]')?.focus()
     renderFoot(census)
     const row = rows.find(r => r.ref === ref)
     if (!row) {
       $('detail').replaceChildren(blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
       return
     }
+    document.title = `Brume, ${short(row.ref)}`
     const ids = viewsFor(row).map(([id]) => id)
-    const view = ids.includes(params.get('view')) ? params.get('view') : ids[0]
+    const asked = new URLSearchParams(location.search).get('view')
+    const view = ids.includes(asked) ? asked : ids[0]
     const body = await { settle: settleView, reach: reachView, solver: solverView }[view](row)
+    if (seq !== renderSeq) return // a newer navigation already rendered
+    $('detail').classList.toggle('animate', animate)
     $('detail').replaceChildren(renderHead(row, view), ...[body].flat())
   } catch (err) {
+    if (seq !== renderSeq) return
     const hint = {
       live: 'Start the agent with pnpm agent, or open this page with ?source=snapshot.',
       snapshot: 'Regenerate the data with pnpm site:data.',
@@ -441,4 +452,39 @@ async function main() {
   }
 }
 
-main()
+function go(href, opts) {
+  history.pushState(null, '', href)
+  render(opts)
+}
+
+// In-page links (?escrow=…&view=…) navigate without a reload. e.detail is 0 when Enter activated the link.
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="?"]')
+  if (!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  e.preventDefault()
+  const keyboard = e.detail === 0
+  go(a.getAttribute('href'), { animate: !keyboard, focusList: keyboard && a.classList.contains('row') })
+})
+addEventListener('popstate', () => render({ animate: false }))
+
+// j / k move focus through the escrow list, Enter opens (native link). Arrows move between view segments.
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('input, textarea, select')) return
+  if (e.key === 'j' || e.key === 'k') {
+    const rows = [...document.querySelectorAll('.row')]
+    const from = rows.indexOf(document.activeElement)
+    const at = from >= 0 ? from : rows.findIndex(r => r.hasAttribute('aria-current'))
+    rows[Math.max(0, Math.min(rows.length - 1, at + (e.key === 'j' ? 1 : -1)))]?.focus()
+    e.preventDefault()
+  } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && e.target.closest('.seg')) {
+    const links = [...e.target.closest('.seg').querySelectorAll('a')]
+    links[(links.indexOf(e.target) + (e.key === 'ArrowRight' ? 1 : links.length - 1)) % links.length].focus()
+    e.preventDefault()
+  }
+})
+
+renderSource()
+document.querySelector('.brand').setAttribute('href', urlFor())
+$('reset').addEventListener('click', () => go(urlFor(), { animate: false }))
+$('detail').replaceChildren(renderGrid(null))
+render()

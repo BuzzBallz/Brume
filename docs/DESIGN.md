@@ -68,7 +68,9 @@ Rules: text always wears `--ink` / `--ink-2`, never a status color. A state is n
 
 **Space and shape.** 4 px base: 4, 8, 12, 16, 24, 32, 48. Radius 6 px controls, 4 px cells, 0 page frame. One shadow, popovers only: `0 4px 16px rgb(33 32 28 / .12)`.
 
-**Motion.** One orchestrated moment: when an escrow opens, its 21 cells resolve in reading order, 18 ms stagger, 300 ms total, `cubic-bezier(.2,.8,.2,1)`. User-driven changes (a step completing, a popover opening) 120 ms. `prefers-reduced-motion`: no stagger.
+**Motion.** One orchestrated moment: when an escrow is opened with the mouse or on first load, its 21 cells resolve in reading order, 14 ms stagger, about 400 ms total, `cubic-bezier(0.23, 1, 0.32, 1)`. Never on keyboard navigation or back/forward. Popover: opacity + `scale(0.97)` to 1 in 150 ms from the cell it describes, instant exit. Buttons and cells: `scale(0.97)` on press, 160 ms. Hover styles only on fine pointers. `prefers-reduced-motion`: no stagger, popover fades only.
+
+**Navigation.** In-page, no reload: escrow and view live in the URL (`?escrow=…&view=…`), back and forward work. `j` / `k` move through the escrow list, `Enter` opens; arrow keys move between view segments.
 
 ## 5. Layout
 
