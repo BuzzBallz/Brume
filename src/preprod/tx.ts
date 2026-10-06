@@ -152,7 +152,14 @@ export async function submitOnly(signed: Built, submitter: Submitter, base: LogB
     return null
   } catch (error: unknown) {
     if (error instanceof AmbiguousSubmit) {
-      if (await seenByChain(signed.txHash)) return null
+      // A read hole while settling the ambiguity settles nothing: the tx stays possibly live, and says why.
+      let seen: boolean
+      try {
+        seen = await seenByChain(signed.txHash)
+      } catch (readError: unknown) {
+        throw new AmbiguousSubmit(`${error.message}; the chain could not be read to settle it: ${readError instanceof Error ? readError.message : String(readError)}`, { cause: readError })
+      }
+      if (seen) return null
       throw error
     }
     // Certainly not delivered (SubmitTransportError): its inputs were never ours to treat as spent.

@@ -247,7 +247,13 @@ async function postCbor(url: string, cborHex: string, headers: Record<string, st
       }
       throw new AmbiguousSubmit(`no answer from the submit endpoint: ${error instanceof Error ? error.message : String(error)}`)
     }
-    const text = await res.text()
+    // The status came back: the request reached the endpoint. A body that cannot be read leaves the outcome unknown.
+    let text: string
+    try {
+      text = await res.text()
+    } catch (error: unknown) {
+      throw new AmbiguousSubmit(`submit HTTP ${res.status}, its body could not be read: ${error instanceof Error ? error.message : String(error)}`)
+    }
     if (res.ok) return text.replace(/"/g, '').trim()
     onStatus?.(res.status)
     if (res.status === 400) {
