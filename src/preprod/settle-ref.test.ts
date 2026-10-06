@@ -22,6 +22,6 @@ test('anything else is refused before it names a file', () => {
 })
 
 test('submit refuses a proposal whose escrowRef is a path, before any record or key is read', async () => {
-  const forged = { escrowRef: '../proposals/x', network: 'preprod', path: 'B', sellerShare: 0.4, payout: { buyer: {}, seller: {}, fee: {} }, signedBy: [] } as unknown as Proposal
+  const forged: Proposal = { escrowRef: '../proposals/x', network: 'preprod', path: 'B', sellerShare: 0.4, payout: { buyer: {}, seller: {}, fee: {} }, signedBy: [] }
   await assert.rejects(submit(forged), (e: unknown) => e instanceof SettleError && /Not an escrow reference/.test(e.message))
 })
