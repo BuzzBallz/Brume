@@ -143,7 +143,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
 - [x] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 132/131 printed
-- [ ] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
+- [x] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
 - [ ] B4 UI v0: escrow + grid + propose/accept/sign/submit flow over mocks [sonnet/medium]
 - [ ] B5 5c: Masumi payment service, agent registered, MIP-003 endpoint answering, listed on preprod Sokosumi [sonnet/high] — done when a hire from Sokosumi reaches `/start_job`
 - Done when (**Integration 1, 23:30**): on A's machine, the UI runs the full settle flow on a bank escrow end to end; grid on a real mainnet escrow; Sokosumi hire reaches the agent.
