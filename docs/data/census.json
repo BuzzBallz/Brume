@@ -2,9 +2,9 @@
  "census": {
   "network": "mainnet",
   "tip": {
-   "height": 14034352,
-   "hash": "99c8adb9228eeabdd05c37ab7dc357902aa1bbda5a6132d79613b85a17ea0b5f",
-   "timeMs": 1791313754000
+   "height": 14034367,
+   "hash": "8f8652d54a5a9f7e45939034f192061dd8b3d9fbd7a48415ce79b03f8e0d65ba",
+   "timeMs": 1791314058000
   },
   "provider": "koios",
   "open": 141,
