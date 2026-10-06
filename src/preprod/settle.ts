@@ -282,7 +282,9 @@ function sameAssets(a: Asset[], b: Asset[]): boolean {
 // seller's file: only the two bodies count, read against the chain. Leg 1 must be the concession of THIS escrow as the
 // chain holds it (state RefundRequested, the whole pot kept at the script); leg 2 must spend leg 1's output 0 and nothing
 // under the buyer's payment key, and pay the buyer's key at least the agreed part of every asset, the part the share
-// gives on the pot read from the chain.
+// gives on the pot read from the chain. Leg 2's other inputs, collateral and reference inputs are the seller's own key
+// UTxOs (a second script input could be another escrow the buyer's signature unlocks), and it mints, withdraws and
+// certifies nothing.
 export async function checkForBuyer(proposal: Proposal): Promise<void> {
   const { leg1, leg2 } = proposal
   if (!leg1 || !leg2) throw new SettleError('This proposal is missing a leg.')
@@ -299,13 +301,23 @@ export async function checkForBuyer(proposal: Proposal): Promise<void> {
   if (!out0 || !cont || out0.address().toBech32() !== V1_ADDRESS.preprod || !sameAssets(valueOf(out0), escrow.output.amount)) throw new SettleError('Leg 1 does not keep the whole pot at the escrow.')
   const c = readDatum(cont)
   if (c.state !== 'RefundRequested' || c.resultHash !== '' || c.buyer.payment.hash !== buyerKey || c.seller.payment.hash !== d.seller.payment.hash) throw new SettleError('Leg 1 is not this escrow\'s concession.')
-  const own = [...refs(leg2.cborHex, 'inputs'), ...refs(leg2.cborHex, 'collateral')].filter((r) => r !== `${leg1Hash}#0`)
-  if (own.length === refs(leg2.cborHex, 'inputs').length + refs(leg2.cborHex, 'collateral').length) throw new SettleError('Leg 2 does not spend leg 1\'s escrow output.')
+  if (!refs(leg2.cborHex, 'inputs').includes(`${leg1Hash}#0`)) throw new SettleError('Leg 2 does not spend leg 1\'s escrow output.')
+  const body2 = cst.deserializeTx(leg2.cborHex).body()
+  if ((body2.mint()?.size ?? 0) > 0 || (body2.withdrawals()?.size ?? 0) > 0 || (body2.certs()?.size() ?? 0) > 0) throw new SettleError('Leg 2 mints, withdraws or carries a certificate: not signing it.')
+  const own = [...refs(leg2.cborHex, 'inputs'), ...refs(leg2.cborHex, 'collateral'), ...refs(leg2.cborHex, 'referenceInputs')].filter((r) => r !== `${leg1Hash}#0`)
+  const sellerKey = d.seller.payment.hash
   const info = await utxoInfo(own)
   for (const r of own) {
     const i = info.get(r)
     if (!i) throw new SettleError('An input of leg 2 cannot be read on chain: not signing it.')
-    if (mesh.deserializeAddress(i.address).pubKeyHash === buyerKey) throw new SettleError('Leg 2 spends one of the buyer\'s own UTxOs: not signing it.')
+    let key: string | undefined
+    try {
+      key = mesh.deserializeAddress(i.address).pubKeyHash
+    } catch {
+      key = undefined
+    }
+    if (key === buyerKey) throw new SettleError('Leg 2 spends one of the buyer\'s own UTxOs: not signing it.')
+    if (!key || key !== sellerKey) throw new SettleError('Leg 2 spends an input that is not the seller\'s own: not signing it.')
   }
   const want = assetMap(splitPot(escrow.output.amount, proposal.sellerShare).buyer)
   const stated = assetMap(Object.entries(proposal.payout.buyer).map(([unit, quantity]) => ({ unit, quantity })))
