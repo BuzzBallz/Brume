@@ -48,7 +48,24 @@ export const mockFile = (name: string) => JSON.parse(readFileSync(join(ROOT, 'sh
 export const mockGrid = (ref: string, state: State): Grid => ({ ...mockFile('grid').grid, ref, state })
 export const mockSolver = (ref: string): SolverOutput => ({ ...mockFile('solver').solver, ref })
 
-export async function readDatum(net: Network, ref: string): Promise<{ ref: string; datum: Datum; value: Value }> {
+type DatumRead = { ref: string; datum: Datum; value: Value }
+
+// A flood of /api/datum must not become a flood of provider calls: one read per net and ref every 30 s.
+const DATUM_TTL_MS = 30_000
+const datumCache = new Map<string, { at: number; read: Promise<DatumRead> }>()
+
+export function readDatum(net: Network, ref: string): Promise<DatumRead> {
+  const key = `${net}|${ref}`
+  const hit = datumCache.get(key)
+  if (hit && Date.now() - hit.at < DATUM_TTL_MS) return hit.read
+  if (datumCache.size >= 500) datumCache.clear()
+  const read = fetchDatum(net, ref)
+  datumCache.set(key, { at: Date.now(), read })
+  read.catch(() => datumCache.delete(key))
+  return read
+}
+
+async function fetchDatum(net: Network, ref: string): Promise<DatumRead> {
   const read = await utxo(net, ref)
   if (read.holes) throw new HttpError(502, 'the provider did not answer: a hole, not proof the escrow is gone')
   if (!read.data) throw new HttpError(404, 'no unspent output at this ref')

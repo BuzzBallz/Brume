@@ -33,7 +33,13 @@ const proposalFor = (ref: string) => {
   const m = mockFile('proposal')
   return { ...m, proposal: { ...m.proposal, signedBy: [...(witnessed.get(ref) ?? [])] } }
 }
-const refOfPath = (url: URL) => decodeURIComponent(url.pathname.split('/')[3] ?? '')
+const refOfPath = (url: URL) => {
+  try {
+    return decodeURIComponent(url.pathname.split('/')[3] ?? '').slice(0, 200)
+  } catch {
+    throw new HttpError(400, 'bad path')
+  }
+}
 const routes: Record<string, Handler> = {
   ...mip003,
   'GET /api/census': async () => ({ body: { census: await getCensus() } }),
@@ -44,11 +50,12 @@ const routes: Record<string, Handler> = {
   'POST /api/proposal': () => mock(mockFile('proposal')),
   'GET /api/proposal/:id': (url) => mock(proposalFor(refOfPath(url))),
   'POST /api/proposal/:id/witness': async (url, req) => {
-    const { role, leg } = await body(req)
+    const { role, leg } = (await body(req)) ?? {}
     if (role !== 'buyer' && role !== 'seller') throw new HttpError(400, 'role must be buyer or seller')
     if (leg !== 1 && leg !== 2) throw new HttpError(400, 'leg must be 1 or 2')
     if (leg === 1) return mock(mockFile('txlog'))
     const ref = refOfPath(url)
+    if (!witnessed.has(ref) && witnessed.size >= 100) throw new HttpError(429, 'too many proposals')
     witnessed.set(ref, (witnessed.get(ref) ?? new Set()).add(role))
     return mock(proposalFor(ref))
   },
@@ -68,7 +75,13 @@ const TYPES: Record<string, string> = {
 
 // docs/ at the root, plus shared/mock/ so the UI's ?source=mock works locally.
 function staticFile(path: string, res: ServerResponse) {
-  const rel = normalize(decodeURIComponent(path === '/' ? '/index.html' : path)).replace(/^[/\\]+/, '')
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(path === '/' ? '/index.html' : path)
+  } catch {
+    throw new HttpError(400, 'bad path')
+  }
+  const rel = normalize(decoded).replace(/^[/\\]+/, '')
   const base = rel.startsWith('shared/mock/') ? ROOT : join(ROOT, 'docs')
   const file = join(base, rel)
   if (!file.startsWith(base) || !TYPES[extname(file)]) throw new HttpError(404, 'not found')
@@ -78,11 +91,24 @@ function staticFile(path: string, res: ServerResponse) {
   } catch {
     throw new HttpError(404, 'not found')
   }
-  res.writeHead(200, { 'content-type': TYPES[extname(file)], 'cache-control': 'no-store' }).end(content)
+  res.writeHead(200, { 'content-type': TYPES[extname(file)], 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }).end(content)
 }
 
 const routeKey = (method: string, pathname: string) =>
   `${method} ${pathname.replace(/^(\/api\/proposal\/)[^/]+/, '$1:id')}`
+
+// Tunnel traffic carries cf-connecting-ip; direct local use does not and is never limited, so the UI's polling is safe.
+const hits = new Map<string, number[]>()
+function limit(req: IncomingMessage, name: string, max: number) {
+  const ip = req.headers['cf-connecting-ip']
+  if (!ip) return
+  const key = `${name}|${ip}`
+  const now = Date.now()
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < 60_000)
+  if (recent.length >= max) throw new HttpError(429, 'rate limit, try again in a minute')
+  hits.set(key, [...recent, now])
+  if (hits.size > 5000) for (const [k, v] of hits) if (now - v[v.length - 1] > 60_000) hits.delete(k)
+}
 
 async function handle(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? '/', 'http://localhost')
@@ -92,15 +118,18 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
     if (req.method !== 'GET') throw new HttpError(405, 'method not allowed')
     return staticFile(url.pathname, res)
   }
+  limit(req, 'api', 300)
+  if (req.method === 'POST' && url.pathname === '/start_job') limit(req, 'start_job', 10)
   const { body, mock: isMock } = await handler(url, req)
-  res.writeHead(200, { 'content-type': 'application/json', 'x-brume-source': isMock ? 'mock' : 'live', 'cache-control': 'no-store' }).end(JSON.stringify(body))
+  const out = JSON.stringify(body)
+  res.writeHead(200, { 'content-type': 'application/json', 'x-brume-source': isMock ? 'mock' : 'live', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }).end(out)
 }
 
 createServer((req, res) => {
   handle(req, res).catch((e) => {
-    const status = e instanceof HttpError ? e.status : 500
     if (!(e instanceof HttpError)) console.error(e)
-    res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify({ error: (e as Error).message }))
+    if (res.headersSent) return res.destroy()
+    res.writeHead(e instanceof HttpError ? e.status : 500, { 'content-type': 'application/json', 'x-content-type-options': 'nosniff' }).end(JSON.stringify({ error: e instanceof HttpError ? e.message : 'internal error' }))
   })
 }).listen(PORT, '127.0.0.1', () => {
   console.log(`Brume agent on http://127.0.0.1:${PORT}  (census: ${process.env.READ_SOURCE === 'fixture' ? 'FIXTURE' : 'live'})`)

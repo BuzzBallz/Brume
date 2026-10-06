@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 
 const NETWORK = 'Preprod'
 // The payment service wants payByTime at least 5 min before submitResultTime, and submitResultTime at least 15 min ahead.
-const PAY_WITHIN_MS = 30 * 60_000
+export const PAY_WITHIN_MS = 30 * 60_000
 const SUBMIT_WITHIN_MS = 60 * 60_000
 
 export const sha256 = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex')
