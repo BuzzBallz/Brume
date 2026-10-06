@@ -1,0 +1,36 @@
+{
+  "label": "OUR OWN DEPLOYMENT of the V1 escrow (same compiled code, our admin key ×3, threshold 2) — not the shared Masumi escrow",
+  "blueprint": "e6d17c4860df984673606cbc92f682b3b5236e3450deab62500b0795",
+  "params": {
+    "requiredAdmins": 2,
+    "adminKeyHashes": [
+      "59bfa7e059a6931270365d1dd68bb49eee276d513d460b524bdf566c",
+      "59bfa7e059a6931270365d1dd68bb49eee276d513d460b524bdf566c",
+      "59bfa7e059a6931270365d1dd68bb49eee276d513d460b524bdf566c"
+    ],
+    "feeAddress": {
+      "payment": {
+        "type": "key",
+        "hash": "13cedc5388c33ff6eac2f0d919a9fd5517910de8def01b11523995e4"
+      },
+      "stake": {
+        "type": "key",
+        "hash": "c447a7c9eae8438a852033e904952a1680dfd035166e1800e1505b96"
+      }
+    },
+    "feePermille": 50,
+    "cooldownMs": 420000
+  },
+  "scriptHash": "d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d",
+  "address": "addr_test1wrfwwtssfd45jzzp9u86eltxnqsuxkrcryteajxs4nc5qrgfenf83",
+  "escrows": [
+    {
+      "ref": "78523249b908a52a3cce35f9eb1670c3df3be34ff6b67d07de818ca13109ab8d#0",
+      "purpose": "X: the admin arbitrates BEFORE any concession (expected: accepted)"
+    },
+    {
+      "ref": "78523249b908a52a3cce35f9eb1670c3df3be34ff6b67d07de818ca13109ab8d#1",
+      "purpose": "Y: the seller concedes, then the admin tries to arbitrate (expected: refused)"
+    }
+  ]
+}

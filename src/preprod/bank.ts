@@ -7,7 +7,7 @@ import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import type { Asset } from '@meshsdk/core'
 import type { State } from '../../shared/types.ts'
-import { liveUtxos, preprodSubmitter } from './chain.ts'
+import { liveUtxos, preprodSubmitter, utxoStatus } from './chain.ts'
 import { readDatum } from './datum.ts'
 import { ROOT } from './env.ts'
 import { escrowAt, tokenQty, TUSDM } from './fixture.ts'
@@ -40,7 +40,7 @@ const save = (e: Entry[]): void => {
 }
 const pot = (ada: number, usdm: number): Asset[] => [{ unit: 'lovelace', quantity: String(ada * 1e6) }, ...(usdm > 0 ? [{ unit: TUSDM, quantity: String(usdm * 1e6) }] : [])]
 
-const { positionals, values } = parseArgs({ allowPositionals: true, options: { amount: { type: 'string', default: '90' }, usdm: { type: 'string', default: '10' } } })
+const { positionals, values } = parseArgs({ allowPositionals: true, options: { amount: { type: 'string', default: '90' }, usdm: { type: 'string', default: '10' }, follow: { type: 'string' } } })
 
 async function token(amount: number): Promise<void> {
   const [buyer, seller] = [await party('buyer'), await party('seller')]
@@ -122,6 +122,22 @@ async function fast(usdm: number): Promise<void> {
   console.log(`fast fixture: lock block ${entry.block.height} → Disputed block ${e.disputedInBlock ?? '-'} in ${Math.round((Date.now() - t0) / 1000)} s`)
 }
 
+// The registry against the chain: an entry whose ref is spent is marked spent (with nothing re-pointed silently), and a
+// known successor (e.g. a dispute whose registry write was lost) can be attached with --follow <old>=<new>.
+async function reconcile(follow: string | undefined): Promise<void> {
+  const bank = load()
+  if (follow) {
+    const [from, to] = follow.split('=')
+    const e = bank.find((x) => x.ref === from)
+    if (!e) throw new Error(`no entry ${from}`)
+    Object.assign(e, { disputedFrom: from, ref: to, state: 'Disputed' })
+  }
+  const status = await utxoStatus(bank.map((e) => e.ref))
+  for (const e of bank) if (status.get(e.ref) === 'spent') e.state = 'spent'
+  save(bank)
+  console.log(bank.map((e) => `${e.ref.slice(0, 16)}… ${e.state}`).join(' | '))
+}
+
 async function list(): Promise<void> {
   const bank = load()
   for (const e of bank) {
@@ -140,5 +156,6 @@ if (cmd === 'token') await token(Number(values.amount))
 else if (cmd === 'build') await build()
 else if (cmd === 'fast') await fast(Number(values.usdm))
 else if (cmd === 'dispute') await disputeAll(load(), await party('buyer'))
+else if (cmd === 'reconcile') await reconcile(values.follow)
 else if (cmd === 'list') await list()
 else throw new Error('usage: bank.ts token --amount 90 | build | dispute | list')

@@ -399,3 +399,20 @@ test('witness: an expired proposal is refused before any key is read', async () 
   const ws = witnessSetOf(await buyer.wallet.signTx(x.leg2.cborHex, true))
   assert.throws(() => witness(p, 'buyer', 2, ws), (e: unknown) => e instanceof SettleError && /^Leg 1 expired at/.test(e.message))
 })
+
+test('lock: a dead owner\'s or an expired lock is stale; a live one blocks, with its owner named', async () => {
+  const { lock, isStale, LOCK_MAX_AGE_MS } = await import('./settle.ts')
+  const { hostname } = await import('node:os')
+  const now = Date.now()
+  assert.equal(isStale({ pid: process.pid, host: hostname(), atMs: now }, now), false) // this process: alive
+  assert.equal(isStale({ pid: 2 ** 22 + 12345, host: hostname(), atMs: now }, now), true) // no such process
+  assert.equal(isStale({ pid: process.pid, host: 'another-host', atMs: now - LOCK_MAX_AGE_MS - 1 }, now), true) // too old
+  assert.equal(isStale({ pid: 1, host: 'another-host', atMs: now }, now), false) // another host, recent: respected
+  assert.equal(isStale(null, now), true)
+  const ref = 'ee'.repeat(32) + '#9'
+  const release = lock(ref)
+  assert.throws(() => lock(ref), /already running \(process \d+ on .+, since .+ SGT\)/)
+  release()
+  const again = lock(ref) // released: free again
+  again()
+})

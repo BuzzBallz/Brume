@@ -1,0 +1,68 @@
+{
+  "label": "S-1 race, contended run 4: our own bank escrow, our own keys; a data point, not a probability",
+  "escrow": "970ecd3afc383dfc68e0b72a40b3c844e6351c592523e5431464c3124c17ed16#0",
+  "leg1": "6331ca92f6e8a2bf097dc1178657377b2977656bf77409f46c030c4c459919f3",
+  "leg2": "3f4abd689b785830628ac893517a196a30ceb60056057fd54888fc0169edb063",
+  "rival": "37087b798e6cdaf05639cb92218786b7af8292f1f3d391865e5a8338258e00af",
+  "rivalPositiveControl": "evaluated OK twice against leg 1's pending output (a valid exit had leg1#0 been free)",
+  "setup": "legs to Blockfrost (seller); the rival polls Blockfrost's mempool every 200 ms, then fires raw POSTs at Koios (2.5 s timeout each) every 200 ms until leg1#0 is spent or 60 s pass",
+  "absoluteMs": {
+    "leg1Sent": 1791272016887,
+    "leg1Answered": 1791272017141,
+    "rivalSeesLeg1": 1791272017201,
+    "leg2Answered": 1791272017390,
+    "rivalAnswered": 1791272020190
+  },
+  "relativeMs": {
+    "leg1Sent": 0,
+    "leg1Answered": 254,
+    "rivalSeesLeg1": 314,
+    "leg2Answered": 503,
+    "rivalAnswered": 3303
+  },
+  "rivalSighting": "mempool",
+  "rivalAttempts": 5,
+  "rivalAttemptKinds": {
+    "BadInputsUTxO": 4,
+    "HTTP 500": 1
+  },
+  "rivalAttemptsTimeline": [
+    {
+      "atMs": 314,
+      "kind": "refused",
+      "reason": "BadInputsUTxO"
+    },
+    {
+      "atMs": 1021,
+      "kind": "refused",
+      "reason": "BadInputsUTxO"
+    },
+    {
+      "atMs": 1489,
+      "kind": "http",
+      "reason": "HTTP 500"
+    },
+    {
+      "atMs": 1955,
+      "kind": "refused",
+      "reason": "BadInputsUTxO"
+    },
+    {
+      "atMs": 2675,
+      "kind": "refused",
+      "reason": "BadInputsUTxO"
+    }
+  ],
+  "rivalAnswer": {
+    "status": "refused",
+    "detail": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\"6331ca92f6e8a2bf097dc1178657377b2977656bf77409f46c030c4c459919f3\\\"}) (TxIx {unTxIx = 0})]))))\",\"ConwayUtxowFailure (Utxo"
+  },
+  "leg2Answer": "accepted by Blockfrost",
+  "winner": "leg 2 (the settlement)",
+  "blocks": {
+    "leg1": 5259799,
+    "leg1TimeS": 1791272018,
+    "leg2": 5259799,
+    "rival": null
+  }
+}

@@ -1,7 +1,9 @@
 import type { BlockfrostProvider, UTxO } from '@meshsdk/core'
 import type { Network, Provider } from '../../shared/types.ts'
 import { KOIOS } from '../../shared/constants.ts'
-import { requireEnv, loadEnv } from './env.ts'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { requireEnv, loadEnv, ROOT } from './env.ts'
 import { mesh } from './mesh.ts'
 
 // Every write in this repo goes through src/preprod. A mainnet value anywhere is a thrown error, never a fallback.
@@ -120,6 +122,30 @@ export async function utxoStatus(refs: string[]): Promise<Map<string, 'spent' | 
 // It also lags the other way: a fresh output can be missing from it. So the candidates are the union of the Blockfrost
 // and Koios listings, and only what Koios confirms unspent is kept.
 type KoiosUtxo = { tx_hash: string; tx_index: number; address: string; value: string; asset_list: { policy_id: string; asset_name: string; quantity: string }[] | null }
+// Both providers lag the node by about a block, so an input our own last tx spent can still read as unspent. Every tx we
+// hand to a node records its inputs here (out/spent.json, kept 15 min, across processes), and liveUtxos skips them.
+const SPENT_FILE = (): string => join(ROOT, 'out', 'spent.json')
+const SPENT_TTL_MS = 15 * 60_000
+function spentByUs(): Map<string, number> {
+  const now = Date.now()
+  const m = new Map<string, number>(existsSync(SPENT_FILE()) ? (JSON.parse(readFileSync(SPENT_FILE(), 'utf8')) as [string, number][]) : [])
+  for (const [ref, at] of m) if (now - at > SPENT_TTL_MS) m.delete(ref)
+  return m
+}
+// A definite ledger refusal spent nothing (unless it was refused because those inputs are already spent).
+export function unmarkSpent(refs: string[]): void {
+  const m = spentByUs()
+  for (const r of refs) m.delete(r)
+  mkdirSync(join(ROOT, 'out'), { recursive: true })
+  writeFileSync(SPENT_FILE(), JSON.stringify([...m]))
+}
+export function markSpent(refs: string[]): void {
+  const m = spentByUs()
+  for (const r of refs) m.set(r, Date.now())
+  mkdirSync(join(ROOT, 'out'), { recursive: true })
+  writeFileSync(SPENT_FILE(), JSON.stringify([...m]))
+}
+
 export async function liveUtxos(address: string): Promise<UTxO[]> {
   const fromBlockfrost = await preprodChain().fetchAddressUTxOs(address)
   const kres = await fetch(`${KOIOS.preprod}/address_utxos`, {
@@ -135,7 +161,8 @@ export async function liveUtxos(address: string): Promise<UTxO[]> {
   const listed = [...byRef.values()]
   if (listed.length === 0) return []
   const status = await utxoStatus([...byRef.keys()])
-  return listed.filter((u) => status.get(`${u.input.txHash}#${u.input.outputIndex}`) === 'unspent')
+  const ours = spentByUs()
+  return listed.filter((u) => status.get(`${u.input.txHash}#${u.input.outputIndex}`) === 'unspent' && !ours.has(`${u.input.txHash}#${u.input.outputIndex}`))
 }
 
 // A submit has three outcomes besides success, and only one is a refusal:

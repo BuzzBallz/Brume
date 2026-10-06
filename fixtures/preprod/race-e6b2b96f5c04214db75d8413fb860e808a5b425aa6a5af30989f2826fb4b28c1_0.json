@@ -1,0 +1,36 @@
+{
+  "label": "S-1 race, contended run 1: our own bank escrow, our own keys; a data point, not a probability",
+  "escrow": "e6b2b96f5c04214db75d8413fb860e808a5b425aa6a5af30989f2826fb4b28c1#0",
+  "leg1": "409d9e2a32701d64953355afc07dd35cc0f2f04a2efad0e8169bcab1bedd7684",
+  "leg2": "953c3de01cedaaeb66b0ce5a2144f9ffd98f265b1ef17e9f38cf343e3b00f165",
+  "rival": "adc7ff7528e85cc5b78302efeca47363448dfc973c6da6516176865a0d7b3b9a",
+  "rivalPositiveControl": "evaluated OK twice against leg 1's pending output (a valid exit had leg1#0 been free)",
+  "setup": "legs to Blockfrost (seller); rival polls Blockfrost's mempool every 200 ms and submits through Koios",
+  "absoluteMs": {
+    "leg1Sent": 1791271161882,
+    "leg1Answered": 1791271162168,
+    "leg2Answered": 1791271162440,
+    "rivalSeesLeg1": 1791271162868,
+    "rivalAnswered": 1791271163183
+  },
+  "relativeMs": {
+    "leg1Sent": 0,
+    "leg1Answered": 286,
+    "leg2Answered": 558,
+    "rivalSeesLeg1": 986,
+    "rivalAnswered": 1301
+  },
+  "rivalSighting": "mempool",
+  "rivalAnswer": {
+    "status": "refused",
+    "detail": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\"409d9e2a32701d64953355afc07dd35cc0f2f04a2efad0e8169bcab1bedd7684\\\"}) (TxIx {unTxIx = 0})]))))\",\"ConwayUtxowFailure (Utxo"
+  },
+  "leg2Answer": "accepted by Blockfrost",
+  "winner": "leg 2 (the settlement)",
+  "blocks": {
+    "leg1": 5259750,
+    "leg1TimeS": 1791271184,
+    "leg2": 5259750,
+    "rival": null
+  }
+}

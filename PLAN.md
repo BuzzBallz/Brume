@@ -39,7 +39,7 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [ ] M-3 reachability engine 7×3 (part 3)
 - [ ] M-4 preprod fast fixture + bank of 6–8 locked escrows (part 4)
 - [ ] M-5 two-leg settlement, leg 2 pre-signed; path A fallback (part 5)
-- [ ] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal)
+- [x] M-6 one accept/refuse control + leg-2 replay refusal (part 10 minimal) — and C11 below
 - [ ] M-7 solver core: band, defection payoffs, fee + exposed party per path, scale-free (part 8)
 - [ ] M-8 agent server: MIP-003 endpoints + UI API, one process (`src/agent`)
 - [ ] M-9 Brume UI: escrow, grid, propose/accept/sign, submit, balances, solver panel; read-only mode on GitHub Pages
@@ -48,8 +48,8 @@ The UI steps (0:20–2:10) must work perfectly. Exact inputs are fixed in `DEMO.
 - [ ] M-12 recording + slides incl. "who pays" (part 12)
 
 **SHOULD (in this order)**
-- [ ] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing
-- [ ] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession + one refusal per other unavailable branch (A)
+- [x] S-1 race measurement 5b (A, 1 h). Until run, say nothing about racing — ONE run, 6 Oct, `fixtures/preprod/race-18268b5a…_0.json` (§10)
+- [x] S-2 own deployment (key ×3, threshold 2): admin pair `WithdrawDisputed` before/after concession (A) — pair done 6 Oct, blocks 5259662 (accepted) / 5259664 → refused (phase 2). The other unavailable branches are the C11 controls on the shared script (§10: SetRefundRequested clean; the two seller branches re-run with the guard isolated)
 - [ ] S-3 CIP-30 browser signing (upgrade of the file-drop path; only if core done)
 - [ ] S-4 solver hazard term (option to wait, one-sided arrival bound)
 - [ ] S-5 `verify <txhash>` judge script; solver over all 61 as fixture
@@ -217,6 +217,17 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 - **First refusal by the deployed bytes (A4 done-when):** the engine predicted the buyer cannot take `WithdrawRefund` while `Disputed`; built and sent anyway (`tryAnyway`, no evaluation, the node ran the script), it was refused in phase 2 (`ValidationTagMismatch (IsValid True) … PlutusFailure`) on bank escrow `8e0d6df4…#0`. Rejected from the mempool, no collateral taken.
 - A5 file-drop path end to end on a token pot (`pnpm sign --prepare / --role buyer / --role seller`): both legs in block 5259570, 8 tADA + 4 tUSDM to the seller, 12 tADA + 6 tUSDM to the buyer.
 - Both legs landed in the same block, handed 668 ms apart to one Koios node. One run: favourable, not a race measurement (S-1).
+
+**S-1 race, 6 Oct, 5 runs** (`fixtures/preprod/race-*.json`; 4 of the 5 contended — the run in block 5259678 was not — one of them run from the second session). **Same block, 5 of 5** (blocks 5259678, 5259750, 5259751, 5259754, 5259799): leg 2 accepted 503–711 ms after leg 1 was sent, both handed to one provider — **R5, sayable.** **Front-run: still unmeasured.** A rival pre-built by the buyer (its own `WithdrawRefund` taking the whole pot, evaluated as a valid exit against leg 1's pending output before each run: the positive control that a refusal is not a malformed rival) never landed, but no run gave it a clean window: run 1 watched a mempool that could not see leg 1 (first sight after the block); in runs 2–4 it saw leg 1 in Blockfrost's mempool at +314 to +1063 ms and fired through Koios, whose node had not yet received leg 1 (`BadInputsUTxO` on leg 1's own txid), and the first fixed-transport retries were cut off when the block landed (+1.1 s in run 4). **What the numbers do say:** the attack window is the seller's gap between leg 1 and leg 2 at one endpoint (249–296 ms across the contended runs) against an attacker watching that endpoint (first sight ~300 ms here) — the same order of magnitude, so **no safety claim**. **Not sayable:** "the rival was refused N/N", any probability, "cannot be raced". The solver keeps p at its worst case (1).
+
+**C11 on the shared script, first run, 6 Oct** (`fixtures/preprod/txlog-c11-8e0d6df4…_0.json`): after the seller's `AuthorizeRefund` alone, `SetRefundRequested` (buyer) was refused by the validator with the state guard as the only failing one — **clean, R5**. `SubmitResult` and `AuthorizeRefund` (seller) were also refused, but **while the seller cooldown armed by the concession was still running**, so the cooldown alone explains them: **guard not isolated, still R4** (review, 6 Oct). Then the buyer's `WithdrawRefund` — accepted (block 5259675). An isolated re-run (concession with a minimal cooldown, controls sent after it expires) is below. `Withdraw` not sent (its mandatory tagged outputs would decide): R4. The admin branch is R5 on our own deployment only; on the shared script it stays "the validator's source says".
+
+**C11 isolated re-run, 6 Oct** (`fixtures/preprod/txlog-c11-isolated-7e37dc3f…_0.json`): the concession written with the minimal seller cooldown (upper bound + 7 min + 1 min), each seller control sent only once the engine named no cooldown: `SubmitResult` (seller) refused by the validator with the emptied result hash as the only failing guard, `AuthorizeRefund` again (seller) refused with the state as the only failing guard (both phase 2); then the buyer's `WithdrawRefund`, accepted (block 5259786). **The two seller branches are now R5 on the shared script**; with `SetRefundRequested` (first run) and `WithdrawDisputed` on our own deployment, C11 is R5 for every branch but `Withdraw` (R4).
+
+**Executed on OUR OWN DEPLOYMENT (S-2), 6 Oct** — the vendored V1 blueprint with the deployed fee address, fee permille and cooldown, and only the admin set changed to our admin key ×3, threshold 2: script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, address `addr_test1wrfwwtssfd45jzzp9u86eltxnqsuxkrcryteajxs4nc5qrgfenf83` (`fixtures/preprod/own-deployment.json`, log `txlog-own-deployment.json`). Two identical Disputed escrows, arbitration window open:
+- X: the admin's `WithdrawDisputed` before any concession — **accepted** (block 5259662), as the engine predicted.
+- Y: the seller's `AuthorizeRefund` (block 5259664), then the same admin's `WithdrawDisputed` — **refused by the validator** (phase 2, `ValidationTagMismatch (IsValid True) … PlutusFailure`), as predicted: "needs Disputed (is RefundRequested); needs a result hash". Then the buyer's `WithdrawRefund` on Y — accepted (block 5259665): after the concession only the buyer moves the value.
+- Wording: "on our own deployment of the same compiled code" — R5 on our copy; on the shared script the admin branch is still "the validator's source says" (its keys are Masumi's).
 
 **Tooling traps met in A1–A2 (each fixed in `src/preprod`, each would have cost an hour later)**
 - `import … from '@meshsdk/core'` fails under Node: its ESM build pulls a libsodium file that is not shipped. Mesh is loaded through its CJS build (`src/preprod/mesh.ts`).

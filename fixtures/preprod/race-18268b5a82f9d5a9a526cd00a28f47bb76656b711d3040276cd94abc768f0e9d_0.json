@@ -1,0 +1,21 @@
+{
+  "label": "S-1 race measurement, ONE run on our own bank escrow with our own keys; a data point, not a probability",
+  "escrow": "18268b5a82f9d5a9a526cd00a28f47bb76656b711d3040276cd94abc768f0e9d#0",
+  "leg1": "92089c4c57865cea872c496b6e0dd0ae85f8630afc54448bfcbaf3108dc41e47",
+  "leg2": "bb928f2ea4ecd82d9ad009b3fcd555652de61a9ffa2a6236eb127b87db955cf9",
+  "rival": "533e4981a19e2485c72aad37536ac643126d43e1ebcee21e8bb1fb2968414659",
+  "timings": {
+    "leg1HandedToKoios": "+0 ms",
+    "leg1Accepted": "+414 ms",
+    "leg2Accepted": "+711 ms",
+    "rivalSeesLeg1": "+49143 ms",
+    "rivalSent": "+49552 ms"
+  },
+  "rivalAnswer": {
+    "status": "refused",
+    "error": "{\"error\":\"Bad Request\",\"message\":\"{\\\"contents\\\":{\\\"contents\\\":{\\\"contents\\\":{\\\"era\\\":\\\"ShelleyBasedEraConway\\\",\\\"error\\\":[\\\"ConwayUtxowFailure (UtxoFailure (BadInputsUTxO (NonEmptySet (fromList [TxIn (TxId {unTxId = SafeHash \\\\\\\"92089c4c57865cea872c496b6e0dd0ae85f8630afc54448bfcbaf3108dc41e47\\\\\\\"}) (TxIx {unTxIx = 0})]))))\\\",\\\"ConwayUtxowFailure (UtxoFailure (ValueNotConservedUTxO Mismatch (RelEQ) {supplied: MaryValue (Coin 13058496) (MultiAsset (fromList [])), expected: MaryValue (Coin 33058496) (MultiAsset (fromList [(PolicyID {policyID = ScriptHash \\\\\\\"16a55b2a349361ff88c03788f93e1e966e5d68"
+  },
+  "winner": "leg 2 (the settlement)",
+  "leg1Block": 5259678,
+  "leg2Block": 5259678
+}

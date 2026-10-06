@@ -12,7 +12,7 @@ export type LockRequest = { buyer: string; seller: string; amount: Asset[]; opti
 
 // One lock tx can create several escrows: locking runs no validator (only spending does), so P4/P5 do not apply here.
 // The funder pays; the datum names the parties, who alone can move each escrow afterwards.
-export async function lockEscrows(funder: Party, requests: LockRequest[]): Promise<{ entry: TxLogEntry; refs: string[] }> {
+export async function lockEscrows(funder: Party, requests: LockRequest[], scriptAddress: string = V1_ADDRESS.preprod): Promise<{ entry: TxLogEntry; refs: string[] }> {
   const now = Date.now()
   const funding = byLovelace(await liveUtxos(funder.address))
   const need = requests.reduce((s, r) => s + BigInt(r.amount.find((a) => a.unit === 'lovelace')?.quantity ?? '0'), 0n) + 3_000_000n
@@ -32,8 +32,8 @@ export async function lockEscrows(funder: Party, requests: LockRequest[]): Promi
   }
   for (const [unit, q] of tokensNeeded) if ((have.get(unit) ?? 0n) < q) throw new TxRuleError(`the funder holds less than ${q} of ${unit.slice(0, 12)}…`)
   const built = await buildPlain({
-    network: 'preprod', window: txWindow(now), signers: [funder], inputs, changeAddress: funder.address, maxScriptOutputs: requests.length,
-    outputs: requests.map((r) => ({ address: V1_ADDRESS.preprod, amount: r.amount, datumCbor: encodeDatum(fixtureDatum(r.buyer, r.seller, now, r.options)) })),
+    network: 'preprod', window: txWindow(now), signers: [funder], inputs, changeAddress: funder.address, maxScriptOutputs: requests.length, scriptAddress,
+    outputs: requests.map((r) => ({ address: scriptAddress, amount: r.amount, datumCbor: encodeDatum(fixtureDatum(r.buyer, r.seller, now, r.options)) })),
   })
   const entry = await submitAndConfirm(await addWitness(built, funder), preprodSubmitter(), `lock ${requests.length} fixture escrow(s)`, now)
   return { entry, refs: requests.map((_, i) => `${built.txHash}#${i}`) }

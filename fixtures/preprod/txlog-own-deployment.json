@@ -1,0 +1,104 @@
+[
+  {
+    "step": "buyer → admin 2 × 15 tADA (fee and collateral for the admin control)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "7fdc41a9e201388595f2cbacf9901dcc25e093add0159f52c70eb6b1f0283392",
+    "atMs": 1791269103177,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259657,
+      "hash": "a448f1f51ca604bf007d58f3ef6b644e8c52c75c17c3e768521c5ccfbaa32d66",
+      "slot": 135585928
+    }
+  },
+  {
+    "step": "lock 2 fixture escrow(s) at our own deployment (a lock runs no validator)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "78523249b908a52a3cce35f9eb1670c3df3be34ff6b67d07de818ca13109ab8d",
+    "atMs": 1791269145381,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259660,
+      "hash": "473d27865adf43b00671e8569ef8d7b77798087361dfb9ae0fcf51d5c2b3e369",
+      "slot": 135585977
+    }
+  },
+  {
+    "step": "WithdrawDisputed by the admin at our own deployment (engine: CAN)",
+    "network": "preprod",
+    "scriptHash": "d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d",
+    "txHash": "8e5c49cb3c3077bb77b7cff1054e18c972f8359c5bdf69699bca8523cc6a5fe5",
+    "atMs": 1791269201201,
+    "via": "koios",
+    "redeemer": "WithdrawDisputed",
+    "role": "admin",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259662,
+      "hash": "a1e894e727417238750c7fd63bb02e24afb7948bfb7930b60b9c4f5744e890ac",
+      "slot": 135586011
+    }
+  },
+  {
+    "step": "AuthorizeRefund by the seller at our own deployment (engine: CAN)",
+    "network": "preprod",
+    "scriptHash": "d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d",
+    "txHash": "64299c10ef1b75dca69b9de19b3860f43125f2e7bb8cd1a0c111ae0bcde6dad8",
+    "atMs": 1791269238535,
+    "via": "koios",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259664,
+      "hash": "5cea78cbdbb01f8390990ea35d1488ccae0a03296c946d7a247a1441efac3771",
+      "slot": 135586059
+    }
+  },
+  {
+    "step": "WithdrawDisputed by the admin at our own deployment (engine: needs Disputed (is RefundRequested); needs a result hash)",
+    "network": "preprod",
+    "scriptHash": "d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d",
+    "txHash": "a776a247abcee829b8b353f167ef0ce5da882832d8c0f6c2d2561d20f8e5e72b",
+    "atMs": 1791269294569,
+    "via": "koios",
+    "redeemer": "WithdrawDisputed",
+    "role": "admin",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 2,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol version is: Version 11\\\\nScriptInfo: SpendingScript (TxOutRef {txOutRefId = 64299c10ef1b75dca69b9de19b3860f43125f2e7bb8cd1a0c111ae0bcde6dad8, txOutRefIdx = 0}) (Just (Datum {getDatum = Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\154\\\\\\\\219V\\\\\\\\218\\\\\\\\232\\\\\\\\218\\\\\\\\DC1M\\\\\\\\182\\\\\\\\239\\\\\\\\224\\\\\\\\223 \\\\\\\\ENQ\\\\\\\\255\\\\\\\\179\\\\\\\\175\\\\\\\\NUL\\\\\\\\135\\\\\\\\163\\\\\\\\227\\\\\\\\SYN\\\\\\\\SYN\\\\\\\\231\\\\\\\\145\\\\\\\\&9\\\\\\\\209K\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"1C\\\\\\\\233\\\\\\\\160\\\\\\\\152\\\\\\\\239\\\\\\\\190\\\\\\\\178\\\\\\\\183\\\\\\\\b\\\\\\\\151\\\\\\\\147\\\\\\\\190BIOc\\\\\\\\247\\\\\\\\DEL\\\\\\\\192\\\\\\\\230\\\\\\\\153\\\\\\\\219j\\\\\\\\253\\\\\\\\134\\\\\\\\203\\\\\\\\177\\\\\\\"]]]],Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\SI\\\\\\\\234\\\\\\\\134\\\\\\\\235d\\\\\\\\212M\\\\\\\\192\\\\\\\\254\\\\\\\\154\\\\\\\\DC4\\\\\\\\207\\\\\\\\&1\\\\\\\\212\\\\\\\\SUB\\\\\\\\184\\\\\\\\US^\\\\\\\\137\\\\\\\\169\\\\\\\\216\\\\\\\\246\\\\\\\\229\\\\\\\\192\\\\\\\\US\\\\\\\\134\\\\\\\\&4~\\\\\\\"],Constr 0 [Constr 0 [Constr 0 [B \\\\\\\"\\\\\\\\247]\\\\\\\\203\\\\\\\\NAKOOJ\\\\\\\\184\\\\\\\\&2P|\\\\\\\\170\\\\\\\\208\\\\\\\\236y\\\\\\\\164\\\\\\\\&"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"<script bytes>\\\\\\\"\\\\nThe script hash is:ScriptHash \\\\\\\"d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d\\\\\\\"\\\\nThe plutus evaluation error is: CekError An error has occurred:\\\\nThe machine terminated because of an error, either from a built-in function or from an explicit use of 'error'.\\\\nCaused by: error\\\\nThe protocol vers"
+  },
+  {
+    "step": "WithdrawRefund by the buyer at our own deployment (engine: CAN)",
+    "network": "preprod",
+    "scriptHash": "d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d",
+    "txHash": "2b0f89ac0df8e81aa89b0a0fff6115c326e8ef1d9afce990e19923c320e2f03d",
+    "atMs": 1791269319682,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259665,
+      "hash": "9dbc7385ccbd56067006b4298a16adc75dd1910de41968c944f0cf6263e083fe",
+      "slot": 135586129
+    }
+  }
+]
