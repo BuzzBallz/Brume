@@ -113,7 +113,12 @@ export async function walkSettlement(escrowRef: string, logFile: string = txLogF
   // The parties as the escrow's own datum names them, read on chain at the escrow UTxO.
   const d = readDatum(await datumAt(escrowRef))
   const parties = { buyer: d.buyer.payment.hash, seller: d.seller.payment.hash }
-  return { escrowRef, parties, legs: [await walkLeg(1, leg1.txHash, parties), await walkLeg(2, leg2.txHash, parties)] }
+  const legs = [await walkLeg(1, leg1.txHash, parties), await walkLeg(2, leg2.txHash, parties)]
+  // The log names the two txs; the chain must say they are this settlement: leg 1 spends this escrow, leg 2 spends leg 1's
+  // continuation. Otherwise a walk would vouch for "no admin key" on two unrelated transactions.
+  if (legs[0].redeemer.spends !== escrowRef) throw new Error(`${escrowRef}: leg 1 ${leg1.txHash} spends ${legs[0].redeemer.spends}, not this escrow`)
+  if (legs[1].redeemer.spends !== `${leg1.txHash}#0`) throw new Error(`${escrowRef}: leg 2 ${leg2.txHash} spends ${legs[1].redeemer.spends}, not leg 1's continuation`)
+  return { escrowRef, parties, legs }
 }
 
 export type Settlement = Awaited<ReturnType<typeof walkSettlement>>
