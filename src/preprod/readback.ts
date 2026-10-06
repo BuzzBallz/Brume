@@ -8,6 +8,7 @@ import type { Provider, TxLogEntry, Value } from '../../shared/types.ts'
 import { KOIOS } from '../../shared/constants.ts'
 import { blockfrostGet } from './chain.ts'
 import { readDatum } from './datum.ts'
+import { mesh } from './mesh.ts'
 
 export type Readback = NonNullable<TxLogEntry['readback']>
 type Flow = { address: string; amount: { unit: string; quantity: string }[] }
@@ -37,19 +38,30 @@ async function viaKoios(txHash: string): Promise<{ fee: bigint; valid: boolean; 
   return { fee: BigInt(t.fee), valid: (t.plutus_contracts ?? []).every((c) => c.valid_contract !== false), inputs: t.inputs.map(flow), outputs: t.outputs.map(flow) }
 }
 
+// The payment key hash of an address; none for a script address.
+const keyOf = (address: string): string | undefined => {
+  try {
+    return mesh.deserializeAddress(address).pubKeyHash || undefined
+  } catch {
+    return undefined
+  }
+}
+
 // sentVia: the provider that accepted the send; the read-back uses the other one.
 export async function readBack(txHash: string, sentVia: Provider | undefined, buyer: string, seller: string): Promise<Readback | undefined> {
   const provider: Provider = sentVia === 'blockfrost' ? 'koios' : 'blockfrost'
   const t = provider === 'blockfrost' ? await viaBlockfrost(txHash) : await viaKoios(txHash)
   if (!t) return undefined
+  // By payment key, not by whole address: the seller's change and payout may sit under another staking part.
+  const [bk, sk] = [keyOf(buyer), keyOf(seller)]
   const b = new Map<string, bigint>(), s = new Map<string, bigint>()
   for (const o of t.outputs) for (const a of o.amount) {
-    if (o.address === buyer) add(b, a.unit, BigInt(a.quantity))
-    if (o.address === seller) add(s, a.unit, BigInt(a.quantity))
+    if (keyOf(o.address) === bk) add(b, a.unit, BigInt(a.quantity))
+    if (keyOf(o.address) === sk) add(s, a.unit, BigInt(a.quantity))
   }
   for (const i of t.inputs) for (const a of i.amount) {
-    if (i.address === buyer) add(b, a.unit, -BigInt(a.quantity))
-    if (i.address === seller) add(s, a.unit, -BigInt(a.quantity))
+    if (keyOf(i.address) === bk) add(b, a.unit, -BigInt(a.quantity))
+    if (keyOf(i.address) === sk) add(s, a.unit, -BigInt(a.quantity))
   }
   add(s, 'lovelace', t.fee) // the seller paid leg 2's fee from its own input
   return { provider, validContract: t.valid, balances: { buyer: toValue(b), seller: toValue(s) } }
