@@ -275,7 +275,7 @@ function sendButton(row, rerun) {
   const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
     btn.disabled = true
     btn.textContent = 'Sending…'
-    try { await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun() }
+    try { rerun(await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref })) }
     catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
   } }, 'Send both legs')
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
@@ -344,12 +344,19 @@ async function settleView(row) {
   const panel = h('div', { class: 'settle' })
   const solver = await load('solver', row.ref)
   const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30) : null
-  const rerun = async () => {
-    const [proposal, log] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
+  let sent = [] // the submit response, shown while GET /api/txlog has nothing for this escrow
+  let shown = null // label of the step last scrolled into view
+  const rerun = async justSent => {
+    if (Array.isArray(justSent)) sent = justSent
+    const [proposal, fetched] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
+    const log = fetched.length ? fetched : sent
     const mine = proposal?.escrowRef === row.ref ? proposal : null
     const steps = settleSteps(row, mine, log, rerun, band)
     panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
-    requestAnimationFrame(() => panel.querySelector('.step.current, .step.error')?.scrollIntoView({ block: 'nearest' }))
+    const now = panel.querySelector('.step.current, .step.error')
+    const label = now?.querySelector('.step-label').textContent ?? null
+    if (now && label !== shown) requestAnimationFrame(() => now.scrollIntoView({ block: 'nearest' })) // only when the step changes, so polling never yanks the scroll
+    shown = label
     const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
     if (live && waitingOnSignature) setTimeout(() => panel.isConnected && rerun(), POLL_MS) // picks up the signed file dropped by pnpm sign; stops once the view is left
   }
