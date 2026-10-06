@@ -169,6 +169,7 @@ The buyer signs leg 2 against leg 1's output before that output exists. The sell
 | Escrow | Action | Engine | Result |
 |---|---|---|---|
 | `8e0d6df4…#0` (Disputed) | buyer `WithdrawRefund` | needs FundsLocked or RefundRequested | refused by the validator (phase 2), body `ae8c0418…` |
+| `c3e0b68a…#0` (Disputed), from the UI | buyer `WithdrawRefund` | needs FundsLocked or RefundRequested; needs an empty result hash | refused by the validator (phase 2), body `7b501a19e699405fcad115f517f9cc4050b3982d97f46426ad3e03eb3301819b`; the escrow is unspent |
 
 ### After a concession alone (claim C11, shared script)
 
