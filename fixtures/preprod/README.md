@@ -118,7 +118,7 @@ Rerun: `node src/preprod/race.ts <Disputed ref of yours> --share 0.4 --run k`.
 
 ## Not here yet
 
-- **Path A settlement** (buyer first): priced by the solver, shown in the UI's solver panel, not built in `src/preprod`, never run (PLAN M-5).
+- **Path A settlement** (buyer first): priced by the solver, shown as a comparison in the UI, not built and never run, by decision (PLAN §10, D16).
 
 ## Every transaction, per file
 
