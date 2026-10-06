@@ -158,7 +158,7 @@ COWORKER_ID=01a1128d-de6e-700b-b929-c5b4289c2a05 node src/agent/worker.ts   # ne
 
 The worker lists the Tasks assigned to the Coworker, starts each READY one, computes the answer and completes the Task. It writes a journal per Task in `out/worker/` before every external write, so a restart resumes instead of redoing work, and an uncertain start or completion is checked against the Task's status first. A failed chain read leaves the Task running for the next poll; it is never answered from a hole.
 
-First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on the mainnet escrow `a7084c50…#0`, CREATED → READY → RUNNING → COMPLETED (completion event `01a11290-6d79-722c-bbfc-1b7b71df6aeb`). Event access is granted (TOKEN2049 Workspace, access `01a11296-82e0-7031-992e-117e7fafdbec`), and an event Task ran through the same worker (`01a112bf-cf3c-772c-8f52-3a50e33d3c8d`).
+First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on the mainnet escrow `a7084c50…#0`, CREATED → READY → RUNNING → COMPLETED (completion event `01a11290-6d79-722c-bbfc-1b7b71df6aeb`). Event access is granted (TOKEN2049 Workspace, access `01a11296-82e0-7031-992e-117e7fafdbec`), and an event Task ran through the same worker, paid and collected (below).
 
 **Paid Task, seller paid.** With `PAID_TASKS=true` the worker asks our payment service for signed terms (1 test USDM, Preprod, Web3CardanoV2, agent registered with Dynamic pricing), posts them on the Task as a `masumiPayment` event, runs the job once the escrow is confirmed funded, submits the result hash, completes the Task, and reads the seller receipt after the payment service has collected.
 
@@ -175,6 +175,8 @@ First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on th
 The receipt from `sokosumi runtime receipt` says `settled: true`, `onChainState: Withdrawn`, with the same transaction hash. The net amount was checked separately on Blockfrost, from that transaction's inputs and outputs at the seller address.
 
 A second paid Task, the hire filmed with the take at 0.40 (`01a112b7-41b4-711b-b920-030378f45aed`, on escrow `0452fc53…#0`): payment event `01a112b7-533e-74b2-97cd-d4e2062c6d84`, escrow funded in `56334a9331577ea2ac7491f748b327386f811bcd2836bd1e9112bf0978d06205` (block 5261685), result hash in `5a7b5196947a7bb17d588fc4be125dc038785e3c9fa3bae9e3530d38712527b8` (block 5261687), collected by the seller in [`2563ba0104e1fd2dccbc5ec0b24ad67411ea89bee8a7753f9e07b89b578aa4b1`](https://preprod.cardanoscan.io/transaction/2563ba0104e1fd2dccbc5ec0b24ad67411ea89bee8a7753f9e07b89b578aa4b1) (block 5261808), net 1 tUSDM to the same seller address, checked the same way.
+
+A third paid Task, created in the TOKEN2049 event Workspace (`01a112bf-cf3c-772c-8f52-3a50e33d3c8d`): payment event `01a112bf-e69f-726c-bbc3-e09f71efe17a`, collected by the seller in [`8375bacaf9f08a9355e2a19413a866ff40eb7bfe67391a572b2e1a437888d6b9`](https://preprod.cardanoscan.io/transaction/8375bacaf9f08a9355e2a19413a866ff40eb7bfe67391a572b2e1a437888d6b9) (block 5261832), net 1 tUSDM, same check.
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
