@@ -41,6 +41,8 @@ const readJson = (file: string, missing: string) => {
   if (!existsSync(file)) throw new HttpError(404, missing)
   return JSON.parse(readFileSync(file, 'utf8'))
 }
+// No file yet is an answer (nothing proposed, nothing sent), not an error: a 200, so the browser logs no failed request.
+const readOr = (file: string, none: unknown) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none)
 const saveProposal = (p: Proposal) => {
   mkdirSync(join(proposalFile(p.escrowRef), '..'), { recursive: true })
   writeFileSync(proposalFile(p.escrowRef), JSON.stringify(p, null, 2) + '\n')
@@ -81,7 +83,7 @@ const routes: Record<string, Handler> = {
   'GET /api/census': async () => ({ body: { census: await getCensus() } }),
   'GET /api/datum': async (url) => ({ body: await readDatum(parseNet(url.searchParams.get('net') ?? 'mainnet'), parseRef(url.searchParams.get('ref'))) }),
   'GET /api/bank': async () => ({ body: { bank: await getBank() } }),
-  'GET /api/txlog': (url) => ({ body: { txlog: readJson(txLogFile(parseRef(url.searchParams.get('ref'))), 'no run recorded for this escrow') } }),
+  'GET /api/txlog': (url) => ({ body: { txlog: readOr(txLogFile(parseRef(url.searchParams.get('ref'))), []) } }),
   'GET /api/grid': async (url) => {
     const e = await escrowFor(url)
     return { body: { grid: reach(e.datum, e.value, Date.now(), PARAMS, e.ref) } }
@@ -109,7 +111,7 @@ const routes: Record<string, Handler> = {
   // `error` is the sentence of a send that failed after its 202.
   'GET /api/proposal/:id': (url) => {
     const ref = refOfPath(url)
-    return { body: { proposal: readJson(proposalFile(ref), 'no proposal for this escrow yet'), sending: sending.has(ref), error: sendErrors.get(ref) ?? null } }
+    return { body: { proposal: readOr(proposalFile(ref), null), sending: sending.has(ref), error: sendErrors.get(ref) ?? null } }
   },
   // witness() keeps a seller's leg-1 signature in the seller's own record, never in the proposal, and that signature
   // starts the send at once (first-mover rule, PLAN §4).

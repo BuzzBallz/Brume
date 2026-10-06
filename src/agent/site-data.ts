@@ -28,6 +28,9 @@ write('grid', { grid: reach(datum, hero.value, now, PARAMS, HERO_REF) })
 write('solver', { solver: solve(solverInputFor(HERO_REF, datum, hero.value, now), 'B') })
 const bank = await getBank()
 write('bank', { bank })
+// The snapshot holds no settlement run: "nothing yet" files, so Pages answers 200 instead of logging a 404.
+write('settle', { proposal: null })
+write('txlog', { txlog: [] })
 
 console.log(`docs/data written · hero ${HERO_REF} · tip ${census.tip.height} · ${census.open} open · ${census.holes} holes`)
 console.log(`preprod bank: ${bank.length} escrows`)
