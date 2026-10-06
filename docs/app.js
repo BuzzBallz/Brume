@@ -653,12 +653,12 @@ function renderBands(solver) {
 }
 
 function renderPaths(solver, value) {
-  const paths = [['Seller concedes first', solver.pathB], ['Buyer concedes first', solver.pathA]]
+  const paths = [['Seller concedes first', solver.pathB], ['Buyer concedes first', solver.pathA, 'not offered: comparison only']] // Settle builds path B only
   const row = (label, cell) => h('tr', {}, h('th', { scope: 'row' }, label), paths.map(([, p]) => h('td', {}, cell(p))))
   return h('section', { class: 'paths' },
     h('h2', {}, 'What each exit path costs'),
     h('table', {},
-      h('thead', {}, h('tr', {}, h('td'), paths.map(([name]) => h('th', { scope: 'col' }, name)))),
+      h('thead', {}, h('tr', {}, h('td'), paths.map(([name, , note]) => h('th', { scope: 'col' }, name, note && h('span', { class: 'hint col-note' }, note))))),
       h('tbody', {},
         row('Protocol fee', p => Object.keys(p.fee).length ? perAsset(p.fee, value) : 'None'),
         row('Exposed on the second leg', p => cap(p.exposedParty)),
