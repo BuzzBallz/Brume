@@ -95,10 +95,24 @@ export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise
 
 // Blockfrost's address listing lags a fresh spend (seen 6 Oct: an input spent one block earlier was still listed), so every
 // UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws.
+// It also lags the other way: a fresh output can be missing from it. So the candidates are the union of the Blockfrost
+// and Koios listings, and only what Koios confirms unspent is kept.
+type KoiosUtxo = { tx_hash: string; tx_index: number; address: string; value: string; asset_list: { policy_id: string; asset_name: string; quantity: string }[] | null }
 export async function liveUtxos(address: string): Promise<UTxO[]> {
-  const listed = await preprodChain().fetchAddressUTxOs(address)
+  const fromBlockfrost = await preprodChain().fetchAddressUTxOs(address)
+  const kres = await fetch(`${KOIOS.preprod}/address_utxos`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _addresses: [address], _extended: true }), signal: AbortSignal.timeout(30_000),
+  })
+  if (!kres.ok) throw new Error(`Koios address_utxos HTTP ${kres.status}: cannot list the UTxOs on a second provider`)
+  const fromKoios: UTxO[] = ((await kres.json()) as KoiosUtxo[]).map((r) => ({
+    input: { txHash: r.tx_hash, outputIndex: r.tx_index },
+    output: { address: r.address, amount: [{ unit: 'lovelace', quantity: r.value }, ...(r.asset_list ?? []).map((a) => ({ unit: a.policy_id + a.asset_name, quantity: a.quantity }))] },
+  }))
+  const byRef = new Map<string, UTxO>()
+  for (const u of [...fromKoios, ...fromBlockfrost]) byRef.set(`${u.input.txHash}#${u.input.outputIndex}`, u)
+  const listed = [...byRef.values()]
   if (listed.length === 0) return []
-  const refs = listed.map((u) => `${u.input.txHash}#${u.input.outputIndex}`)
+  const refs = [...byRef.keys()]
   const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
     method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
   })
