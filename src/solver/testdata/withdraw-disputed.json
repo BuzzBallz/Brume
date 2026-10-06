@@ -1,0 +1,189 @@
+{
+  "source": "Koios mainnet tx_info + datum_info, read 7 Oct 2026, trimmed to the fields src/solver/history.ts reads; values unchanged",
+  "txs": [
+    {
+      "tx_hash": "20fa8df4d36aba0a65718294ce2b7564ab693bbd4a755a3fd851041c11901ab8",
+      "block_height": 12704767,
+      "tx_timestamp": 1764282420,
+      "inputs": [
+        {
+          "tx_hash": "a907fd6bd2fcf1df23779323c8d97ac68855838b56959de2f85904477435e64e",
+          "tx_index": 1,
+          "value": "75950239",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "66000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "89eef9ea84e0ee7fe4921fa93eb2873ff6e34473f751d5d52cb75aa6"
+          },
+          "datum_hash": null
+        },
+        {
+          "tx_hash": "d0d13c1f16e7974875d115b4083f2c6099ee03fce5b25fe44af6949a4294e03d",
+          "tx_index": 0,
+          "value": "4029850",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "3000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0"
+          },
+          "datum_hash": "044c0db3aee795f3b0718c2967fe17bd7116ea020b49a0a122401757509d2e55"
+        }
+      ],
+      "outputs": [
+        {
+          "tx_hash": "20fa8df4d36aba0a65718294ce2b7564ab693bbd4a755a3fd851041c11901ab8",
+          "tx_index": 0,
+          "value": "4029850",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "3000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2"
+          },
+          "datum_hash": null
+        },
+        {
+          "tx_hash": "20fa8df4d36aba0a65718294ce2b7564ab693bbd4a755a3fd851041c11901ab8",
+          "tx_index": 1,
+          "value": "75453943",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "66000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "89eef9ea84e0ee7fe4921fa93eb2873ff6e34473f751d5d52cb75aa6"
+          },
+          "datum_hash": null
+        }
+      ],
+      "plutus_contracts": [
+        {
+          "script_hash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+          "valid_contract": true,
+          "spends_input": {
+            "tx_hash": "d0d13c1f16e7974875d115b4083f2c6099ee03fce5b25fe44af6949a4294e03d",
+            "tx_index": 0
+          },
+          "input": {
+            "redeemer": {
+              "purpose": "spend",
+              "datum": {
+                "value": {
+                  "constructor": 4
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "tx_hash": "00b64e1de0c3f0a392d5b4415ab33f5c9d88d33fc1170aa769c04c2cb72f9124",
+      "block_height": 12245351,
+      "tx_timestamp": 1754954187,
+      "inputs": [
+        {
+          "tx_hash": "607e17c609d60dd8e3f330abab9083f76693c1a1ae65b800427aae52ffcbec87",
+          "tx_index": 1,
+          "value": "43590870",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "35000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "89eef9ea84e0ee7fe4921fa93eb2873ff6e34473f751d5d52cb75aa6"
+          },
+          "datum_hash": null
+        },
+        {
+          "tx_hash": "d203334446b84bb7089fb51de83c86a848db7c38df5da3e03577abae0a1bb83c",
+          "tx_index": 0,
+          "value": "3754010",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "10000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0"
+          },
+          "datum_hash": "622ba6481ed0267c46dd2d15fb465002f312899e839e71958e870524c10632fb"
+        }
+      ],
+      "outputs": [
+        {
+          "tx_hash": "00b64e1de0c3f0a392d5b4415ab33f5c9d88d33fc1170aa769c04c2cb72f9124",
+          "tx_index": 0,
+          "value": "3754010",
+          "asset_list": [],
+          "payment_addr": {
+            "cred": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2"
+          },
+          "datum_hash": null
+        },
+        {
+          "tx_hash": "00b64e1de0c3f0a392d5b4415ab33f5c9d88d33fc1170aa769c04c2cb72f9124",
+          "tx_index": 1,
+          "value": "43096642",
+          "asset_list": [
+            {
+              "policy_id": "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad",
+              "asset_name": "0014df105553444d",
+              "quantity": "45000000"
+            }
+          ],
+          "payment_addr": {
+            "cred": "89eef9ea84e0ee7fe4921fa93eb2873ff6e34473f751d5d52cb75aa6"
+          },
+          "datum_hash": null
+        }
+      ],
+      "plutus_contracts": [
+        {
+          "script_hash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+          "valid_contract": true,
+          "spends_input": {
+            "tx_hash": "d203334446b84bb7089fb51de83c86a848db7c38df5da3e03577abae0a1bb83c",
+            "tx_index": 0
+          },
+          "input": {
+            "redeemer": {
+              "purpose": "spend",
+              "datum": {
+                "value": {
+                  "constructor": 4
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "datums": {
+    "044c0db3aee795f3b0718c2967fe17bd7116ea020b49a0a122401757509d2e55": "d8799fd8799fd8799f581c98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2ffd8799fd8799fd8799f581c3ecccc6a2fccae86a2fb80b11c33b2ffe30592f2f226b8037655f85dffffffffd8799fd8799f581c6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6ffd8799fd8799fd8799f581c06b429219ff910698a52f3f0d58949d583c23c3bba3c3a30eb76d7f4ffffffff582aa40101032706212158201f860256f246b087985bee9899cd30f580a54d8414cb64e6b8474a8117a781465f5840845869a301270458201f860256f246b087985bee9899cd30f580a54d8414cb64e6b8474a8117a7814667616464726573735839016c834b85d78061599589a10c5840890939d7b855620ad460e8c9f5195be606b429219ff910698a52f3f0d58949d583c23c3bba3c3a30eb76d7f4a166686173686564f45820fc62359e8cc946618158400453416b7d0293c8a55f30c69e9ac9abbd4bc19369580258406d6d07137f3baf26dac077d0770560474e0df0f616761ad5ee004d5590a5d78b9661bba532c6d3581966200867c3b03bf0bffc9f4d717715406cf67e8d7f17436205ff5f5840cb1277fd15dca73d30ebc4d2f46b3f89eb45a80ceb4326503a4697a6eb0e54e6ad6424e3ce9e47bbd8364984bd731b41de591f1d11f6d7d43d0da9b91a8a7abb581cc0228db77d9dc8422fe81504b1362e15eb2cfc5aaf4aed6a0a20f0adff4aead6682ef5524e89927c00582090b39ace4731bde6e0ca794a49339ca7bf4046f47d5a1adc14f5a04ed14428225820f3a7d9d184050816af4add9d9977f850f93b0be16d95b4e9b27096ae03c03f8d1b000001999c9595d61b000001999f28c3d61b00000199a0725ad61b00000199a1bbf1d6001b000001999a3529a0d87c80ff",
+    "622ba6481ed0267c46dd2d15fb465002f312899e839e71958e870524c10632fb": "d8799fd8799fd8799f581c98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2ffd8799fd8799fd8799f581c3ecccc6a2fccae86a2fb80b11c33b2ffe30592f2f226b8037655f85dffffffffd8799fd8799f581c50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5ffd8799fd8799fd8799f581c276569485d27dd37a748f5218c8b1ecd0e778c4689a63fe01e4e2ca1ffffffff582aa40101032706212158208e823fc0455ce6c6aa5b3c60852d7502d75aa8701be32f2971a5d02f1b9919de5f5840845869a301270458208e823fc0455ce6c6aa5b3c60852d7502d75aa8701be32f2971a5d02f1b9919de676164647265737358390150b8d8281300d1d3632c7d4a584077c4ced68aeecc87eec57e5af67377d5276569485d27dd37a748f5218c8b1ecd0e778c4689a63fe01e4e2ca1a166686173686564f45820a267a40d8637aaddcc5840e7a8f9e223f8a83c78914e2ae4b68586ce964337b226025840306873a7a337cc37335c55434d4f5fbe06ea8800bbc4db3b7870e4e39f339b714eb57f1960eb575819df29113b3fb2ac72e3f757741c875e2b7204e5f798742fbe05ff58206a15c3c5842f79d80581659cda3ee23ef2c341a469561681b27046a0a5ff76cc4a5513f352abb94db495a61a0039481a58200ef914d1d83d423cd977010fc5167b4d74f71658167f5f6c8a5a44666aca79f45820fb32fad34d12284b4cb21ec22931f6a0b144fc2edb78ab6d0e19a0e7a0906f761b000001983343e8611b0000019835d716611b000001983720ad611b00000198386a4461001b0000019836e2f220d87c80ff"
+  }
+}
