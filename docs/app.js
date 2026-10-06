@@ -611,7 +611,7 @@ function renderWitnesses(w) {
   const names = list => list.length ? list.join(', ') : 'none'
   return h('section', { class: 'witnesses' },
     h('h2', {}, 'Who signed'),
-    h('p', { class: 'hint' }, `Read back from the chain: every key that signed, named against this escrow's datum. Admin keys among the signers: ${w.noAdminKey ? none : 'present'}.`),
+    h('p', { class: 'hint' }, `Read back from the chain: every key that signed, named against this escrow's datum. Admin keys among the signers: ${w.noAdminKey ? none : 'present'}.${w.noAdminKey ? ' On leg 2 the seller signs only for its own fee input.' : ''}`),
     h('ol', { class: 'timeline' }, w.legs.map(l => h('li', { class: 'accepted' },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, `Leg ${l.leg}, ${l.redeemer.name}`),
@@ -701,7 +701,7 @@ function renderBands(solver) {
       solver.bands.map(b => [
         h('span', { class: 'band-label' }, `Buyer who would wait at most ${b.horizonDays} days`),
         b.feasible === false
-          ? h('span', { class: 'band-none' }, 'No split both sides accept at this horizon.')
+          ? h('span', { class: 'band-none' }, 'No seller share beats waiting for this buyer at this horizon.')
           : [h('div', { class: 'track', title: `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)} of the value` },
               h('span', { class: 'range', style: `left:${b.sellerShareMin * 100}%;width:${(b.sellerShareMax - b.sellerShareMin) * 100}%` })),
             h('span', { class: 'band-value mono' }, `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)}`)],
@@ -719,11 +719,15 @@ const rate = r => r * 100 >= 1e5 ? 'over 100,000\u00a0%/yr' : `${Math.ceil(r * 1
 
 function renderWait(wait) {
   const d = wait.dormancy
-  const where = d.providers.length === 1 ? ' on one provider' : d.providers.length >= 2 && d.method !== 'pin' ? ` on ${d.providers.length === 2 ? 'two' : d.providers.length} providers` : ''
+  const names = d.providers.map(p => ({ koios: 'Koios', blockfrost: 'Blockfrost' })[p] ?? p).join(' and ')
+  const checked = d.method === 'live' && names
+    ? `checked through block ${d.through.height.toLocaleString('en')} on ${names}`
+    : `checked to block ${d.through.height.toLocaleString('en')}, the block pinned with the census`
   const alert = d.status !== 'silent' || d.acted.length > 0
   return h('section', { class: 'paths wait' },
     h('h2', {}, 'Waiting for an arbiter'),
-    h('p', { class: 'hint' }, `No arbitration since ${day(d.lastActionMs)}, checked to block ${d.through.height.toLocaleString('en')}${where} (${d.method}).`),
+    h('p', { class: 'hint' }, `No arbitration since ${day(d.lastActionMs)}, ${checked}.`),
+    h('p', { class: 'hint' }, 'The seller\'s payoff from arbitration: 0, received in none of the 120 arbitrations on record (fixtures/arbitrations-14034022.json).'),
     alert
       ? h('div', { class: 'alert', role: 'alert' }, h('strong', {}, 'ALERT '),
           d.acted.length
@@ -733,7 +737,7 @@ function renderWait(wait) {
       : [h('p', { class: 'hint' }, `At 95 %, the arbiter acts at most once every ${Math.round(wait.meanGapDaysAtLeast)} days on average; nothing puts a floor under that.`),
         h('table', {},
           h('thead', {}, h('tr', {}, ['Seller share', 'Beats waiting for a buyer who would stop within', 'or who discounts at, or more'].map(c => h('th', { scope: 'col' }, c)))),
-          h('tbody', {}, wait.curve.map(p => h('tr', { class: p.feasible ? null : 'off', title: p.feasible ? null : 'Outside the splits both sides can accept' },
+          h('tbody', {}, wait.curve.map(p => h('tr', { class: p.feasible ? null : 'off', title: p.feasible ? null : 'Outside the band for a buyer who would wait at most 30 days' },
             h('th', { scope: 'row', class: 'mono' }, pct(p.sellerShare)),
             h('td', { class: 'mono' }, p.deadlineDays === null ? 'any wait' : `${Math.floor(p.deadlineDays)}\u00a0days`),
             h('td', { class: 'mono' }, p.breakEvenDiscountAnnual === null ? 'no rate does' : rate(p.breakEvenDiscountAnnual))))))],
