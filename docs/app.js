@@ -453,7 +453,8 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
           : submitted
             ? [h('p', {}, 'Submitted to the agent. Waiting for the first leg to appear on preprod.')]
             : [sendButton(row, rerun), validity] },
-    { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
+    { label: 'Balances read back from the second indexer', done: !!leg2?.readback,
+      waiting: leg2?.block ? 'Read-back in progress' : 'Waiting for read-back', // the indexer may lag a confirmed leg 2: never a failure
       body: [
         leg2?.readback && h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
         leg2?.block && proposal.payout && renderBalances(proposal.payout, leg2.readback?.balances ?? null), // what leg 2 wrote, until a read-back exists
@@ -610,7 +611,7 @@ async function settleView(row) {
     // the background submit, the blocks, the read-back. A refusal or an expired leg 1 stops it.
     const ended = steps.every(s => s.done) || steps.some(s => s.error)
     clearTimeout(timer)
-    if (live && mine && !ended && !row.spent) timer = setTimeout(poll, POLL_MS) // a spent escrow's run is history
+    if (live && mine && !ended && (!row.spent || steps[4].done)) timer = setTimeout(poll, POLL_MS) // a spent escrow's run is history, but for its read-back
   }
   await rerun()
   return panel
