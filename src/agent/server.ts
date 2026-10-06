@@ -1,11 +1,12 @@
 import './env.ts'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { extname, join, normalize } from 'node:path'
 import type { Census } from '../../shared/types.ts'
 import { runCensus } from '../census/census.ts'
 import { body, HttpError, mockFile, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
+import { getBank } from './bank.ts'
 import { mip003 } from './mip003.ts'
 
 const PORT = Number(process.env.PORT ?? 8787)
@@ -44,6 +45,12 @@ const routes: Record<string, Handler> = {
   ...mip003,
   'GET /api/census': async () => ({ body: { census: await getCensus() } }),
   'GET /api/datum': async (url) => ({ body: await readDatum(parseNet(url.searchParams.get('net') ?? 'mainnet'), parseRef(url.searchParams.get('ref'))) }),
+  'GET /api/bank': async () => ({ body: { bank: await getBank() } }),
+  'GET /api/txlog': (url) => {
+    const file = join(ROOT, 'fixtures/preprod', `txlog-${parseRef(url.searchParams.get('ref')).replace('#', '_')}.json`)
+    if (!existsSync(file)) throw new HttpError(404, 'no run recorded for this escrow')
+    return { body: { txlog: JSON.parse(readFileSync(file, 'utf8')) } }
+  },
   'GET /api/grid': () => mock(mockFile('grid')),
   'GET /api/solver': () => mock(mockFile('solver')),
   'POST /api/try': () => mock(mockFile('txlog').txlog.find((e: { status: string }) => e.status === 'refused')),

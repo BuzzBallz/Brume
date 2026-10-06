@@ -1,6 +1,8 @@
+import './env.ts'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { runCensus } from '../census/census.ts'
 import { decodeDatum } from '../census/decode.ts'
+import { getBank } from './bank.ts'
 import { mockGrid, mockSolver, ROOT } from './escrow.ts'
 
 const HERO_REF = process.env.HERO_REF ?? 'a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0'
@@ -19,9 +21,13 @@ const write = (name: string, body: unknown) => writeFileSync(new URL(`${name}.js
 write('census', { census })
 write('datum', { ref: HERO_REF, datum, value: hero.value })
 // ponytail: no producer for grid and solver yet (stream A), so the snapshot carries the mock shapes; swap for engine and solver output when they land.
-write('grid', { grid: mockGrid(HERO_REF, datum.state) })
-write('solver', { solver: mockSolver(HERO_REF) })
+const NOTE = 'MOCK, no producer yet'
+write('grid', { _note: NOTE, grid: mockGrid(HERO_REF, datum.state) })
+write('solver', { _note: NOTE, solver: mockSolver(HERO_REF) })
+const bank = await getBank()
+write('bank', { bank })
 
 console.log(`docs/data written · hero ${HERO_REF} · tip ${census.tip.height} · ${census.open} open · ${census.holes} holes`)
 console.log('MOCK, no producer yet: grid, solver')
+console.log(`preprod bank: ${bank.length} escrows`)
 if (!census.secondProvider) console.log('second provider: skipped (no key)')
