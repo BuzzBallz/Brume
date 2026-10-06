@@ -1,0 +1,70 @@
+[
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3",
+    "atMs": 1791292911821,
+    "via": "koios",
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260711,
+      "hash": "80ba8a03b78a231560575976f9b956510989aac60dff841aaacaa4fb4066499e",
+      "slot": 135609721
+    }
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+    "atMs": 1791292917612,
+    "via": "blockfrost",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260711,
+      "hash": "80ba8a03b78a231560575976f9b956510989aac60dff841aaacaa4fb4066499e",
+      "slot": 135609721
+    },
+    "readback": {
+      "provider": "koios",
+      "validContract": true,
+      "balances": {
+        "buyer": {
+          "lovelace": "5000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2500000"
+        },
+        "seller": {
+          "lovelace": "15000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "7500000"
+        }
+      }
+    }
+  },
+  {
+    "step": "replay leg 2 (same bytes)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+    "atMs": 1791292929109,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "seller",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+  }
+]
