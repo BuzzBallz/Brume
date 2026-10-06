@@ -32,6 +32,7 @@ pnpm site:data                      # snapshot docs/data/*.json for GitHub Pages
 pnpm verify <tx hash> [network]     # read a transaction on Koios and, with a key, Blockfrost; says whether they agree
 pnpm engine <ref> [--net preprod]   # the 7×3 reachability grid of one escrow
 pnpm solver <ref> [--net preprod]   # the split bands of one escrow, path B by default
+node src/census/solver-all.ts        # the solver over every Disputed escrow of the pinned census, no network
 pnpm sign --prepare <ref> [--share 0.4]  # seller side: writes the proposal file
 pnpm sign --role buyer|seller <file> # file-drop signature of a proposal (needs the party's key in .env)
 ```
@@ -59,6 +60,8 @@ Pinned to tip block **14031954**, hash `e4d15bf4126618bbf9c9ae9d0d3077e90815a1fa
 | Disputed, held | 295.342750 ADA and 498.15 USDM (native units, no fiat) |
 
 The two providers agree: 141 refs on each, the same values, the same inline datums and the same totals (794.769350 ADA, 669.70 USDM and 1 unit of one other asset over all open UTxOs), printed as `diff: none`. A run without `BLOCKFROST_MAINNET_PROJECT_ID` in `.env` is single-provider and says so; `pnpm census:mainnet --pin` re-reads both providers and re-pins the two snapshots.
+
+The solver over all 61 Disputed escrows, priced at the census tip on path B, is in `fixtures/mainnet/solver-disputed.json` (regenerate with `node src/census/solver-all.ts`). The bands are the same for every escrow (0 to 93.5 % of the value to the seller at 7 days, 0 to 75 % at 30, 0 to 42.2 % at 90): the solver is scale-free, and at one time the arbiter's dormancy and the measured arbitration shares are the same for all of them. What differs from one escrow to the next is the fee, the collateral floor and what a defector keeps, in each escrow's own assets.
 
 The decoder is checked three ways in `src/census/census.test.ts`: against Koios's own decoding of a real mainnet datum, on a set of corrupted datums that must fail (truncated, trailing byte, state as an integer, unknown state, 11 and 15 fields), and on the census arithmetic.
 
