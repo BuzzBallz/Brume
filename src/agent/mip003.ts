@@ -49,7 +49,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 const ORIGIN = process.env.PUBLIC_URL ?? `http://127.0.0.1:${process.env.PORT ?? 8787}`
 
-async function run(net: 'mainnet' | 'preprod', ref: string) {
+export async function run(net: 'mainnet' | 'preprod', ref: string) {
   const { datum, value } = await readDatum(net, ref)
   const now = Date.now()
   const result: JobResult = {
