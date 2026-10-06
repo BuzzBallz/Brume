@@ -1,0 +1,56 @@
+[
+  {
+    "step": "AuthorizeRefund (leg 1)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "4cd4dd854be5b6d71ab7d62d9ef329846a89dc21926b19c3c549a3680ca386b3",
+    "atMs": 1791265242477,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259491,
+      "hash": "0f378ede1024d526cf36fac77bba6570bae301d4fb055e88b8f989da3a131dc1",
+      "slot": 135582048
+    },
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "expected": "accept"
+  },
+  {
+    "step": "WithdrawRefund (leg 2, pre-signed)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "ecfd489b84d60da78bc03f6826ee1348714a4afbc6a895c1430e08d4b1e90117",
+    "atMs": 1791265242477,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259491,
+      "hash": "0f378ede1024d526cf36fac77bba6570bae301d4fb055e88b8f989da3a131dc1",
+      "slot": 135582048
+    },
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "replay leg 2 (same bytes)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "ecfd489b84d60da78bc03f6826ee1348714a4afbc6a895c1430e08d4b1e90117",
+    "atMs": 1791265264077,
+    "via": "koios",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayMempoolFailure \\\"All inputs are spent. Transaction has probably already been included\\\"\"],\"kind\":\"ShelleyTxValidationError\"},\"tag\":\"TxValidationErrorInCardanoMode\"},\"tag\":\"TxCmdTxSubmitValidationError\"},\"tag\":\"TxSubmitFail\"}",
+    "redeemer": "WithdrawRefund",
+    "role": "seller",
+    "expected": "refuse"
+  }
+]
