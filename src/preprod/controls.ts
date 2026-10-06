@@ -97,7 +97,9 @@ export async function tryAnyway(escrowRef: string, redeemer: Redeemer, role: Rol
 // C11 on the shared script: after a concession alone, every branch the engine says is gone is sent anyway and must be
 // refused by the validator; then the buyer, the only party left, exits. Our own bank escrow, our own keys, one log.
 //   node src/preprod/controls.ts c11 <disputed bank ref>
-async function concedeAlone(ref: string, logAs: string): Promise<string> {
+// minimalCooldown: the concession writes seller_cooldown = upper bound + the V1 period (7 min, R5) + 1 min, the smallest
+// safe value, so the seller controls can be sent once it has passed and the cooldown cannot be what refuses them.
+async function concedeAlone(ref: string, logAs: string, minimalCooldown = false): Promise<string> {
   const seller = await party('seller')
   const escrow = await escrowAt(ref)
   const raw = escrow.output.plutusData as string
@@ -106,10 +108,10 @@ async function concedeAlone(ref: string, logAs: string): Promise<string> {
   const window = txWindow(Date.now())
   const built = await buildEscrowSpend({
     network: 'preprod', window, escrow, redeemer: 'AuthorizeRefund', signers: [seller], funding: [utxos[0]], collateral: utxos[1],
-    continuation: { datumCbor: patchDatum(raw, { resultHash: '', sellerCooldownTime: cooldownFrom(window), buyerCooldownTime: 0, state: 'RefundRequested' }), amount: escrow.output.amount },
+    continuation: { datumCbor: patchDatum(raw, { resultHash: '', sellerCooldownTime: minimalCooldown ? window.toMs + PARAMS.cooldownMs + 60_000 : cooldownFrom(window), buyerCooldownTime: 0, state: 'RefundRequested' }), amount: escrow.output.amount },
     outputs: [], changeAddress: seller.address,
   })
-  const e = await submitAndConfirm(await addWitness(built, seller), preprodSubmitter(), 'AuthorizeRefund alone (C11: the concession, no exit signed)', Date.now(), SCRIPT_HASH)
+  const e = await submitAndConfirm(await addWitness(built, seller), preprodSubmitter(), `AuthorizeRefund alone (C11: the concession, no exit signed${minimalCooldown ? '; minimal seller cooldown' : ''})`, Date.now(), SCRIPT_HASH)
   upsertTxLog(logAs, { ...e, redeemer: 'AuthorizeRefund', role: 'seller', expected: 'accept' })
   if (e.status !== 'accepted' || !e.block) throw new SettleError(`the concession was ${e.status} at ${e.stage}`)
   // The bank entry follows the escrow to its new output, so the controls below run on a registered ref.
@@ -132,6 +134,31 @@ async function buyerExit(ref: string, logAs: string): Promise<TxLogEntry> {
   })
   const e = await submitAndConfirm(await addWitness(built, buyer), preprodSubmitter(), 'WithdrawRefund by the buyer (C11: the only party left)', Date.now(), SCRIPT_HASH)
   return upsertTxLog(logAs, { ...e, redeemer: 'WithdrawRefund', role: 'buyer', expected: 'accept' })
+}
+
+// C11 with the guard isolated: concession with the minimal cooldown, then each seller control only once the engine's
+// reasons for it no longer include any cooldown, so the state or the emptied result hash is what decides.
+if (process.argv[1]?.endsWith('controls.ts') && process.argv[2] === 'c11-isolated' && process.argv[3]) {
+  const start = process.argv[3]
+  const logAs = `c11-isolated-${start}`
+  const after = await concedeAlone(start, logAs, true)
+  console.log(`conceded: ${after}; waiting for the seller cooldown to pass`)
+  const seller = [['SubmitResult', 'seller'], ['AuthorizeRefund', 'seller']] as const
+  for (;;) {
+    const escrow = await escrowAt(after)
+    const d = readDatum(escrow.output.plutusData as string)
+    const v: Value = Object.fromEntries(escrow.output.amount.map((a) => [a.unit, a.quantity]))
+    const g = reach(d, v, Date.now(), PARAMS, after)
+    const cells = seller.map(([r, role]) => g.verdicts.find((x) => x.redeemer === r && x.role === role))
+    if (cells.every((c) => c && !c.failed.some((f) => /cooldown/.test(f)))) break
+    await new Promise((r) => setTimeout(r, 20_000))
+  }
+  for (const [redeemer, role] of seller) {
+    const e = await tryAnyway(after, redeemer, role, logAs)
+    console.log(`  ${e.step}: ${e.status} at ${e.stage}${e.refusal ? `, phase ${e.refusal.phase}` : ''}`)
+  }
+  const exit = await buyerExit(after, logAs)
+  console.log(`  ${exit.step}: ${exit.status} at ${exit.stage}${exit.block ? `, block ${exit.block.height}` : ''}`)
 }
 
 if (process.argv[1]?.endsWith('controls.ts') && process.argv[2] === 'c11' && process.argv[3]) {
