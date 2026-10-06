@@ -177,6 +177,8 @@ body {
 @keyframes resolve { from { opacity: 0; transform: translateY(2px); } }
 .animate .cell { animation: resolve 120ms var(--ease) both; animation-delay: calc(var(--i) * 14ms); }
 @media (prefers-reduced-motion: reduce) { .animate .cell { animation: none; } }
+/* backwards holds the from-state during the stagger delay only, so the 21 finished cells leave getAnimations(). */
+.animate .cell { animation-fill-mode: backwards; }
 /* Content replacing the painted boot skeleton fades in once, at its final geometry; the grid keeps its own stagger. No fill, so nothing lingers in getAnimations(). */
 @media (prefers-reduced-motion: no-preference) { .fade-in > :not(.grid) { animation: brume-fade var(--dur-in) var(--ease); } }
 
@@ -315,6 +317,7 @@ body {
   .cell:hover { border-color: var(--line-strong); }
   .cell.can:hover { border-color: var(--ink); }
 }
+@media (prefers-reduced-motion: reduce) { .btn:active:not(:disabled), .cell:active { transform: none; } }
 
 /* Popover grows out of its cell (transform-origin set in JS); exits instantly */
 .pop:popover-open {
