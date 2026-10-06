@@ -3,10 +3,13 @@
 const REDEEMERS = ['Withdraw', 'SetRefundRequested', 'UnSetRefundRequested', 'WithdrawRefund', 'WithdrawDisputed', 'SubmitResult', 'AuthorizeRefund'] // = REDEEMER in shared/types.ts
 const ROLES = ['buyer', 'seller', 'admin']
 const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
-const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed' }
+const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', proposal: 'proposal', txlog: 'txlog' }
+const EXPLORER = 'https://preprod.cexplorer.io/tx/' // DESIGN §10.2: format confirmed by eye on the first real tx
+const POLL_MS = 2000
 
 const params = new URLSearchParams(location.search)
 const source = params.get('source') ?? (location.hostname.endsWith('github.io') ? 'snapshot' : 'live')
+const live = source === 'live'
 const $ = id => document.getElementById(id)
 
 // ponytail: snapshot and mock hold one escrow per kind; per-ref files once the list shows more than the hero escrow.
@@ -15,9 +18,23 @@ async function load(kind, ref) {
     : source === 'snapshot' ? `data/${kind}.json`
     : `/api/${kind}${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`
   const res = await fetch(url)
+  if (res.status === 404 && kind === 'proposal') return null // no proposal yet for this escrow
   if (!res.ok) throw new Error(`${url} answered HTTP ${res.status}`)
   const json = await res.json()
   return json[kind] ?? json
+}
+
+async function post(path, body) {
+  const res = await fetch(`/api/${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+  if (!res.ok) throw new Error(`/api/${path} answered HTTP ${res.status}: ${await res.text()}`)
+  return res.json()
+}
+
+// The preprod bank has no shared mock: in mock mode it is the escrow the mock proposal targets.
+async function loadBank() {
+  if (source !== 'mock') return load('bank')
+  const proposal = await load('proposal')
+  return [{ ref: proposal.escrowRef, state: 'Disputed' }]
 }
 
 // Elements are built with text nodes only: provider data never reaches innerHTML.
@@ -33,8 +50,9 @@ function h(tag, attrs = {}, ...kids) {
   return el
 }
 
-const short = ref => `${ref.slice(0, 8)}…${ref.slice(-8)}`
+const short = ref => ref.length > 20 ? `${ref.slice(0, 8)}…${ref.slice(-8)}` : ref
 const cap = s => s[0].toUpperCase() + s.slice(1)
+const pct = x => `${Math.round(x * 100)}%`
 const utc = ms => `${new Date(ms).toISOString().slice(0, 16).replace('T', ' ')} UTC`
 const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
 const rel = (ms, nowMs) => {
@@ -42,10 +60,11 @@ const rel = (ms, nowMs) => {
   return Math.abs(days) >= 1 ? rtf.format(Math.round(days), 'day') : rtf.format(Math.round(days * 24), 'hour')
 }
 
-function urlFor(ref) {
+function urlFor(ref, view) {
   const q = new URLSearchParams()
   if (params.has('source')) q.set('source', source)
   if (ref) q.set('escrow', ref)
+  if (view) q.set('view', view)
   return `?${q}`
 }
 
@@ -56,6 +75,16 @@ function escrowFromUrl() {
 }
 
 const chip = state => h('span', { class: `chip state-${state}` }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), STATE_LABEL[state] ?? 'Datum not decodable')
+const txLink = hash => h('a', { class: 'mono', href: EXPLORER + hash, target: '_blank', rel: 'noopener', title: hash }, short(hash))
+
+function copyButton(text, label = 'Copy') {
+  const btn = h('button', { class: 'btn copy', type: 'button', onclick: async () => {
+    await navigator.clipboard.writeText(text)
+    btn.textContent = 'Copied'
+    setTimeout(() => { btn.textContent = label }, 1200)
+  } }, label)
+  return btn
+}
 
 function renderSource() {
   $('source').textContent = { live: 'Live', snapshot: 'Snapshot, read-only', mock: 'Mock data' }[source] ?? source
@@ -65,12 +94,16 @@ function renderSource() {
   }
 }
 
-function renderList(census, selected) {
+function renderList(census, bank, selected) {
+  const row = r => h('a', { class: 'row', href: urlFor(r.ref), title: r.ref, 'aria-current': r.ref === selected ? 'page' : null },
+    h('span', { class: 'mono' }, short(r.ref)), chip(r.state))
   $('list').replaceChildren(
     h('h2', { class: 'group' }, 'Mainnet, read-only'),
     h('p', { class: 'meta' }, `${census.byState.Disputed} disputed of ${census.open} open`),
-    ...census.rows.map(r => h('a', { class: 'row', href: urlFor(r.ref), title: r.ref, 'aria-current': r.ref === selected ? 'page' : null },
-      h('span', { class: 'mono' }, short(r.ref)), chip(r.state))),
+    ...census.rows.map(row),
+    h('h2', { class: 'group' }, 'Preprod bank'),
+    h('p', { class: 'meta' }, `${bank.length} ${bank.length === 1 ? 'escrow' : 'escrows'} we locked`),
+    ...bank.map(row),
   )
 }
 
@@ -85,32 +118,21 @@ function renderFoot(census) {
   )
 }
 
-function copyButton(text) {
-  const btn = h('button', { class: 'btn copy', type: 'button', onclick: async () => {
-    await navigator.clipboard.writeText(text)
-    btn.textContent = 'Copied'
-    setTimeout(() => { btn.textContent = 'Copy' }, 1200)
-  } }, 'Copy')
-  return btn
-}
-
-const clock = (label, ms, nowMs) => h('div', {}, h('dt', {}, label), h('dd', { title: utc(ms) }, ms ? rel(ms, nowMs) : 'not set'))
-
-function renderHead(ref, grid, datum, network) {
-  const fields = Object.entries(datum).map(([k, v]) => [h('dt', {}, k), h('dd', { class: 'mono' }, typeof v === 'object' ? v.payment.hash : String(v))])
+function renderHead(row, view) {
+  const views = row.network === 'preprod' ? [['settle', 'Settle'], ['reach', 'Reachability']] : [['reach', 'Reachability']]
   return h('header', { class: 'head' },
     h('div', { class: 'title' },
-      h('h1', { class: 'mono', title: ref }, short(ref)), copyButton(ref),
-      chip(grid.state),
-      h('span', { class: 'chip net' }, network === 'mainnet' ? 'Mainnet, read-only' : 'Preprod')),
-    h('dl', { class: 'clocks' },
-      clock('Arbitration opened', datum.externalDisputeUnlockTime, grid.atMs),
-      clock('Unlock', datum.unlockTime, grid.atMs),
-      clock('Result deadline', datum.submitResultTime, grid.atMs),
-      h('div', {}, h('dt', {}, 'Result hash'), h('dd', {}, datum.resultHash ? 'set' : 'empty'))),
-    h('details', { class: 'datum' }, h('summary', {}, 'Datum, 16 fields'), h('dl', {}, fields)),
+      h('h1', { class: 'mono', title: row.ref }, short(row.ref)), copyButton(row.ref),
+      chip(row.state),
+      h('span', { class: 'chip net' }, row.network === 'mainnet' ? 'Mainnet, read-only' : 'Preprod')),
+    views.length > 1 && h('nav', { class: 'seg', 'aria-label': 'View' },
+      views.map(([id, label]) => h('a', { href: urlFor(row.ref, id), 'aria-current': id === view ? 'page' : null }, label))),
   )
 }
+
+/* Reachability */
+
+const clock = (label, ms, nowMs) => h('div', {}, h('dt', {}, label), h('dd', { title: utc(ms) }, ms ? rel(ms, nowMs) : 'not set'))
 
 function openPop(anchor, v) {
   const list = (items, none) => items.length ? h('ul', {}, items.map(t => h('li', {}, t))) : h('p', {}, none)
@@ -146,8 +168,134 @@ function renderGrid(grid) {
   )
 }
 
-function blank(title, text) {
-  return h('div', { class: 'blank' }, h('h2', {}, title), h('p', {}, text), h('a', { class: 'btn', href: urlFor() }, 'Back to the list'))
+async function reachView(row) {
+  const [grid, datum] = await Promise.all([load('grid', row.ref), load('datum', row.ref)])
+  if (grid.ref !== row.ref) return blank('No verdicts for this escrow', 'The engine has not produced a grid for this reference in this data set.', false)
+  const fields = Object.entries(datum).map(([k, v]) => [h('dt', {}, k), h('dd', { class: 'mono' }, typeof v === 'object' ? v.payment.hash : String(v))])
+  return [
+    h('dl', { class: 'clocks' },
+      clock('Arbitration opened', datum.externalDisputeUnlockTime, grid.atMs),
+      clock('Unlock', datum.unlockTime, grid.atMs),
+      clock('Result deadline', datum.submitResultTime, grid.atMs),
+      h('div', {}, h('dt', {}, 'Result hash'), h('dd', {}, datum.resultHash ? 'set' : 'empty'))),
+    h('details', { class: 'datum' }, h('summary', {}, 'Datum, 16 fields'), h('dl', {}, fields)),
+    renderGrid(grid),
+  ]
+}
+
+/* Settle: SPEC-TRANSACTIONS §4 order, Carbon progress indicator glyphs, GOV.UK task-list statuses */
+
+const signCommand = role => `pnpm sign --role ${role} proposal.json`
+
+function waitingFor(role) {
+  const cmd = signCommand(role)
+  return h('div', { class: 'cmd' }, h('code', { class: 'mono' }, cmd), copyButton(cmd), h('span', { class: 'hint' }, 'Waiting for the signed file'))
+}
+
+function proposeForm(row, rerun) {
+  const input = h('input', { type: 'number', min: '0', max: '1', step: '0.05', value: '0.40', class: 'mono share', 'aria-label': 'Seller share of the value' })
+  const err = h('p', { class: 'error', hidden: true })
+  const form = h('form', { class: 'propose', onsubmit: async e => {
+    e.preventDefault()
+    try { await post('proposal', { escrowRef: row.ref, sellerShare: Number(input.value) }); rerun() }
+    catch (x) { err.hidden = false; err.textContent = x.message }
+  } },
+  h('label', {}, 'Seller share', input),
+  h('button', { class: 'btn primary', type: 'submit', disabled: !live }, 'Propose this split'),
+  !live && h('span', { class: 'hint' }, 'Runs in live mode'),
+  err)
+  return form
+}
+
+function sendButton(row, rerun) {
+  const err = h('p', { class: 'error', hidden: true })
+  const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
+    btn.disabled = true
+    btn.textContent = 'Sending…'
+    try { await post('submit', { escrowRef: row.ref }); rerun() }
+    catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
+  } }, 'Send both legs')
+  return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
+}
+
+function settleSteps(row, proposal, log, rerun) {
+  const signed = role => proposal?.signedBy.includes(role) ?? false
+  const bothSigned = signed('buyer') && signed('seller') // nothing can be sent before both signatures exist
+  const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash)
+  const leg1 = entry('leg1')
+  const leg2 = entry('leg2')
+  const refused = [leg1, leg2].find(e => e?.status === 'refused')
+  return [
+    { label: 'Buyer raises the dispute', done: ['Disputed', 'RefundRequested'].includes(row.state) || !!proposal,
+      waiting: 'Waiting for buyer', body: [] },
+    { label: 'Seller proposes the split', done: !!proposal, waiting: 'Waiting for seller',
+      body: proposal
+        ? [h('p', {}, `Seller receives ${pct(proposal.sellerShare)} of the value, buyer ${pct(1 - proposal.sellerShare)}.`),
+          proposal.leg1 && h('p', { class: 'hash' }, 'Leg 1 fixed, hash ', h('span', { class: 'mono', title: proposal.leg1.txHash }, short(proposal.leg1.txHash)))]
+        : [proposeForm(row, rerun)] },
+    { label: 'Buyer pre-signs the exit (leg 2)', done: signed('buyer'), waiting: 'Waiting for buyer',
+      body: signed('buyer')
+        ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash }, short(proposal.leg2.txHash))),
+          h('p', { class: 'lock' }, 'Split locked: changing leg 1 now would void this signature.')]
+        : [waitingFor('buyer')] },
+    { label: 'Seller signs the concession (leg 1)', done: signed('seller'), waiting: 'Waiting for seller',
+      body: signed('seller') ? [] : [waitingFor('seller')] },
+    { label: 'Seller sends both legs', done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
+      body: refused
+        ? [h('p', {}, `Refused by the node: ${refused.error ?? 'no reason given'}. Start over on the next bank escrow.`)]
+        : leg1 || leg2
+          ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: accepted, `, txLink(e.txHash)))]
+          : [sendButton(row, rerun)] },
+    { label: 'Read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
+      body: leg2?.readback ? [h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`)] : [] },
+  ]
+}
+
+function renderSteps(steps) {
+  let reached = false
+  return h('ol', { class: 'steps' }, steps.map(s => {
+    const state = s.error ? 'error' : s.done ? 'done' : reached ? 'later' : 'current'
+    if (!s.done) reached = true
+    const status = { done: 'Done', current: s.waiting, later: 'Cannot start yet', error: 'Refused' }[state]
+    return h('li', { class: `step ${state}` },
+      h('span', { class: 'mark', 'aria-hidden': 'true' }),
+      h('div', { class: 'step-body' },
+        h('div', { class: 'step-head' }, h('span', { class: 'step-label' }, s.label), h('span', { class: 'status' }, status)),
+        state !== 'later' && s.body),
+    )
+  }))
+}
+
+function renderLog(log) {
+  if (!log.length) return null
+  return h('section', { class: 'log' },
+    h('h2', {}, 'Transactions'),
+    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: e.status },
+      h('span', { class: 'mark', 'aria-hidden': 'true' }),
+      h('span', {}, e.step),
+      h('span', { class: 'status' }, e.status === 'accepted' ? 'Accepted' : `Refused: ${e.error ?? 'no reason given'}`),
+      txLink(e.txHash)))))
+}
+
+async function settleView(row) {
+  const panel = h('div', { class: 'settle' })
+  const rerun = async () => {
+    const [proposal, log] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
+    const mine = proposal?.escrowRef === row.ref ? proposal : null
+    const steps = settleSteps(row, mine, log, rerun)
+    panel.replaceChildren(renderSteps(steps), renderLog(log))
+    requestAnimationFrame(() => panel.querySelector('.step.current, .step.error')?.scrollIntoView({ block: 'nearest' }))
+    const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
+    if (live && waitingOnSignature) setTimeout(rerun, POLL_MS) // picks up the signed file dropped by pnpm sign
+  }
+  await rerun()
+  return panel
+}
+
+/* Shell */
+
+function blank(title, text, back = true) {
+  return h('div', { class: 'blank' }, h('h2', {}, title), h('p', {}, text), back && h('a', { class: 'btn', href: urlFor() }, 'Back to the list'))
 }
 
 async function main() {
@@ -155,16 +303,18 @@ async function main() {
   $('reset').addEventListener('click', () => { location.href = urlFor() })
   $('detail').replaceChildren(renderGrid(null))
   try {
-    const census = await load('census')
+    const [census, bank] = await Promise.all([load('census'), loadBank()])
+    const rows = [...census.rows.map(r => ({ ...r, network: 'mainnet' })), ...bank.map(r => ({ ...r, network: 'preprod' }))]
     const ref = escrowFromUrl() ?? census.rows.find(r => r.state === 'Disputed')?.ref
-    renderList(census, ref)
+    renderList(census, bank, ref)
     renderFoot(census)
-    const [grid, datum] = await Promise.all([load('grid', ref), load('datum', ref)])
-    if (grid.ref !== ref) {
+    const row = rows.find(r => r.ref === ref)
+    if (!row) {
       $('detail').replaceChildren(blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
       return
     }
-    $('detail').replaceChildren(renderHead(ref, grid, datum, census.network), renderGrid(grid))
+    const view = row.network === 'preprod' ? (params.get('view') ?? 'settle') : 'reach'
+    $('detail').replaceChildren(renderHead(row, view), ...[await (view === 'settle' ? settleView(row) : reachView(row))].flat())
   } catch (err) {
     const hint = {
       live: 'Start the agent with pnpm agent, or open this page with ?source=snapshot.',

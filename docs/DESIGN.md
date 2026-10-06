@@ -157,9 +157,10 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/datum?ref=<ref>` |
 | Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` |
-| Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal`, `GET /api/proposal/:id` (polled) |
-| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/:id/submit` |
+| Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal?ref=<ref>` polled every 2 s while a signature is missing (404 = no proposal yet) |
+| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/submit` `{escrowRef}`; `GET /api/txlog?ref=<ref>` |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
+| Preprod bank list | `{ref, state}[]` | `GET /api/bank` |
 | Job result link | `JobResult` (verdict + split + UI link) | `uiUrl` = `…/?escrow=<ref, URL-encoded>`; the UI also accepts the raw `#<index>` landing in the fragment |
 
 **Interface requests** (to propose in PLAN.md with a §11 entry; not applied here):
