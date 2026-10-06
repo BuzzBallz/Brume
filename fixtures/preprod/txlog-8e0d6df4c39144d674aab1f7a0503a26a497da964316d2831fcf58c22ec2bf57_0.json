@@ -1,0 +1,20 @@
+[
+  {
+    "step": "try anyway: WithdrawRefund by the buyer (engine: needs FundsLocked or RefundRequested (is Disputed))",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "ae8c04182fbc67ed43858ebc85f87d236631af54abd88d9036f04cb62939b19a",
+    "atMs": 1791267268342,
+    "via": "koios",
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "expected": "refuse",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 2,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"WRiwAQEAmACrpKYBAQIApgFcn1gc/Bah/PMJrtA+wYuyF29eoprOpwu3kUXrr/qOdVgcf3gWE2lUnY4rE4/uckyfpgbWEHpmcgvbTEitplgcie756oTg7n/kkh+pPrKHP/bjRHP3UdXVLLdapv8ApgFQ2Hmf2HmfWBwTztxTiMM/9urC8NkZqf1VF5EN6N7wGxFSOZXk/9h5n9h5n9h5n1gcxEenyeroQ4qFIDPpBJUqFoDf0DUWbhgA4VBblv////8ApgECGDIApgEFGgAGaKAASMjIyMjIyMiMiMiIyIyJZgAmRkZGRkpmRmAiYAJgJG6oAITIzIjIyMjIyWYAJgBgAxWYAJgNm6oAuAFFkBxFZgAmASADFZgAmA2bqgC4AUWQHEVmACYAoAMVmACYDZuqALgBRZAcRWYAJgCAAxWYAJgNm6oAuAFFkBxFZgAmbh0gCAAYrMAEwGzdUAXACiyA4iswATNw6QBQAMVmACYDZuqALgBRZAcRWYAJm4dIAwAGKzABMBs3VAFwAosgOIsgMkBkgMkBkgMkBkgMjAZN1QBQrMAEwATAYN1QAkTIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyWYAJgVGB2bqgAYmRkZLMAEwJzA+N1QAMTIyMjIyWYAJgZGACZgBm6wwCjBEN1QGpGbrzALMEU3VGAYYIpuqABAFiZLMAEzcSYARmAIbrDABMEU3VAbEZuvMAwwRjdUACAMkAFEyUzIzBFMjMAEAE3WGAIYJBuqA5IlmACADFKMTMiWYAKzABM3XmAiYJZuqACALiYApgDGCWbqgAopRQSUTMAQAQAGKUEEkYJgAJgmgAoJQTIyMjIyMjIyMjIyMjIyMjIyMjIyMjJZgAmCKADEyWYAJgjGC6bqgAYrMAEzAEBPN1xgwmC8bqgAYrMAEzAMAmAriswATAYAniZGRkZLMAEzIjIzABABMjMAEAEAQiWYAIAMUvXBEymACbrjBnABm6swaAAZmAGAGYNgASREZGYAIAIAZEswAQAYgBxMjMHA3TmYOBupAGMwcDBtABMwcDBuABS9cBmAGAGYOQARg4AAoNwYNQAKDQIlmACADFKMTMiWYAJm4kzcGZuCN1pgSABAvpBoB8wAQBZuuMC4AKbrjAvACQB0TMAQAQAGKUEGYbrDBpABMGoAFBnG6swKTBiN1RgUmDEbqgI5gAmYEJusMB4wYjdUCmR"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (UtxoFailure (UtxosFailure (ValidationTagMismatch (IsValid True) (FailedUnexpectedly (PlutusFailure \\\"\\\\nThe PlutusV3 script failed:\\\\nBase64-encoded script bytes:\\\\n\\\\\\\"WRiwAQEAmACrpKYBAQIApgFcn1gc/Bah/PMJrtA+wYuyF29eoprOpwu3kUXrr/qOdVgcf3gWE2lUnY4rE4/uckyfpgbWEHpmcgvbTEitplgcie756oTg7n/kkh+pPrKHP/bjRHP3UdXVLLdapv8ApgFQ2Hmf2HmfWBwTztxTiMM/9urC8NkZqf1VF5EN6N7wGxFSOZXk/9h5n9h5n9h5n1gcxEenyeroQ4qFIDPpBJUqFoDf0DUWbhgA4VBblv////8ApgECGDIApgEFGgAGaKAASMjIyMjIyMiMiMiIyIyJZgAmRkZGRkpmRmAiYAJgJG6oAITIzIjIyM"
+  }
+]
