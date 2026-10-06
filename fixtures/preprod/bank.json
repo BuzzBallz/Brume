@@ -122,7 +122,7 @@
     "ref": "20735c8a88b0e2dcba89de66fa205059880f45807e19ca3a7ffccd763f4036ea#0",
     "lockedIn": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d",
     "lockedInBlock": 5259528,
-    "state": "RefundRequested",
+    "state": "spent",
     "concededFrom": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#5"
   },
   {
@@ -309,7 +309,7 @@
     "ref": "9e7c0991247df977603972775e449cbeb90152f3273a9611f0f37ce1d31e697a#0",
     "lockedIn": "fc3a5d5fe7f51149b0ebe266cdb70212f1b6ae545efc176e5b49c533ca9d4317",
     "lockedInBlock": 5259905,
-    "state": "Disputed",
+    "state": "spent",
     "disputedFrom": "fc3a5d5fe7f51149b0ebe266cdb70212f1b6ae545efc176e5b49c533ca9d4317#0",
     "disputedInBlock": 5259906,
     "targetStateMs": 48999
