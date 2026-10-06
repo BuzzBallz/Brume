@@ -11,6 +11,7 @@ import { reach } from '../engine/reach.ts'
 import { tryAnyway } from '../preprod/controls.ts'
 import { checkForBuyer, prepare, proposalFile, SettleError, submit, txLogFile, witness } from '../preprod/settle.ts'
 import { witnessSummary } from '../preprod/witnesses.ts'
+import { checkDormancy } from '../solver/dormancy.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { body, escrowFor, HttpError, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
 import { getBank } from './bank.ts'
@@ -117,7 +118,7 @@ const routes: Record<string, Handler> = {
   },
   'GET /api/solver': async (url) => {
     const e = await escrowFor(url)
-    return { body: { solver: solve(solverInputFor(e.ref, e.datum, e.value, Date.now()), 'B') } }
+    return { body: { solver: solve(solverInputFor(e.ref, e.datum, e.value, Date.now(), null, await checkDormancy()), 'B') } }
   },
   'POST /api/try': async (_url, req) => {
     const { escrowRef, redeemer, role } = (await body(req)) ?? {}
@@ -230,6 +231,9 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
   const out = JSON.stringify(body)
   res.writeHead(status ?? 200, { 'content-type': 'application/json', 'x-brume-source': 'live', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' }).end(out)
 }
+
+// Warm the 10-minute dormancy cache, so the first /api/solver does not wait for the walk.
+checkDormancy().catch((e: unknown) => console.error('dormancy warm-up:', e instanceof Error ? e.message : e))
 
 createServer((req, res) => {
   handle(req, res).catch((caught) => {

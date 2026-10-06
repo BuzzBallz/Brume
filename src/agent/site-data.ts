@@ -7,6 +7,7 @@ import { PARAMS } from '../../shared/constants.ts'
 import { reach } from '../engine/reach.ts'
 import { proposalFile, txLogFile } from '../preprod/settle.ts'
 import { witnessSummary } from '../preprod/witnesses.ts'
+import { checkDormancy } from '../solver/dormancy.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { ROOT } from './escrow.ts'
 
@@ -30,7 +31,7 @@ write('census', { census })
 write('datum', { ref: HERO_REF, datum, value: hero.value })
 const now = Date.now()
 write('grid', { grid: reach(datum, hero.value, now, PARAMS, HERO_REF) })
-write('solver', { solver: solve(solverInputFor(HERO_REF, datum, hero.value, now), 'B') })
+write('solver', { solver: solve(solverInputFor(HERO_REF, datum, hero.value, now, null, await checkDormancy()), 'B') })
 const bank = await getBank()
 write('bank', { bank })
 // The proposal lives in out/ (not committed): run site:data on the machine that prepared it, or the run has no proposal.

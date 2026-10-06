@@ -3,6 +3,7 @@ import type { IncomingMessage } from 'node:http'
 import type { JobResult } from '../../shared/types.ts'
 import { PARAMS } from '../../shared/constants.ts'
 import { reach } from '../engine/reach.ts'
+import { checkDormancy } from '../solver/dormancy.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { body, HttpError, parseNet, parseRef, readDatum } from './escrow.ts'
 import { assertConfigured, createPayment, inputHash, PAY_WITHIN_MS, resolvePayment, resultHash, submitResult } from './payment.ts'
@@ -55,7 +56,7 @@ export async function run(net: 'mainnet' | 'preprod', ref: string) {
   const result: JobResult = {
     escrowRef: ref,
     grid: reach(datum, value, now, PARAMS, ref),
-    solver: solve(solverInputFor(ref, datum, value, now), 'B'),
+    solver: solve(solverInputFor(ref, datum, value, now, null, await checkDormancy()), 'B'),
     uiUrl: `${ORIGIN}/?escrow=${encodeURIComponent(ref)}`,
   }
   return `${summary(net, result)}\n\n${JSON.stringify(result)}`
