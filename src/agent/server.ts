@@ -58,7 +58,13 @@ async function preprodOnly(ref: string) {
 // A run that ends within 2 s answers with its log; a refusal raised later is kept for GET /api/proposal (`error`).
 const sending = new Map<string, Promise<TxLogEntry[]>>()
 const sendErrors = new Map<string, string>()
-const sentence = (e: unknown) => (e instanceof SettleError || e instanceof HttpError ? e.message : 'internal error')
+// A provider that rate-limits or fails is a hole: say so, nothing was built or sent.
+const asHttp = (e: unknown) =>
+  e instanceof HttpError ? e
+  : e instanceof SettleError ? new HttpError(400, e.message)
+  : e instanceof Error && /\bHTTP (429|5\d\d)\b/.test(e.message) ? new HttpError(503, 'The chain provider is rate-limiting or down (a hole): nothing was built or sent. Try again in a minute.')
+  : e
+const sentence = (e: unknown) => { const h = asHttp(e); return h instanceof HttpError ? h.message : 'internal error' }
 async function startSubmit(proposal: Proposal) {
   const ref = proposal.escrowRef
   if (sending.has(ref)) throw new HttpError(409, 'A settlement of this escrow is already running: wait for it to finish.')
@@ -215,8 +221,8 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 createServer((req, res) => {
   handle(req, res).catch((caught) => {
     // A settlement refusal is one readable sentence from stream A, shown as-is.
-    const e = caught instanceof SettleError ? new HttpError(400, caught.message) : caught
-    if (!(e instanceof HttpError)) console.error(e)
+    const e = asHttp(caught)
+    if (!(e instanceof HttpError) || e.status === 503) console.error(caught)
     if (res.headersSent) return res.destroy()
     res.writeHead(e instanceof HttpError ? e.status : 500, { 'content-type': 'application/json', 'x-content-type-options': 'nosniff' }).end(JSON.stringify({ error: e instanceof HttpError ? e.message : 'internal error' }))
   })
