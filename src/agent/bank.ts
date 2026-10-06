@@ -1,5 +1,5 @@
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import type { State } from '../../shared/types.ts'
+import type { State, Value } from '../../shared/types.ts'
 import { decodeAll } from '../census/census.ts'
 import { utxosAt } from '../read/koios.ts'
 import type { RawUtxo } from '../../shared/types.ts'
@@ -17,13 +17,13 @@ export function paymentKeyHash(bech32: string) {
   return Buffer.from(bytes.slice(1)).toString('hex')
 }
 
-export type BankRow = { ref: string; state: State }
+export type BankRow = { ref: string; state: State; value: Value }
 
 // An escrow belongs to the bank when its datum names the demo buyer and seller.
 export function pickBank(utxos: RawUtxo[], buyer: string, seller: string): BankRow[] {
   return decodeAll(utxos)
     .filter((d) => d.datum && d.datum.buyer.payment.hash === buyer && d.datum.seller.payment.hash === seller)
-    .map((d) => ({ ref: d.utxo.ref, state: d.datum!.state }))
+    .map((d) => ({ ref: d.utxo.ref, state: d.datum!.state, value: d.utxo.value }))
     .sort((a, b) => a.ref.localeCompare(b.ref))
 }
 

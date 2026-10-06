@@ -19,6 +19,6 @@ test('the bank keeps only escrows naming the demo buyer and seller', () => {
   const rows = [utxo('b#0', hex), utxo('a#0', hex), utxo('c#0', null), utxo('d#0', hex.slice(0, -2))]
   const buyer = '98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2'
   const seller = 'b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3'
-  assert.deepEqual(pickBank(rows, buyer, seller), [{ ref: 'a#0', state: 'Disputed' }, { ref: 'b#0', state: 'Disputed' }])
+  assert.deepEqual(pickBank(rows, buyer, seller), [{ ref: 'a#0', state: 'Disputed', value: { lovelace: '1' } }, { ref: 'b#0', state: 'Disputed', value: { lovelace: '1' } }])
   assert.deepEqual(pickBank(rows, seller, buyer), [], 'buyer and seller are not interchangeable')
 })
