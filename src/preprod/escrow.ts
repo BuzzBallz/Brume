@@ -21,6 +21,7 @@ export type EscrowSpend = {
   outputs: TxOut[] // everything else, e.g. the negotiated split on an exit branch
   changeAddress: string
   pending?: UTxO[] // outputs of unsubmitted txs this one spends, inline datum included (leg 1's escrow output, for leg 2)
+  unevaluated?: ExUnits // try-anyway only: a fixed budget and NO evaluation, so the node itself runs the script and decides
   script?: Script // defaults to the shared deployed V1; our own deployment (S-2) passes its own
 }
 
@@ -71,7 +72,9 @@ export async function buildEscrowSpend(spec: EscrowSpend): Promise<Built> {
   if (spec.funding.some((u) => u.output.address === script.address.preprod)) throw new TxRuleError('a funding input sits at the script address: one escrow input per tx')
 
   let cborHex: string
-  if (!spec.pending?.length) {
+  if (spec.unevaluated) {
+    cborHex = await assemble(spec, script, spec.unevaluated)
+  } else if (!spec.pending?.length) {
     cborHex = await assemble(spec, script) // escrow on chain: Mesh's evaluator resolves it
   } else {
     // Escrow not on chain yet: evaluate against the pending outputs ourselves, then build with those units plus 10 %,
