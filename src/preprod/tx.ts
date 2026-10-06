@@ -1,9 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { createPublicKey, verify } from 'node:crypto'
 import { join } from 'node:path'
 import type { Asset, Protocol, UTxO } from '@meshsdk/core'
 import type { Network, TxLogEntry } from '../../shared/types.ts'
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import { assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, slotAt, type Submitter } from './chain.ts'
+import { AmbiguousSubmit, assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, seenByChain, slotAt, type Submitter } from './chain.ts'
 import { ROOT } from './env.ts'
 import { cst, mesh } from './mesh.ts'
 import type { Party } from './wallet.ts'
@@ -28,7 +29,7 @@ export function txWindow(nowMs: number, beforeMs = WINDOW_MARGIN_MS, afterMs = W
 // and with a wide margin rather than the computed minimum (a tight one is a refusal with no useful message).
 export const cooldownFrom = (w: TxWindow): number => w.toMs + COOLDOWN_MARGIN_MS
 
-export type TxOut = { address: string; amount: Asset[] }
+export type TxOut = { address: string; amount: Asset[]; datumCbor?: string } // datumCbor: inline datum (an escrow lock)
 export type PlainTx = {
   network: Network
   window: TxWindow
@@ -36,19 +37,21 @@ export type PlainTx = {
   inputs: UTxO[] // explicit; the builder never selects from a whole wallet
   outputs: TxOut[]
   changeAddress: string
+  maxScriptOutputs?: number // 1 for a lock into the escrow, 0 otherwise
 }
 
 export type Built = { cborHex: string; txHash: string }
 
 // What every built body must satisfy before anyone signs it. Reads the CBOR, not the spec that produced it.
-export function checkTx(cborHex: string, expect: { signers: string[]; maxScriptOutputs?: number; inputs?: string[] }): void {
+export function checkTx(cborHex: string, expect: { signers: string[]; inputs: string[]; window: TxWindow; maxScriptOutputs?: number; scriptAddress?: string }): void {
   const body = cst.deserializeTx(cborHex).body()
-  if (expect.inputs) {
-    // Exactly the inputs asked for: the two-UTxO rule depends on no input ever being added behind our back.
-    const got = body.inputs().toCore().map((i) => `${i.txId}#${i.index}`).sort()
-    const want = [...expect.inputs].sort()
-    if (got.join() !== want.join()) throw new TxRuleError(`inputs differ from the ones given: ${got.length} in the body, ${want.length} given`)
-  }
+  // The body must carry the window the datum was computed from: a cooldown is only safe relative to this upper bound.
+  if (body.ttl() !== undefined && Number(body.ttl()) !== expect.window.toSlot) throw new TxRuleError(`upper bound ${body.ttl()} is not the window's ${expect.window.toSlot}`)
+  if (body.validityStartInterval() !== undefined && Number(body.validityStartInterval()) !== expect.window.fromSlot) throw new TxRuleError(`lower bound ${body.validityStartInterval()} is not the window's ${expect.window.fromSlot}`)
+  // Exactly the inputs asked for: the two-UTxO rule depends on no input ever being added behind our back.
+  const got = body.inputs().toCore().map((i) => `${i.txId}#${i.index}`).sort()
+  const want = [...expect.inputs].sort()
+  if (got.join() !== want.join()) throw new TxRuleError(`inputs differ from the ones given: ${got.length} in the body, ${want.length} given`)
   if (body.ttl() === undefined) throw new TxRuleError('no upper validity bound (invalid_hereafter): the validator fails every branch without one')
   if (body.validityStartInterval() === undefined) throw new TxRuleError('no lower validity bound (invalid_before)')
   const required = new Set<string>(body.requiredSigners()?.toCore() ?? [])
@@ -59,7 +62,7 @@ export function checkTx(cborHex: string, expect: { signers: string[]; maxScriptO
   for (const o of body.outputs()) {
     const address = o.address().toBech32()
     assertPreprodAddress(address)
-    if (address === V1_ADDRESS.preprod) {
+    if (address === (expect.scriptAddress ?? V1_ADDRESS.preprod)) {
       scriptOutputs++
       if (o.scriptRef() !== undefined) throw new TxRuleError('an escrow output carries a reference script')
     }
@@ -68,7 +71,12 @@ export function checkTx(cborHex: string, expect: { signers: string[]; maxScriptO
 }
 
 let params: Promise<Protocol> | null = null
-const protocol = (): Promise<Protocol> => (params ??= preprodChain().fetchProtocolParameters())
+// A failed fetch is not cached: the next build retries (an HTTP error is a hole, never a cached value).
+export const protocol = (): Promise<Protocol> =>
+  (params ??= preprodChain().fetchProtocolParameters().catch((error: unknown) => {
+    params = null
+    throw error
+  }))
 
 export async function buildPlain(spec: PlainTx): Promise<Built> {
   assertPreprod(spec.network)
@@ -79,11 +87,14 @@ export async function buildPlain(spec: PlainTx): Promise<Built> {
   // The fetcher only completes the given inputs; no input selection is ever called on this builder.
   const b = new mesh.MeshTxBuilder({ fetcher: preprodChain(), params: await protocol() }).setNetwork('preprod')
   for (const u of spec.inputs) b.txIn(u.input.txHash, u.input.outputIndex, u.output.amount, u.output.address)
-  for (const o of spec.outputs) b.txOut(o.address, o.amount)
+  for (const o of spec.outputs) {
+    b.txOut(o.address, o.amount)
+    if (o.datumCbor) b.txOutInlineDatumValue(o.datumCbor, 'CBOR')
+  }
   for (const s of spec.signers) b.requiredSignerHash(s.pkh)
   b.invalidBefore(spec.window.fromSlot).invalidHereafter(spec.window.toSlot).changeAddress(spec.changeAddress)
   const cborHex = await b.complete()
-  checkTx(cborHex, { signers: spec.signers.map((s) => s.pkh), inputs: spec.inputs.map((u) => `${u.input.txHash}#${u.input.outputIndex}`) })
+  checkTx(cborHex, { signers: spec.signers.map((s) => s.pkh), inputs: spec.inputs.map((u) => `${u.input.txHash}#${u.input.outputIndex}`), window: spec.window, maxScriptOutputs: spec.maxScriptOutputs ?? 0 })
   return { cborHex, txHash: mesh.resolveTxHash(cborHex) }
 }
 
@@ -95,32 +106,71 @@ export async function addWitness(built: Built, by: Party): Promise<Built> {
   return { cborHex: signed, txHash }
 }
 
+const SPKI_ED25519 = Buffer.from('302a300506032b6570032100', 'hex')
+
+// True iff the tx carries a witness from key hash `pkh` whose signature verifies over this tx's body hash.
+// This, never Proposal.signedBy, is what submit() trusts.
+export function hasValidWitness(cborHex: string, pkh: string): boolean {
+  const txHash = Buffer.from(mesh.resolveTxHash(cborHex), 'hex')
+  for (const w of cst.deserializeTx(cborHex).witnessSet().vkeys()?.values() ?? []) {
+    const vkey = Buffer.from(w.vkey(), 'hex')
+    if (cst.blake2b(28).update(vkey).digest('hex') !== pkh) continue
+    const key = createPublicKey({ key: Buffer.concat([SPKI_ED25519, vkey]), format: 'der', type: 'spki' })
+    if (verify(null, txHash, key, Buffer.from(w.signature(), 'hex'))) return true
+  }
+  return false
+}
+
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
-// Submits, then waits for the tx to be visible in a block on Blockfrost. Retries reads with backoff.
-// A ledger rejection is returned as a refused entry with its phase; a transport failure (SubmitTransportError) is thrown:
-// it is a hole, and must never be logged or shown as a refusal. scriptHash: the validator the tx ran, '' when none.
-export async function submitAndConfirm(signed: Built, submitter: Submitter, step: string, atMs: number, scriptHash = '', timeoutMs = 300_000): Promise<TxLogEntry> {
-  const base = { step, network: 'preprod' as const, scriptHash, txHash: signed.txHash, atMs, via: submitter.via }
-  let returned: string
+type LogBase = Pick<TxLogEntry, 'step' | 'network' | 'scriptHash' | 'txHash' | 'atMs' | 'via'>
+
+// Hands the tx to one node. A ledger rejection becomes a refused entry with its phase; a transport failure
+// (SubmitTransportError) is thrown: it is a hole, and must never be logged or shown as a refusal.
+// An AmbiguousSubmit is settled by the chain, never by the HTTP status: seen in the mempool or a block → submitted (null);
+// not seen → rethrown, and the caller must treat the tx as possibly live (never "prepare again" over it).
+export async function submitOnly(signed: Built, submitter: Submitter, base: LogBase): Promise<TxLogEntry | null> {
   try {
-    returned = await submitter.submitTx(signed.cborHex)
+    const returned = await submitter.submitTx(signed.cborHex)
+    if (returned && returned !== signed.txHash) throw new TxRuleError(`submitter returned ${returned}, expected ${signed.txHash}`)
+    return null
   } catch (error: unknown) {
+    if (error instanceof AmbiguousSubmit) {
+      if (await seenByChain(signed.txHash)) return null
+      throw error
+    }
     if (!(error instanceof LedgerRejection)) throw error
     return { ...base, status: 'refused', stage: 'submit', refusal: { phase: refusalPhase(error.message), ledgerError: error.message }, error: error.message.slice(0, 600) }
   }
-  if (returned && returned !== signed.txHash) throw new TxRuleError(`submitter returned ${returned}, expected ${signed.txHash}`)
+}
+
+// Waits for the tx to be in a block on Blockfrost and pins it to that block. A read error is a hole: it keeps polling,
+// and the caller always gets an entry for a submitted tx.
+export async function confirmTx(base: LogBase, timeoutMs = 300_000): Promise<TxLogEntry> {
   const deadline = Date.now() + timeoutMs
+  let holes = 0
   for (let wait = 5_000; Date.now() < deadline; wait = Math.min(wait * 2, 20_000)) {
     await sleep(wait)
-    const tx = await blockfrostGet<{ block: string; block_height: number; slot: number; valid_contract: boolean }>(`/txs/${signed.txHash}`)
+    let tx: { block: string; block_height: number; slot: number; valid_contract: boolean } | null
+    try {
+      tx = await blockfrostGet(`/txs/${base.txHash}`)
+    } catch {
+      holes++
+      continue
+    }
     if (tx) {
       const entry: TxLogEntry = { ...base, status: 'accepted', stage: 'confirm', block: { height: tx.block_height, hash: tx.block, slot: tx.slot } }
       // valid_contract false = phase 2 failed on chain and collateral was taken: never report that as accepted.
       return tx.valid_contract ? entry : { ...entry, status: 'refused', refusal: { phase: 2, ledgerError: 'valid_contract=false (collateral consumed)' } }
     }
   }
-  return { ...base, status: 'accepted', stage: 'submit', error: `submitted, not seen in a block within ${timeoutMs / 1000} s` }
+  return { ...base, status: 'accepted', stage: 'submit', error: `submitted, not seen in a block within ${timeoutMs / 1000} s (${holes} read holes): pending, not confirmed` }
+}
+
+// scriptHash: the validator the tx ran, '' when none.
+export async function submitAndConfirm(signed: Built, submitter: Submitter, step: string, atMs: number, scriptHash = '', timeoutMs = 300_000): Promise<TxLogEntry> {
+  const base: LogBase = { step, network: 'preprod', scriptHash, txHash: signed.txHash, atMs, via: submitter.via }
+  return (await submitOnly(signed, submitter, base)) ?? confirmTx(base, timeoutMs)
 }
 
 // Append-only run log per escrow or wallet: fixtures/preprod/txlog-<name>.json (survives reloads, README evidence).

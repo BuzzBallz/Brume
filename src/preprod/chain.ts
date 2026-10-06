@@ -1,4 +1,4 @@
-import type { BlockfrostProvider } from '@meshsdk/core'
+import type { BlockfrostProvider, UTxO } from '@meshsdk/core'
 import type { Network, Provider } from '../../shared/types.ts'
 import { KOIOS } from '../../shared/constants.ts'
 import { requireEnv, loadEnv } from './env.ts'
@@ -37,12 +37,22 @@ export function preprodChain(): BlockfrostProvider {
 
 const BLOCKFROST_PREPROD = 'https://cardano-preprod.blockfrost.io/api/v0'
 
-// Raw Blockfrost read for what Mesh does not expose (block height). 404 → null; 429/5xx retried with backoff, then thrown.
+// Raw Blockfrost read for what Mesh does not expose (block height). 404 → null; a thrown fetch, 429 or 5xx is retried
+// with backoff, then thrown: a hole, never a value.
 export async function blockfrostGet<T>(path: string): Promise<T | null> {
   const id = requireEnv('BLOCKFROST_PREPROD_PROJECT_ID')
   if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
   for (let attempt = 0, wait = 1_000; ; attempt++, wait *= 2) {
-    const res = await fetch(BLOCKFROST_PREPROD + path, { headers: { project_id: id }, signal: AbortSignal.timeout(30_000) })
+    let res: Response
+    try {
+      res = await fetch(BLOCKFROST_PREPROD + path, { headers: { project_id: id }, signal: AbortSignal.timeout(30_000) })
+    } catch (error: unknown) {
+      if (attempt < 4) {
+        await new Promise((r) => setTimeout(r, wait))
+        continue
+      }
+      throw new Error(`Blockfrost preprod ${path.split('/').slice(0, 2).join('/')}: ${error instanceof Error ? error.message : String(error)}`)
+    }
     if (res.status === 404) return null
     if (res.ok) return (await res.json()) as T
     if ((res.status === 429 || res.status >= 500) && attempt < 4) {
@@ -53,34 +63,81 @@ export async function blockfrostGet<T>(path: string): Promise<T | null> {
   }
 }
 
-// A submit has two kinds of failure, and only one is a refusal:
-// - the node's ledger rejected the tx (HTTP 400 with the ledger error): a data point, logged with its phase;
-// - the tx never reached a ledger check (auth, 429, 5xx, network): a hole, thrown, never logged as a refusal.
+// Blockfrost's address listing lags a fresh spend (seen 6 Oct: an input spent one block earlier was still listed), so every
+// UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws.
+export async function liveUtxos(address: string): Promise<UTxO[]> {
+  const listed = await preprodChain().fetchAddressUTxOs(address)
+  if (listed.length === 0) return []
+  const refs = listed.map((u) => `${u.input.txHash}#${u.input.outputIndex}`)
+  const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
+  })
+  if (!res.ok) throw new Error(`Koios utxo_info HTTP ${res.status}: cannot confirm which UTxOs are unspent`)
+  const rows = (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean }[]
+  const unspent = new Set(rows.filter((r) => !r.is_spent).map((r) => `${r.tx_hash}#${r.tx_index}`))
+  return listed.filter((u) => unspent.has(`${u.input.txHash}#${u.input.outputIndex}`))
+}
+
+// A submit has three outcomes besides success, and only one is a refusal:
+// - LedgerRejection: the first attempt got HTTP 400 carrying a ledger rule. A data point, logged with its phase.
+// - SubmitTransportError: the tx certainly never reached a ledger check (auth, a 400 from the provider itself). A hole.
+// - AmbiguousSubmit: an attempt may have reached a node (timeout, network error, 5xx) and its answer is lost, or a later
+//   retry was refused because the copy already in the mempool spends its inputs. Only the chain can decide.
 export class LedgerRejection extends Error {}
 export class SubmitTransportError extends Error {}
+export class AmbiguousSubmit extends Error {}
+
+// A ledger answer names a rule; a provider's own 400 (bad CBOR, bad request) does not.
+const LEDGER_RULE = /ApplyTxError|Conway\w*Failure|Babbage\w*Failure|Shelley\w*Failure|Utxow?Failure|MempoolFailure|BadInputsUTxO/
 
 // Phase 2 = the script ran and failed (the validator refused). Everything else the ledger rejects is phase 1.
+// "ValidationTagMismatch (IsValid False) … PassedUnexpectedly" means the scripts passed: phase 1.
 export const refusalPhase = (ledgerError: string): 1 | 2 =>
-  /PlutusFailure|ValidationTagMismatch|ScriptFailure|EvaluationFailure|CekError/i.test(ledgerError) ? 2 : 1
+  /ValidationTagMismatch \(IsValid True\)|FailedUnexpectedly|PlutusFailure|CekError|EvaluationFailure|ScriptFailures/.test(ledgerError) ? 2 : 1
 
 export type Submitter = { via: Provider; submitTx: (cborHex: string) => Promise<string> }
 
 async function postCbor(url: string, cborHex: string, headers: Record<string, string>): Promise<string> {
+  let mayHaveReached = false
   for (let attempt = 0, wait = 1_000; ; attempt++, wait *= 2) {
     let res: Response
     try {
       res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/cbor', ...headers }, body: Buffer.from(cborHex, 'hex'), signal: AbortSignal.timeout(30_000) })
     } catch (error: unknown) {
-      if (attempt < 3) { await new Promise((r) => setTimeout(r, wait)); continue }
-      throw new SubmitTransportError(`submit did not reach the node: ${error instanceof Error ? error.message : String(error)}`)
+      mayHaveReached = true // the request may have been delivered before the connection failed
+      if (attempt < 3) {
+        await new Promise((r) => setTimeout(r, wait))
+        continue
+      }
+      throw new AmbiguousSubmit(`no answer from the submit endpoint: ${error instanceof Error ? error.message : String(error)}`)
     }
     const text = await res.text()
     if (res.ok) return text.replace(/"/g, '').trim()
-    if (res.status === 400) throw new LedgerRejection(text.slice(0, 1500))
-    // Resubmitting the same bytes is safe (same hash), so transient failures are retried.
-    if ((res.status === 429 || res.status >= 500) && attempt < 3) { await new Promise((r) => setTimeout(r, wait)); continue }
+    if (res.status === 400) {
+      if (mayHaveReached) throw new AmbiguousSubmit(`HTTP 400 after an earlier attempt may have reached the node: ${text.slice(0, 600)}`)
+      if (!LEDGER_RULE.test(text)) throw new SubmitTransportError(`the provider rejected the request, not a ledger rule: ${text.slice(0, 300)}`)
+      throw new LedgerRejection(text.slice(0, 1500))
+    }
+    if (res.status >= 500) mayHaveReached = true
+    // Resubmitting the same bytes is safe for the chain (same hash), so transient failures are retried.
+    if ((res.status === 429 || res.status >= 500) && attempt < 3) {
+      await new Promise((r) => setTimeout(r, wait))
+      continue
+    }
+    if (mayHaveReached) throw new AmbiguousSubmit(`submit HTTP ${res.status} after an attempt that may have reached the node`)
     throw new SubmitTransportError(`submit HTTP ${res.status}: ${text.slice(0, 200)}`)
   }
+}
+
+// After an ambiguous submit: is the tx in Blockfrost's mempool or in a block? Polls for up to `ms`.
+export async function seenByChain(txHash: string, ms = 90_000): Promise<boolean> {
+  const deadline = Date.now() + ms
+  while (Date.now() < deadline) {
+    if (await blockfrostGet(`/txs/${txHash}`)) return true
+    if (await blockfrostGet(`/mempool/${txHash}`)) return true
+    await new Promise((r) => setTimeout(r, 5_000))
+  }
+  return false
 }
 
 // SUBMIT_VIA=koios|blockfrost (PLAN §9 R-3). Koios is keyless: no auth header is sent at all.
