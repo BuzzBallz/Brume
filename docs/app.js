@@ -3,7 +3,7 @@
 const REDEEMERS = ['Withdraw', 'SetRefundRequested', 'UnSetRefundRequested', 'WithdrawRefund', 'WithdrawDisputed', 'SubmitResult', 'AuthorizeRefund'] // = REDEEMER in shared/types.ts
 const ROLES = ['buyer', 'seller', 'admin']
 const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
-const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', proposal: 'proposal', txlog: 'txlog' }
+const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', txlog: 'txlog' }
 const EXPLORER = 'https://preprod.cexplorer.io/tx/' // DESIGN §10.2: format confirmed by eye on the first real tx
 const POLL_MS = 2000
 
@@ -19,6 +19,7 @@ const LIVE = {
   bank: () => '/api/bank',
   datum: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`,
   grid: ref => `/api/grid?ref=${enc(ref)}`,
+  solver: ref => `/api/solver?ref=${enc(ref)}`,
   proposal: ref => `/api/proposal/${enc(ref)}`,
   txlog: ref => `/api/txlog?ref=${enc(ref)}`,
 }
@@ -91,6 +92,7 @@ function escrowFromUrl() {
 
 const chip = state => h('span', { class: `chip state-${state}` }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), STATE_LABEL[state] ?? 'Datum not decodable')
 const txLink = hash => h('a', { class: 'mono', href: EXPLORER + hash, target: '_blank', rel: 'noopener', title: hash }, short(hash))
+const txRef = e => e.status === 'accepted' ? txLink(e.txHash) : h('span', { class: 'mono', title: e.txHash }, short(e.txHash)) // a refused tx never reaches the chain
 
 function copyButton(text, label = 'Copy') {
   const btn = h('button', { class: 'btn copy', type: 'button', onclick: async () => {
@@ -154,7 +156,37 @@ function renderHead(row, view) {
 
 const clock = (label, ms, nowMs) => h('div', {}, h('dt', {}, label), h('dd', { title: utc(ms) }, ms ? rel(ms, nowMs) : 'not set'))
 
-function openPop(anchor, v) {
+function placePop(anchor) {
+  const pop = $('pop')
+  const r = anchor.getBoundingClientRect()
+  const below = r.bottom + 8 + pop.offsetHeight <= innerHeight - 8
+  pop.style.top = `${Math.max(8, below ? r.bottom + 8 : r.top - 8 - pop.offsetHeight)}px`
+  pop.style.left = `${Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8))}px`
+}
+
+// The control filmed at 1:40: submit what the engine marks not permitted, and show the node refusing it. Preprod only.
+function tryAnyway(row, v, anchor) {
+  const out = h('div', { class: 'try-out', 'aria-live': 'polite' })
+  const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
+    btn.disabled = true
+    btn.textContent = 'Submitting to preprod…'
+    try {
+      const e = await post('try', { escrowRef: row.ref, redeemer: v.redeemer, role: v.role })
+      btn.remove()
+      out.replaceChildren(e.status === 'refused'
+        ? h('p', { class: 'matched' }, `Engine predicted refused. Node refused: ${e.error ?? 'no reason given'}.`)
+        : h('p', { class: 'error' }, 'Engine predicted refused, but the node accepted it: ', txLink(e.txHash)))
+    } catch (x) {
+      out.replaceChildren(h('p', { class: 'error' }, x.message))
+      btn.disabled = false
+      btn.textContent = 'Try anyway'
+    }
+    placePop(anchor)
+  } }, 'Try anyway')
+  return h('div', { class: 'try' }, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), out)
+}
+
+function openPop(anchor, v, row) {
   const list = (items, none) => items.length ? h('ul', {}, items.map(t => h('li', {}, t))) : h('p', {}, none)
   const pop = $('pop')
   pop.replaceChildren(
@@ -162,29 +194,28 @@ function openPop(anchor, v) {
     h('p', {}, `The validator's source says the ${v.role} ${v.allowed ? 'can' : 'can\'t'} do this now.`),
     h('h4', {}, 'Deciding guards'), list(v.failed, 'None, every guard passes.'),
     h('h4', {}, 'Output rules'), list(v.outputRules, 'None.'),
+    ...(!v.allowed && row?.network === 'preprod' ? [tryAnyway(row, v, anchor)] : []),
   )
   pop.showPopover()
-  const r = anchor.getBoundingClientRect()
-  pop.style.top = `${Math.max(8, Math.min(r.bottom + 8, innerHeight - pop.offsetHeight - 8))}px`
-  pop.style.left = `${Math.max(8, Math.min(r.left, innerWidth - pop.offsetWidth - 8))}px`
+  placePop(anchor)
 }
 
-function cell(v, i) {
+function cell(v, i, row) {
   if (!v) return h('td', {}, h('span', { class: 'cell skel' }))
   return h('td', {}, h('button', {
     class: v.allowed ? 'cell can' : 'cell', type: 'button', style: `--i:${i}`, 'aria-haspopup': 'dialog',
-    onclick: e => openPop(e.currentTarget, v),
+    onclick: e => openPop(e.currentTarget, v, row),
   }, h('span', { class: 'glyph', 'aria-hidden': 'true' }), v.allowed ? 'can' : (v.failed[0] ?? 'not permitted')))
 }
 
-function renderGrid(grid) {
+function renderGrid(grid, row) {
   const byKey = new Map((grid?.verdicts ?? []).map(v => [`${v.redeemer}/${v.role}`, v]))
   return h('table', { class: 'grid' },
     h('caption', {}, 'What each party can do now', grid && h('small', {}, `Verdicts at ${utc(grid.atMs)}`)),
     h('thead', {}, h('tr', {}, h('td'), ROLES.map(r => h('th', { scope: 'col' }, cap(r))))),
     h('tbody', {}, REDEEMERS.map((name, i) => h('tr', {},
       h('th', { scope: 'row' }, h('span', { class: 'idx mono' }, i), name),
-      ROLES.map((role, j) => cell(byKey.get(`${name}/${role}`), i * 3 + j))))),
+      ROLES.map((role, j) => cell(byKey.get(`${name}/${role}`), i * 3 + j, row))))),
   )
 }
 
@@ -199,7 +230,7 @@ async function reachView(row) {
       clock('Result deadline', datum.submitResultTime, grid.atMs),
       h('div', {}, h('dt', {}, 'Result hash'), h('dd', {}, datum.resultHash ? 'set' : 'empty'))),
     h('details', { class: 'datum' }, h('summary', {}, 'Datum, 16 fields'), h('dl', {}, fields)),
-    renderGrid(grid),
+    renderGrid(grid, row),
   ]
 }
 
@@ -212,8 +243,9 @@ function waitingFor(role) {
   return h('div', { class: 'cmd' }, h('code', { class: 'mono' }, cmd), copyButton(cmd), h('span', { class: 'hint' }, 'Waiting for the signed file'))
 }
 
-function proposeForm(row, rerun) {
-  const input = h('input', { type: 'number', min: '0', max: '1', step: '0.05', value: '0.40', class: 'mono share', 'aria-label': 'Seller share of the value' })
+// Prefilled with the top of the solver's band at the 30-day horizon: the most the seller can ask that the buyer still accepts.
+function proposeForm(row, rerun, band) {
+  const input = h('input', { type: 'number', min: '0', max: '1', step: '0.05', value: band ? band.sellerShareMax.toFixed(2) : null, required: true, class: 'mono share', 'aria-label': 'Seller share of the value' })
   const err = h('p', { class: 'error', hidden: true })
   const form = h('form', { class: 'propose', onsubmit: async e => {
     e.preventDefault()
@@ -223,6 +255,9 @@ function proposeForm(row, rerun) {
   h('label', {}, 'Seller share', input),
   h('button', { class: 'btn primary', type: 'submit', disabled: !live }, 'Propose this split'),
   !live && h('span', { class: 'hint' }, 'Runs in live mode'),
+  h('p', { class: 'hint band-hint' }, band
+    ? `Both sides can accept ${pct(band.sellerShareMin)} to ${pct(band.sellerShareMax)} of the value (30-day horizon).`
+    : 'No solver band for this escrow yet.'),
   err)
   return form
 }
@@ -238,7 +273,7 @@ function sendButton(row, rerun) {
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
-function settleSteps(row, proposal, log, rerun) {
+function settleSteps(row, proposal, log, rerun, band) {
   const signed = role => proposal?.signedBy.includes(role) ?? false
   const bothSigned = signed('buyer') && signed('seller') // nothing can be sent before both signatures exist
   const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash)
@@ -252,7 +287,7 @@ function settleSteps(row, proposal, log, rerun) {
       body: proposal
         ? [h('p', {}, `Seller receives ${pct(proposal.sellerShare)} of the value, buyer ${pct(1 - proposal.sellerShare)}.`),
           proposal.leg1 && h('p', { class: 'hash' }, 'Leg 1 fixed, hash ', h('span', { class: 'mono', title: proposal.leg1.txHash }, short(proposal.leg1.txHash)))]
-        : [proposeForm(row, rerun)] },
+        : [proposeForm(row, rerun, band)] },
     { label: 'Buyer pre-signs the exit (leg 2)', done: signed('buyer'), waiting: 'Waiting for buyer',
       body: signed('buyer')
         ? [proposal.leg2 && h('p', { class: 'hash' }, 'Exit signed, hash ', h('span', { class: 'mono', title: proposal.leg2.txHash }, short(proposal.leg2.txHash))),
@@ -294,16 +329,18 @@ function renderLog(log) {
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step),
       h('span', { class: 'status' }, e.status === 'accepted' ? 'Accepted' : `Refused: ${e.error ?? 'no reason given'}`),
-      txLink(e.txHash)))))
+      txRef(e)))))
 }
 
 async function settleView(row) {
   const panel = h('div', { class: 'settle' })
+  const solver = await load('solver', row.ref)
+  const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30) : null
   const rerun = async () => {
     const [proposal, log] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
     const mine = proposal?.escrowRef === row.ref ? proposal : null
-    const steps = settleSteps(row, mine, log, rerun)
-    panel.replaceChildren(renderSteps(steps), renderLog(log))
+    const steps = settleSteps(row, mine, log, rerun, band)
+    panel.replaceChildren(...[renderSteps(steps), renderLog(log)].filter(Boolean))
     requestAnimationFrame(() => panel.querySelector('.step.current, .step.error')?.scrollIntoView({ block: 'nearest' }))
     const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
     if (live && waitingOnSignature) setTimeout(rerun, POLL_MS) // picks up the signed file dropped by pnpm sign

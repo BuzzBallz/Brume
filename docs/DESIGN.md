@@ -156,7 +156,7 @@ Left-aligned throughout. List 340 px, detail fills the rest; at 1280×720 the 7�
 | List | `Census` (mainnet rows, `byState`, tip, holes, 2nd provider) | `GET /api/census` |
 | Header | `Datum` (16 fields, SPEC-TRANSACTIONS §0), `State` | `GET /api/datum?net=<network>&ref=<ref>` |
 | Reachability | `Grid {ref, atMs, state, verdicts[21]}`, `Verdict {redeemer, role, allowed, failed[], outputRules[]}` | `GET /api/grid?ref=<ref>` |
-| Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` |
+| Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` `{escrowRef, redeemer, role}` → `TxLogEntry`; preprod escrows only, never offered on mainnet |
 | Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal/<ref, URL-encoded>` polled every 2 s while a signature is missing (404 = no proposal yet) |
 | Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit`; `GET /api/txlog?ref=<ref>` (requested; 404 = no run yet) |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
