@@ -174,6 +174,8 @@ First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on th
 
 The receipt from `sokosumi runtime receipt` says `settled: true`, `onChainState: Withdrawn`, with the same transaction hash. The net amount was checked separately on Blockfrost, from that transaction's inputs and outputs at the seller address.
 
+A second paid Task, the hire filmed with the take at 0.40 (`01a112b7-41b4-711b-b920-030378f45aed`, on escrow `0452fc53…#0`): payment event `01a112b7-533e-74b2-97cd-d4e2062c6d84`, escrow funded in `56334a9331577ea2ac7491f748b327386f811bcd2836bd1e9112bf0978d06205` (block 5261685), result hash in `5a7b5196947a7bb17d588fc4be125dc038785e3c9fa3bae9e3530d38712527b8` (block 5261687), collected by the seller in [`2563ba0104e1fd2dccbc5ec0b24ad67411ea89bee8a7753f9e07b89b578aa4b1`](https://preprod.cardanoscan.io/transaction/2563ba0104e1fd2dccbc5ec0b24ad67411ea89bee8a7753f9e07b89b578aa4b1) (block 5261808), net 1 tUSDM to the same seller address, checked the same way.
+
 ## Transactions sent (preprod, 6 Oct 2026)
 
 Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles and the two takes; the others are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
