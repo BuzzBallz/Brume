@@ -8,9 +8,23 @@
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
 | Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`) |
-| `<BANK_REF>`, a preprod escrow we locked | pending (stream A fixture) |
-| Split proposed by the seller | pending (solver output) |
-| Action the engine marks impossible, for "try anyway" | pending (engine output) |
+| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the video. `#6` was the rehearsal and is spent |
+| Split proposed by the seller | 0.75 to the seller, as in the rehearsal (seller 15 tADA + 7.5 tUSDM, buyer 5 tADA + 2.5 tUSDM on a 20 tADA + 10 tUSDM pot) |
+| Action the engine marks impossible, for "try anyway" | buyer `WithdrawRefund` on a Disputed bank escrow (needs FundsLocked or RefundRequested): refused by the validator, phase 2, as stream A ran it on `8e0d6df4…#0` |
+
+## Order of the take
+
+Settling spends the escrow, and only `#7` is left unspent. "Try anyway" must therefore run on `#7` **before** the settle, or on another bank escrow if stream A locks one more for us. The script's order (settle 0:40, try anyway 1:40) needs that third escrow; otherwise record try anyway first and cut it into place.
+
+## Rehearsal, 6 Oct (escrow `#6`, from the UI)
+
+| Step | Transaction | Block | Result |
+|---|---|---|---|
+| Leg 1, concession (`AuthorizeRefund`) | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` | 5259766 | accepted |
+| Leg 2, pre-signed exit (`WithdrawRefund`) | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` | 5259766 | accepted |
+| Replay of leg 2 | same body | none | refused by the ledger (phase 1) |
+
+Both legs found on two indexers in the same block, `valid_contract` true (`pnpm verify <hash> preprod`).
 
 ## Wallets
 
