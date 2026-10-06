@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import type { Asset, Protocol, UTxO } from '@meshsdk/core'
 import type { Network, TxLogEntry } from '../../shared/types.ts'
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import { AmbiguousSubmit, markSpent, unmarkSpent, assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, seenByChain, slotAt, type Submitter } from './chain.ts'
+import { AmbiguousSubmit, markSpent, SubmitTransportError, unmarkSpent, assertPreprod, assertPreprodAddress, blockfrostGet, LedgerRejection, msAt, preprodChain, refusalPhase, seenByChain, slotAt, type Submitter } from './chain.ts'
 import { ROOT } from './env.ts'
 import { cst, mesh } from './mesh.ts'
 import type { Party } from './wallet.ts'
@@ -155,6 +155,8 @@ export async function submitOnly(signed: Built, submitter: Submitter, base: LogB
       if (await seenByChain(signed.txHash)) return null
       throw error
     }
+    // Certainly not delivered (SubmitTransportError): its inputs were never ours to treat as spent.
+    if (error instanceof SubmitTransportError) unmarkSpent(cst.deserializeTx(signed.cborHex).body().inputs().toCore().map((i) => `${i.txId}#${i.index}`))
     if (!(error instanceof LedgerRejection)) throw error
     if (!/BadInputsUTxO|All inputs are spent/i.test(error.message)) unmarkSpent(cst.deserializeTx(signed.cborHex).body().inputs().toCore().map((i) => `${i.txId}#${i.index}`))
     return { ...base, status: 'refused', stage: 'submit', refusal: { phase: refusalPhase(error.message), ledgerError: error.message }, error: error.message.slice(0, 600) }
