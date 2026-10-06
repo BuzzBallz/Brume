@@ -79,7 +79,9 @@ curl -X POST http://127.0.0.1:8787/start_job -H 'content-type: application/json'
 curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 ```
 
-`input_data.network` is `mainnet` (default, read-only) or `preprod`. The result is a JSON string: escrow reference, grid, solver output, and a link into the UI. Shapes follow the [MIP-003 text](https://github.com/masumi-network/masumi-improvement-proposals). The payment fields of the specification (`blockchainIdentifier` and the rest) are not returned yet.
+`input_data.network` is `mainnet` (default, read-only) or `preprod`. The result is a JSON string: escrow reference, grid, solver output, and a link into the UI. Shapes follow the [MIP-003 text](https://github.com/masumi-network/masumi-improvement-proposals).
+
+`HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. One test purchase of 2 ADA on preprod from the service's own purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes; withdrawal of the funds after the unlock time was not observed.
 
 ## Transactions sent
 

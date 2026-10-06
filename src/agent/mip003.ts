@@ -105,10 +105,12 @@ export const mip003 = {
       body: {
         id,
         blockchainIdentifier: payment.blockchainIdentifier,
-        payByTime: Number(payment.payByTime),
-        submitResultTime: Number(payment.submitResultTime),
-        unlockTime: Number(payment.unlockTime),
-        externalDisputeUnlockTime: Number(payment.externalDisputeUnlockTime),
+        // as the payment service returns them (unix ms, strings): the reference agent passes them through, and buyers repeat them to POST /purchase
+        payByTime: payment.payByTime,
+        submitResultTime: payment.submitResultTime,
+        unlockTime: payment.unlockTime,
+        externalDisputeUnlockTime: payment.externalDisputeUnlockTime,
+        amounts: payment.RequestedFunds,
         agentIdentifier: process.env.AGENT_IDENTIFIER,
         sellerVKey: payment.SmartContractWallet?.walletVkey,
         identifierFromPurchaser: identifier,

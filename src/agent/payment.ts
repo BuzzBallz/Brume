@@ -44,6 +44,7 @@ export type Payment = {
   unlockTime: string
   externalDisputeUnlockTime: string
   onChainState: string | null
+  RequestedFunds: { amount: string; unit: string }[]
   SmartContractWallet: { walletVkey: string } | null
 }
 
