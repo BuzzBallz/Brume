@@ -28,5 +28,20 @@
       "hash": "f2a89f84fc455bb849ead7a1d319fe1a4961f422e959ee00bcb627b83f297579",
       "slot": 135582638
     }
+  },
+  {
+    "step": "split seller into 4 × 10 tADA",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "7033b725d83f4b903a8d54a91d8a6a237ce0e58fc80e2c402f073c22eb43d7f5",
+    "atMs": 1791290526602,
+    "via": "blockfrost",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260615,
+      "hash": "9691e8056f26b69fb05db396afb2be44cc6312c7f89e33d81ceb9c174cb3a3fe",
+      "slot": 135607401
+    }
   }
 ]
