@@ -5,3 +5,5 @@ node_modules/
 .claude/settings.local.json
 out/
 .DS_Store
+docs/screenshots/copy/
+docs/screenshots/legs-pending-1280x720.png

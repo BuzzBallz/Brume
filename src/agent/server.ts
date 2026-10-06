@@ -57,7 +57,7 @@ async function preprodOnly(ref: string) {
 const sending = new Map<string, Promise<TxLogEntry[]>>()
 async function startSubmit(proposal: Proposal) {
   const ref = proposal.escrowRef
-  if (sending.has(ref)) throw new HttpError(409, 'Both legs are already being sent for this escrow.')
+  if (sending.has(ref)) throw new HttpError(409, 'A settlement of this escrow is already running: wait for it to finish.')
   const run = submit(proposal).finally(() => sending.delete(ref))
   sending.set(ref, run)
   const early = await Promise.race([run.then(() => null, (e: unknown) => e), new Promise((r) => setTimeout(() => r(null), 2000))])
@@ -95,7 +95,11 @@ const routes: Record<string, Handler> = {
     await preprodOnly(ref)
     return { body: { proposal: await prepare(ref, sellerShare) } }
   },
-  'GET /api/proposal/:id': (url) => ({ body: { proposal: readJson(proposalFile(refOfPath(url)), 'no proposal for this escrow yet') } }),
+  // `sending` survives a page reload: while it is true the UI shows the send as under way, not a Send button.
+  'GET /api/proposal/:id': (url) => {
+    const ref = refOfPath(url)
+    return { body: { proposal: readJson(proposalFile(ref), 'no proposal for this escrow yet'), sending: sending.has(ref) } }
+  },
   // witness() keeps a seller's leg-1 signature in the seller's own record, never in the proposal, and that signature
   // starts the send at once (first-mover rule, PLAN §4).
   'POST /api/proposal/:id/witness': async (url, req) => {
