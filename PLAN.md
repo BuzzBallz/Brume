@@ -142,7 +142,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
-- [ ] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 132/131 printed
+- [x] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 132/131 printed
 - [ ] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
 - [ ] B4 UI v0: escrow + grid + propose/accept/sign/submit flow over mocks [sonnet/medium]
 - [ ] B5 5c: Masumi payment service, agent registered, MIP-003 endpoint answering, listed on preprod Sokosumi [sonnet/high] — done when a hire from Sokosumi reaches `/start_job`
