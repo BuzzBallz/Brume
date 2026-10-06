@@ -2,7 +2,7 @@
 
 const REDEEMERS = ['Withdraw', 'SetRefundRequested', 'UnSetRefundRequested', 'WithdrawRefund', 'WithdrawDisputed', 'SubmitResult', 'AuthorizeRefund'] // = REDEEMER in shared/types.ts
 const ROLES = ['buyer', 'seller', 'admin']
-const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed' }
+const STATE_LABEL = { FundsLocked: 'Funds locked', ResultSubmitted: 'Result submitted', RefundRequested: 'Refund requested', Disputed: 'Disputed', Settled: 'Settled' } // Settled: UI only, a spent bank escrow
 const MOCK_FILE = { census: 'census', grid: 'grid', datum: 'datum-disputed', solver: 'solver', proposal: 'proposal', settle: 'proposal', txlog: 'txlog' }
 const USDM = 'c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d' // = USDM in shared/constants.ts
 const TUSDM = '16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d' // preprod test USDM in the bank escrows (stream A, 6 Oct); to move into shared/constants.ts
@@ -159,7 +159,8 @@ function renderFoot(census) {
   )
 }
 
-const viewsFor = row => row.network === 'preprod'
+const viewsFor = row => row.spent ? [['settle', 'Settle']] // no grid or solver once the output is spent
+  : row.network === 'preprod'
   ? [['settle', 'Settle'], ['reach', 'Reachability'], ['solver', 'Solver']]
   : [['reach', 'Reachability'], ['solver', 'Solver']]
 
@@ -199,7 +200,7 @@ function tryAnyway(row, v, anchor) {
       btn.remove()
       // expected = the engine's prediction recorded before submitting; stage = where the outcome was decided.
       const predicted = e.expected === 'accept' ? 'accepted' : 'refused'
-      const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`]
+      const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`, rawError(e)]
       const matched = (e.status === 'accepted') === (e.expected === 'accept')
       out.replaceChildren(matched
         ? h('p', { class: 'matched observed' }, `Engine predicted ${predicted}, and `, result, ownTag(e))
@@ -292,13 +293,15 @@ const legsToSign = (proposal, role) => role === pathRoles(proposal).exiter ? [2]
 // Leg 1's body is frozen at prepare() with an upper bound about 20 minutes out; past it, both sides sign new hashes.
 function countdown(toMs, onExpire) {
   const el = h('span', { class: 'tnum' })
+  const show = s => { el.textContent = `Leg 1 valid for ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}.` }
   const tick = () => {
     if (!el.isConnected) return clearInterval(id)
     const s = Math.floor((toMs - Date.now()) / 1000)
     if (s <= 0) { clearInterval(id); return onExpire() }
-    el.textContent = `Leg 1 valid for ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}.`
+    show(s)
   }
   const id = setInterval(tick, 1000)
+  show(Math.max(0, Math.floor((toMs - Date.now()) / 1000))) // built with its text, so a poll's re-render never pushes the steps below
   requestAnimationFrame(tick)
   return el
 }
@@ -398,20 +401,27 @@ function sendButton(row, rerun) {
 const outcome = e => e.block ? `confirmed in block ${e.block.height.toLocaleString('en')}` : 'pending, not yet in a block'
 const pending = e => e?.status === 'accepted' && !e.block
 
-// Claims rule: only a phase-2 failure (the script failed) may be called the validator refusing. Phase 1 is a ledger rule, e.g. a spent input.
+// Claims rule: only a phase-2 failure (the script failed) may be called the validator refusing. Phase 1 is a ledger rule.
+// A sentence, never the node's raw text: that sits behind rawError().
 function refusal(e) {
-  if (e.stage === 'evaluate') return `refused when evaluated, before submission: ${e.refusal?.ledgerError ?? e.error ?? 'no reason given'}`
-  if (e.refusal?.phase === 2) return `the validator refused it: ${e.error ?? e.refusal.ledgerError}`
-  if (e.refusal?.phase === 1) return `the ledger refused it: ${e.refusal.ledgerError}`
-  return `refused: ${e.error ?? 'no reason given'}`
+  if (e.stage === 'evaluate') return 'refused when evaluated, before submission'
+  if (e.refusal?.phase === 2) return 'the validator refused it'
+  if (e.refusal?.phase === 1 && /All inputs are spent|BadInputsUTxO/.test(`${e.error ?? ''} ${e.refusal.ledgerError ?? ''}`)) return 'the ledger refused it: its input was already spent'
+  return 'the ledger refused it'
 }
+const rawError = e => (e.error || e.refusal) && h('details', { class: 'raw' }, h('summary', {}, 'raw error'),
+  h('pre', { class: 'mono' }, JSON.stringify({ error: e.error, refusal: e.refusal, stage: e.stage }, null, 2)))
+// A refusal the run predicted (a control such as the leg-2 replay) is the expected result, not a failure.
+const expectedRefusal = e => e?.status === 'refused' && e.expected === 'refuse'
 
 function settleSteps(row, proposal, log, rerun, band, wait) {
   const ctx = { row, proposal, rerun, wait }
   const { exiter, conceder } = pathRoles(proposal)
-  const signed = role => proposal?.signedBy.includes(role) ?? false
+  // signedBy is UI state only (stream A): a leg accepted in the txlog proves both signatures, whatever signedBy says.
+  const legSent = proposal && ['leg1', 'leg2'].some(k => proposal[k] && log.some(e => e.txHash === proposal[k].txHash && e.status === 'accepted'))
+  const signed = role => legSent || (proposal?.signedBy.includes(role) ?? false)
   const bothSigned = signed('buyer') && signed('seller') // nothing can be sent before both signatures exist
-  const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash)
+  const entry = leg => bothSigned && proposal[leg] && log.find(e => e.txHash === proposal[leg].txHash && !expectedRefusal(e)) // the replay shares leg 2's hash
   const leg1 = entry('leg1')
   const leg2 = entry('leg2')
   const refused = [leg1, leg2].find(e => e?.status === 'refused')
@@ -436,7 +446,7 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
     { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused,
       waiting: leg1 || leg2 ? 'Waiting for confirmation' : submitted ? 'Submitted' : 'Ready to send',
       body: refused
-        ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
+        ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`), rawError(refused)]
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: `, h('span', { 'data-cue': e.block && `block ${e.step}` }, outcome(e)), ', ',
               h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash)), ownTag(e)))]
@@ -444,10 +454,10 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
             ? [h('p', {}, 'Submitted to the agent. Waiting for the first leg to appear on preprod.')]
             : [sendButton(row, rerun), validity] },
     { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
-      body: leg2?.readback ? [
-        h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
-        leg2.readback.balances && proposal.payout && renderBalances(proposal.payout, leg2.readback.balances),
-      ] : [] },
+      body: [
+        leg2?.readback && h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
+        leg2?.block && proposal.payout && renderBalances(proposal.payout, leg2.readback?.balances ?? null), // what leg 2 wrote, until a read-back exists
+      ] },
   ]
   // Leg 1 expired before it was sent: the first step still waiting turns into the re-prepare step.
   if (validTo && Date.now() >= validTo) {
@@ -472,19 +482,19 @@ function qty(unit, q) {
 const unitLabel = unit => DECIMALS[unit] === undefined ? `${assetName(unit)} (base units)` : assetName(unit)
 
 // Carbon data-table pattern. What leg 2 wrote for each party (Proposal.payout) against what the second indexer reads back
-// (readback.balances, taken as the amount each party received from leg 2): the split landed as signed, or it did not.
+// (readback.balances, what each party received from leg 2): the split landed as signed, or it did not. readBack null = not read yet.
 function renderBalances(written, readBack) {
   const rows = ['buyer', 'seller'].flatMap(party =>
-    [...new Set([...Object.keys(written[party] ?? {}), ...Object.keys(readBack[party] ?? {})])].map(unit => {
+    [...new Set([...Object.keys(written[party] ?? {}), ...Object.keys(readBack?.[party] ?? {})])].map(unit => {
       const w = BigInt(written[party]?.[unit] ?? 0)
-      const r = BigInt(readBack[party]?.[unit] ?? 0)
+      const r = readBack && BigInt(readBack[party]?.[unit] ?? 0)
       const cue = col => `amount ${party} ${unit} ${col}`
       return h('tr', {},
         h('td', {}, cap(party)),
         h('td', {}, unitLabel(unit)),
         h('td', { class: 'num mono', 'data-cue': cue('written') }, qty(unit, w)),
-        h('td', { class: 'num mono', 'data-cue': cue('read') }, qty(unit, r)),
-        h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs'))
+        readBack ? h('td', { class: 'num mono', 'data-cue': cue('read') }, qty(unit, r)) : h('td', { class: 'num hint' }, 'not read back yet'),
+        readBack ? h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs') : h('td'))
     }))
   return h('div', { class: 'balances-wrap', 'data-cue': 'balances' }, h('table', { class: 'balances' },
     h('thead', {}, h('tr', {}, ['Party', 'Asset', 'Written in leg 2', 'Read back', ''].map((c, i) => h('th', { scope: 'col', class: i === 2 || i === 3 ? 'num' : null }, c)))),
@@ -550,17 +560,19 @@ function renderLog(log) {
   if (!log.length) return null
   return h('section', { class: 'log' },
     h('h2', {}, 'Transactions'),
-    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : e.status },
+    h('ol', { class: 'timeline' }, log.map(e => h('li', { class: pending(e) ? 'pending' : expectedRefusal(e) ? 'accepted expected' : e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step, ownTag(e)),
-      h('span', { class: 'status' }, cap(e.status === 'accepted' ? outcome(e) : refusal(e))),
-      txRef(e)))))
+      h('span', { class: 'status' },
+        e.status === 'accepted' ? cap(outcome(e)) : expectedRefusal(e) ? `Prediction matched. ${cap(refusal(e))}.` : `${cap(refusal(e))}.`),
+      txRef(e),
+      e.status === 'refused' && rawError(e))))) // under the row, full width
 }
 
 async function settleView(row) {
   const panel = h('div', { class: 'settle' })
-  const solver = await load('solver', row.ref)
-  const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30 && b.feasible !== false) : null
+  const solver = row.spent ? null : await load('solver', row.ref) // a spent escrow has no solver; its share is in the proposal
+  const band = solver?.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30 && b.feasible !== false) : null
   let shown = null // label of the step last scrolled into view
   const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
   let timer = 0 // one polling chain per panel, whoever triggers the re-render
@@ -598,7 +610,7 @@ async function settleView(row) {
     // the background submit, the blocks, the read-back. A refusal or an expired leg 1 stops it.
     const ended = steps.every(s => s.done) || steps.some(s => s.error)
     clearTimeout(timer)
-    if (live && mine && !ended) timer = setTimeout(poll, POLL_MS)
+    if (live && mine && !ended && !row.spent) timer = setTimeout(poll, POLL_MS) // a spent escrow's run is history
   }
   await rerun()
   return panel
@@ -687,7 +699,9 @@ async function render({ animate = true, focusList = false } = {}) {
     renderList(census, bank, ref)
     if (focusList) document.querySelector('.row[aria-current]')?.focus()
     renderFoot(census)
+    // A settled bank escrow is spent and leaves /api/bank; its recorded run still opens, so a reload after a take shows it.
     const row = rows.find(r => r.ref === ref)
+      ?? (live && ref && (await load('settle', ref))?.proposal ? { ref, network: 'preprod', state: 'Settled', spent: true } : null)
     if (!row) {
       $('detail').replaceChildren(blank('No escrow at this reference', 'It may have been spent, or it is not in this data set.'))
       return

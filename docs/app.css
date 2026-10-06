@@ -373,3 +373,8 @@ span[data-cue] { display: inline-block; }
 
 .timeline li.pending .mark { border-color: var(--ink); background: conic-gradient(var(--ink) 0 50%, var(--bg) 0); }
 .tag { display: inline-block; margin-left: 4px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+/* The node's raw answer, one click away from the sentence */
+.raw { margin-top: 4px; font-size: 14px; }
+.raw summary { cursor: pointer; color: var(--ink-2); width: fit-content; }
+.raw pre { margin: 4px 0 0; padding: 8px; max-width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.timeline .raw { grid-column: 2 / -1; margin-top: 0; }
