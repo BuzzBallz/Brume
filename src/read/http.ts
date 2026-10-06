@@ -4,13 +4,14 @@ export type Cfg = { base?: string; backoffMs?: number }
 export const stats = { retries: 0, holes: 0 }
 
 const MAX_RETRIES = 6
+const FETCH_TIMEOUT_MS = 10_000
 
 export type Reply = { status: number; body: unknown }
 
 export async function request(url: string, init: RequestInit, backoffMs = 500): Promise<Reply | null> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await fetch(url, init)
+      const res = await fetch(url, { ...init, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
       if (res.status !== 429 && res.status < 500) {
         const text = await res.text()
         return { status: res.status, body: text ? JSON.parse(text) : null }
