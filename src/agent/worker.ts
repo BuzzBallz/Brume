@@ -3,13 +3,15 @@
 // Coworker runtime key in the CLI vault starts and completes them (no key is read here).
 // One journal per Task in out/worker/, written before every external write, so a restart resumes instead of redoing work:
 // an uncertain start or completion is checked against the Task's status before it is retried.
-//   COWORKER_ID=<id> node src/agent/worker.ts [--once]
+// PAID_TASKS=true: each newly started Task is paid first (1 test USDM through our payment service, see paid.ts).
+//   COWORKER_ID=<id> [PAID_TASKS=true] node src/agent/worker.ts [--once]
 import './env.ts'
 import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { HttpError, parseNet, parseRef, ROOT } from './escrow.ts'
 import { run } from './mip003.ts'
+import { advancePaid, type Paid } from './paid.ts'
 
 type Task = { id: string; status: string; coworkerId?: string; description?: string | null }
 // Where Tasks come from: the personal Workspace, and the TOKEN2049 event Workspace once the Coworker's access is granted.
@@ -18,12 +20,13 @@ const SCOPES: Scope[] = [
   { name: 'personal', list: [], runtime: ['--personal'] },
   { name: 'event', list: ['--organization-slug', 'token2049-origins-hackathon-2026-nws2r7'], runtime: ['--organization-id', '01a109d1-32a9-71a3-a0e3-658b2a7987cd'] },
 ]
-type Journal = { phase: 'starting' | 'started' | 'result-saved' | 'completing' | 'completed'; input?: string; completedAt?: string }
+type Journal = { phase: 'starting' | 'started' | 'result-saved' | 'completing' | 'completed' | 'paid'; input?: string; completedAt?: string; scope?: string; paid?: Paid }
 
 const COWORKER_ID = process.env.COWORKER_ID ?? ''
 if (!/^[0-9a-f-]{36}$/i.test(COWORKER_ID)) throw new Error('COWORKER_ID must be the Brume Coworker id')
 const DIR = join(ROOT, 'out', 'worker')
 const POLL_MS = 5_000
+const PAID = process.env.PAID_TASKS === 'true'
 mkdirSync(DIR, { recursive: true })
 
 const cli = (args: string[]) =>
@@ -61,6 +64,8 @@ async function advance(t: Task, s: Scope) {
     else return
     write(t.id, j)
   }
+  if (j.phase === 'started' && PAID) j = { ...j, phase: 'paid', scope: s.name, paid: { stage: 'new' } }
+  if (j.phase === 'paid') return pay(t.id, j, s)
   if (j.phase === 'started') {
     writeFileSync(resultFile(t.id), await answer(j.input ?? ''))
     j = { ...j, phase: 'result-saved' }
@@ -77,7 +82,38 @@ async function advance(t: Task, s: Scope) {
   }
 }
 
+// A paid Task advances one stage per poll until it settles; it stays in the journal after its completion, until the
+// payment service has collected and the seller receipt is in.
+let owner: string | undefined
+async function pay(id: string, j: Journal, s: Scope) {
+  owner ??= s.name === 'personal' ? cli(['auth', 'whoami']).id : undefined
+  let p = j.paid as Paid
+  for (let step = 0; step < 6; step++) {
+    const before = p.stage
+    p = await advancePaid(p, {
+      taskId: id, input: j.input ?? '', coworkerId: COWORKER_ID, contextUserId: s.name === 'personal' ? owner : undefined,
+      answer, saveResult: (r) => writeFileSync(resultFile(id), r),
+      complete: () => cli(['runtime', 'complete', id, ...s.runtime, '--coworker-id', COWORKER_ID, '--result-file', resultFile(id)]),
+      receipt: () => cli(['runtime', 'receipt', id, '--coworker-id', COWORKER_ID]),
+      save: (q) => write(id, { ...j, paid: q }),
+    })
+    if (p.stage === before) break
+    console.log(`task ${id}: ${p.stage}`)
+  }
+  if (p.stage === 'settled') write(id, { ...j, phase: 'completed', paid: p, completedAt: new Date().toISOString() })
+}
+
 async function poll() {
+  for (const f of readdirSync(DIR).filter((f) => f.endsWith('.json'))) {
+    const j: Journal = JSON.parse(readFileSync(join(DIR, f), 'utf8'))
+    const s = SCOPES.find((x) => x.name === j.scope)
+    if (j.phase !== 'paid' || j.paid?.stage !== 'awaiting-withdrawal' || !s) continue
+    try {
+      await pay(f.slice(0, -5), j, s)
+    } catch (e) {
+      console.error(`task ${f.slice(0, -5)} not advanced this round: ${(e as Error).message.slice(0, 200)}`)
+    }
+  }
   for (const s of SCOPES) {
     let tasks: Task[]
     try {

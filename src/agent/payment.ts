@@ -25,7 +25,7 @@ export function assertConfigured() {
   }
 }
 
-async function call(path: string, method: 'GET' | 'POST', body?: unknown) {
+export async function call(path: string, method: 'GET' | 'POST', body?: unknown) {
   const res = await fetch(`${process.env.PAYMENT_SERVICE_URL}${path}`, {
     method,
     headers: { token: process.env.PAYMENT_API_KEY ?? '', 'content-type': 'application/json', accept: 'application/json' },
