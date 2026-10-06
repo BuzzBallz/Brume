@@ -15,8 +15,8 @@ This README states what exists today. The status table says what does not.
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
 | Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod, see Transactions sent |
-| Masumi payment leg | built; one test purchase completed on preprod |
-| Listing on preprod Sokosumi | registered on the preprod registry; not yet visible on the marketplace |
+| Masumi payment leg | built; exercised once with a test purchase from our own local payment service (its log is local, not in `fixtures/`) |
+| Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000000`); not yet visible on the marketplace |
 | Transactions | every preprod run is listed below with its hashes and blocks |
 
 ## Run it
@@ -32,6 +32,7 @@ pnpm site:data                      # snapshot docs/data/*.json for GitHub Pages
 pnpm verify <tx hash> [network]     # read a transaction on Koios and, with a key, Blockfrost; says whether they agree
 pnpm engine <ref> [--net preprod]   # the 7×3 reachability grid of one escrow
 pnpm solver <ref> [--net preprod]   # the split bands of one escrow, path B by default
+pnpm sign --prepare <ref> [--share 0.4]  # seller side: writes the proposal file
 pnpm sign --role buyer|seller <file> # file-drop signature of a proposal (needs the party's key in .env)
 ```
 
@@ -57,7 +58,7 @@ The decoder is checked three ways in `src/census/census.test.ts`: against Koios'
 
 Cross-check: `fixtures/kickoff-2026-10-06.md` holds an independent census from another provider (NOWNodes, Blockfrost-compatible, tips 14031823 to 14031828). It gives the same counts (141 open, 140 decodable, 1 without a datum, 6 / 69 / 4 / 61 by state) and the same Disputed totals, a third read at an earlier tip.
 
-The Pages snapshot in `docs/data/` is a separate read, at tip 14031774.
+The Pages snapshot in `docs/data/` is a separate, later read, at tip 14032497.
 
 ## Mocks
 
@@ -81,11 +82,11 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 `input_data.network` is `mainnet` (default, read-only) or `preprod`. The result is a JSON string: escrow reference, grid, solver output, and a link into the UI. Shapes follow the [MIP-003 text](https://github.com/masumi-network/masumi-improvement-proposals).
 
-`HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. One test purchase of 2 ADA on preprod from the service's own purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes; withdrawal of the funds after the unlock time was not observed.
+`HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. It was exercised once: a test purchase of 2 tADA from our own local payment service's purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes. That run's log stayed on the payment service and is not in `fixtures/`; withdrawal of the funds after the unlock time was not observed.
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
-Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. Each run below is logged entry by entry in `fixtures/preprod/` and can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
 
 A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
 - **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
@@ -100,7 +101,7 @@ The buyer signs leg 2 against leg 1's output before that output exists. The sell
 | A2 spike | `4cd4dd854be5b6d71ab7d62d9ef329846a89dc21926b19c3c549a3680ca386b3` | `ecfd489b84d60da78bc03f6826ee1348714a4afbc6a895c1430e08d4b1e90117` | 5259491 | refused by the ledger (phase 1) |
 | Token pot, through `prepare` → `sign` → `submit` | `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8` | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` | 5259570 | refused by the ledger (phase 1) |
 | Rewritten submit path | `764f803f96fc4f0c950d1dd0f00bb98437f3bab2a6ff3f9478d0e2ce09a507db` | `ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee` | 5259631 | refused by the ledger (phase 1) |
-| Stream B rehearsal from the UI, through the agent (escrow `9054b1d8…#6`, 75 % to the seller) | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` | 5259766 | refused by the ledger (phase 1) |
+| Stream B rehearsal from the UI, through the agent (escrow `9054b1d8…#6`) | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` | 5259766 | refused by the ledger (phase 1) |
 
 ### Try anyway: an action the engine predicts refused, sent to the chain
 
@@ -122,32 +123,34 @@ After the seller's `AuthorizeRefund` alone, with no exit signed, every branch th
 
 `Withdraw` was not sent: its mandatory tagged outputs, not the state guard, would decide. On the shared script, the admin branch still reads "the validator's source says"; it was run on our own deployment only (below).
 
-### The admin pair, on our own deployment (claim S-2)
+### The admin pair, on our own deployment (test S-2, part of C11)
 
 This is **our own deployment**, never the deployed bytes: the same compiled V1 code with only the admin set changed (our key three times, threshold 2). Script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, not the shared `bd2adb68…`. Details are in `fixtures/preprod/own-deployment.json`.
 
+Two identical Disputed escrows, X and Y, with the arbitration window open.
+
 | Step | Transaction | Block | Result |
 |---|---|---|---|
-| admin `WithdrawDisputed` on a Disputed escrow | `8e5c49cb3c3077bb77b7cff1054e18c972f8359c5bdf69699bca8523cc6a5fe5` | 5259662 | accepted |
-| seller concedes (`AuthorizeRefund`) | `64299c10ef1b75dca69b9de19b3860f43125f2e7bb8cd1a0c111ae0bcde6dad8` | 5259664 | accepted |
-| the same admin's `WithdrawDisputed` after the concession | body `a776a247…` | none | refused by the validator (phase 2) |
-| buyer exits (`WithdrawRefund`) | `2b0f89ac0df8e81aa89b0a0fff6115c326e8ef1d9afce990e19923c320e2f03d` | 5259665 | accepted |
+| X: admin `WithdrawDisputed` on a Disputed escrow | `8e5c49cb3c3077bb77b7cff1054e18c972f8359c5bdf69699bca8523cc6a5fe5` | 5259662 | accepted |
+| Y: seller concedes (`AuthorizeRefund`) | `64299c10ef1b75dca69b9de19b3860f43125f2e7bb8cd1a0c111ae0bcde6dad8` | 5259664 | accepted |
+| Y: the same admin's `WithdrawDisputed` after the concession | body `a776a247…` | none | refused by the validator (phase 2) |
+| Y: buyer exits (`WithdrawRefund`) | `2b0f89ac0df8e81aa89b0a0fff6115c326e8ef1d9afce990e19923c320e2f03d` | 5259665 | accepted |
 
 ### Leg timing, five runs (S-1)
 
 Over five runs (`fixtures/preprod/race-*.json`), both legs landed in the same block five times out of five (blocks 5259678, 5259750, 5259751, 5259754 and 5259799). Leg 2 was accepted 503 to 711 ms after leg 1 was sent, both legs handed to one provider.
 
-Front-running is **not measured**, and we make no safety claim about it. A rival exit, pre-built by the buyer and checked to be valid, never landed, but no run gave it a clean window. The seller's gap between the legs (249 to 296 ms in the contended runs) is the same order of magnitude as an attacker's first sight of leg 1 (about 300 ms here). The solver keeps the front-run probability at its worst case.
+Front-running is **not measured**, and we make no safety claim about it. A rival exit, pre-built by the buyer and checked to be valid before each of the four contended runs, never landed, but no run gave it a clean window. The seller's gap between the legs (249 to 296 ms in the contended runs) is the same order of magnitude as an attacker's first sight of leg 1 (as early as 314 ms here, up to 1063 ms). The solver keeps the front-run probability at its worst case.
 
 ### Setup transactions
 
-Bank lock: `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d`, block 5259528. Each escrow was then raised to Disputed by its buyer (`SetRefundRequested`, blocks 5259535 to 5259549). Wallet splits and funding are in `fixtures/preprod/txlog-bank.json` and `txlog-wallet-*.json`.
+Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d`) to 5259737, and raised to Disputed by their buyer between 5259535 and 5259739. Three were locked directly in Disputed. The A2 spike escrow was locked at 5259457 and raised at 5259468. All entries are in `fixtures/preprod/bank.json` and `txlog-bank.json`; wallet splits and funding are in `txlog-wallet-*.json`.
 
 ## Limits and rules we hold
 
 - Mainnet is read-only. No transaction is built, evaluated or submitted against a mainnet escrow.
 - An HTTP error is a hole, counted and printed, never a data point.
-- Until a guard has been exercised on preprod, its cell says "the validator's source says"; the guards exercised so far are listed under Transactions sent. The deployed V1 addresses are reproduced from the committed blueprint with the deployed parameters (`vendor/PROVENANCE.md`).
+- Until a guard has been exercised on preprod, its cell says "the validator's source says"; the guards exercised so far are listed under Transactions sent. The deployed V1 addresses are reproduced from the committed blueprint with the deployed parameters (`vendor/PROVENANCE.md`); this supersedes the earlier measurement that the bytes were not reproducible (claim C14), and the team's wording decision on it (PLAN Q-K) is still under review.
 - Our own deployment (the admin control) is always labelled as ours and never presented as the deployed bytes.
 - Only the 16-field V1 datum is supported. A 19-field V2 escrow shows as not decodable.
 - Keys come from `.env` only. Nothing secret is printed or committed.
