@@ -36,7 +36,13 @@ pnpm sign --prepare <ref> [--share 0.4]  # seller side: writes the proposal file
 pnpm sign --role buyer|seller <file> # file-drop signature of a proposal (needs the party's key in .env)
 ```
 
-`demo:preprod` in `package.json` points at a file that does not exist.
+To run the whole settlement yourself on preprod, with your own throwaway keys:
+
+```
+pnpm demo:preprod --keygen          # makes demo keys and prints the buyer's address
+# fund that address from the preprod faucet, then:
+pnpm demo:preprod                   # locks an escrow, settles it in two legs, writes the run to fixtures/preprod/
+```
 
 `READ_SOURCE=fixture pnpm census:mainnet` reads `fixtures/mainnet/utxos-koios.json` and `utxos-blockfrost.json` and reprints the census below, with its two-provider comparison, with no network. A live run reads the chain again, so its tip and counts will have moved.
 
@@ -86,7 +92,7 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
-Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
 
 A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
 - **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
