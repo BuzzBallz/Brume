@@ -97,12 +97,20 @@ const chip = state => h('span', { class: `chip state-${state}` }, h('span', { cl
 const txLink = hash => h('a', { class: 'mono', href: EXPLORER + hash, target: '_blank', rel: 'noopener', title: hash }, short(hash))
 const txRef = e => e.status === 'accepted' ? txLink(e.txHash) : h('span', { class: 'mono', title: e.txHash }, short(e.txHash)) // a refused tx never reaches the chain
 
+// A Settle poll rebuilds the button, so the copied state lives here: a rebuilt button shows it without replaying the fade.
+let copied = null // { text, timer }
+
 function copyButton(text, label = 'Copy') {
-  const btn = h('button', { class: 'btn copy', type: 'button', onclick: async () => {
+  const btn = h('button', { class: 'btn copy', type: 'button', 'data-copied': copied?.text === text && 'held', onclick: async () => {
     await navigator.clipboard.writeText(text)
-    btn.textContent = 'Copied'
-    setTimeout(() => { btn.textContent = label }, 1200)
-  } }, label)
+    clearTimeout(copied?.timer)
+    if (copied?.text !== text) document.querySelectorAll('.copy[data-copied]').forEach(b => delete b.dataset.copied)
+    if (!btn.dataset.copied) btn.dataset.copied = 'in'
+    copied = { text, timer: setTimeout(() => {
+      copied = null
+      document.querySelectorAll('.copy[data-copied]').forEach(b => delete b.dataset.copied)
+    }, 1500) }
+  } }, h('span', { class: 'copy-face' }, h('span', { class: 'idle' }, label), h('span', { class: 'done' }, 'Copied')))
   return btn
 }
 
