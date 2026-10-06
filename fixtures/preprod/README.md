@@ -57,7 +57,7 @@ Rerun (needs `PREPROD_BUYER_SKEY`, `PREPROD_SELLER_SKEY` and a Disputed escrow o
 | `txlog-spike-e83f32f8…_0.json` | The first fixture: lock in ResultSubmitted (5259457); the first dispute refused in phase 1 with `ScriptIntegrityHashMismatch` (Mesh beta.96's stale PlutusV3 cost model, kept as evidence of the trap), then accepted with the chain's cost model (5259468) |
 | `txlog-wallet-buyer.json`, `txlog-wallet-seller.json` | Wallet preparation: UTxO splits (the seller needs ≥ 2 independent UTxOs, D13) and the seller → buyer tUSDM transfer |
 
-Escrows still open (6 Oct 17:30 SGT; `bank.ts list` for now): stream B's `9054b1d8…#7` (20 tADA + 10 tUSDM), `c3e0b68a…#0–#3` (20 tADA + 2 tUSDM each) and `47db047f…#0` (20 tADA + 10 tUSDM); 8 of ours, all Disputed.
+Escrows still open (6 Oct 17:05 SGT; `bank.ts list` for now): stream B's `9054b1d8…#7` (20 tADA + 10 tUSDM), `c3e0b68a…#0–#3` (20 tADA + 2 tUSDM each) and `47db047f…#0` (20 tADA + 10 tUSDM); 8 of ours, all Disputed.
 
 Rerun: `node src/preprod/bank.ts fast --usdm 0` (one escrow from nothing to Disputed, timed), `bank.ts topup --owners A --count N --ada 20 --usdm 0`.
 
