@@ -33,6 +33,20 @@
       "height": 5259570,
       "hash": "26351fbcc9088d925164f4918d19509f9c6b70482663d09bf9713e7c70c62304",
       "slot": 135583699
+    },
+    "readback": {
+      "provider": "blockfrost",
+      "validContract": true,
+      "balances": {
+        "buyer": {
+          "lovelace": "12000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "6000000"
+        },
+        "seller": {
+          "lovelace": "8000000",
+          "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "4000000"
+        }
+      }
     }
   },
   {
