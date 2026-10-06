@@ -101,6 +101,7 @@ Each control is built without local evaluation and sent, so the node runs the va
 |---|---|---|
 | `txlog-8e0d6df4…_0.json` | buyer's `WithdrawRefund` while Disputed (engine: needs FundsLocked or RefundRequested) | refused, phase 2: the first refusal by the deployed bytes (A4) |
 | `txlog-5aee2110…_0.json` | the same control through stream B's agent: first `POST /api/try` (16:34 SGT), then the "Try anyway" button of the UI's grid in the browser (Integration 1, 21:20 SGT) | refused, phase 2, both times; the UI says "Engine predicted refused, and the validator refused it" |
+| `txlog-c3e0b68a…_0.json` | the same control from the UI's grid on stream B's machine, on a bank escrow of B's wallets (the take) | refused, phase 2 |
 | `txlog-c11-8e0d6df4…_0.json` | C11, first run: after the seller's concession alone (5259672), `SetRefundRequested` (buyer), `SubmitResult` and `AuthorizeRefund` (seller), then the buyer's exit | all three refused in phase 2; the buyer's `WithdrawRefund` accepted (5259675). **Only `SetRefundRequested` is isolated here**: the two seller refusals ran inside the seller cooldown the concession armed, which alone explains them |
 | `txlog-c11-isolated-7e37dc3f…_0.json` | C11, seller branches isolated: concession with the minimal cooldown (5259745), each control sent once the engine named no cooldown | `SubmitResult` refused (emptied result hash the only failing guard) and `AuthorizeRefund` refused (state the only failing guard), both phase 2; buyer's exit accepted (5259786) |
 | `txlog-c11-withdraw-9054b1d8…_5.json` | C11's last branch and C12: after the concession (5259926), the seller's `Withdraw` with BOTH mandatory outputs (5 % of every asset to the fee address, `c` lovelace to the buyer, both tagged with the escrow's own reference) | refused, phase 2; buyer's exit accepted (5259927). **Positive control:** the same output construction on an escrow where `Withdraw` is open (lock 5259931) — accepted (5259933), so the refusal is the guards, not a malformed tx |
@@ -312,6 +313,12 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | lock for the positive control (ResultSubmitted, unlock_time past) | - | - | accepted | 5259931 | `4e95f1a4dbd19b1f97712d5bfe903078bdde6c7c08ca3b8f8820d7938c7d58ce` |
 | Withdraw by the seller, same tagged outputs (positive control: must be accepted) | seller | accept | accepted | 5259933 | `b0a9da352ee9a4039e2aee3803097e129fd64b99d1c80437477fde4528eed2d3` |
 
+### `txlog-c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `7b501a19e699405fcad115f517f9cc4050b3982d97f46426ad3e03eb3301819b` |
+
 ### `txlog-own-deployment.json`
 
 | Step | Role | Expected | Result | Block | Tx |
@@ -384,6 +391,7 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | Step | Role | Expected | Result | Block | Tx |
 |---|---|---|---|---|---|
 | split buyer into 6 × 10 tADA | - | - | accepted | 5259530 | `03c17e12a6d7153d8208169805b2869b656df23924d2f34130c6714feac91474` |
+| split buyer into 4 × 10 tADA | - | - | accepted | 5260807 | `38cb5e017c18667a3e0d1f605bc68c892f82603727ee2473341f77af6a4e6479` |
 
 ### `txlog-wallet-seller.json`
 
