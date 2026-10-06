@@ -12,11 +12,12 @@ This README states what exists today. The status table says what does not.
 |---|---|
 | Keyless read layer, 429 retry, hole counter (`src/read`), transaction lookup on two indexers (`pnpm verify`) | built; the read layer is tested, `verify` was run on a real V1 transaction |
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
-| Agent server: UI API and MIP-003 job interface (`src/agent`) | built; grid, solver, try and settle routes serve mocks |
-| UI (`docs/`): list, escrow, grid, settle flow, solver | built over live data and mocks |
-| Reachability engine, solver, preprod fixture, two-leg settlement (`src/engine`, `src/solver`, `src/preprod`) | not in this branch yet |
-| Masumi payment leg and listing on preprod Sokosumi | not done: `start_job` answers without the payment fields |
-| Transactions | none sent yet; the hash table below is empty on purpose |
+| Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
+| UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
+| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod, see Transactions sent |
+| Masumi payment leg | built; one test purchase completed on preprod |
+| Listing on preprod Sokosumi | registered on the preprod registry; not yet visible on the marketplace |
+| Transactions | every preprod run is listed below with its hashes and blocks |
 
 ## Run it
 
@@ -29,9 +30,12 @@ pnpm census:mainnet                 # live, keyless (Koios), plus Blockfrost if 
 pnpm agent                          # UI and API on http://127.0.0.1:8787 (PORT to change)
 pnpm site:data                      # snapshot docs/data/*.json for GitHub Pages
 pnpm verify <tx hash> [network]     # read a transaction on Koios and, with a key, Blockfrost; says whether they agree
+pnpm engine <ref> [--net preprod]   # the 7×3 reachability grid of one escrow
+pnpm solver <ref> [--net preprod]   # the split bands of one escrow, path B by default
+pnpm sign --role buyer|seller <file> # file-drop signature of a proposal (needs the party's key in .env)
 ```
 
-Commands listed in `package.json` for `engine`, `solver`, `sign` and `demo:preprod` point at files that do not exist yet.
+`demo:preprod` in `package.json` points at a file that does not exist.
 
 `READ_SOURCE=fixture pnpm census:mainnet` reads `fixtures/mainnet/utxos-koios.json` and `utxos-blockfrost.json` and reprints the census below, with its two-provider comparison, with no network. A live run reads the chain again, so its tip and counts will have moved.
 
@@ -57,18 +61,13 @@ The Pages snapshot in `docs/data/` is a separate read, at tip 14031774.
 
 ## Mocks
 
-Every mock lives in `shared/mock/*.mock.json`. Each is hand-made, not evidence, and says so in its `_note`.
+The agent serves no mock: every route answers from the chain and stream A's code. Mocks remain only for building the UI offline (`?source=mock`), in `shared/mock/*.mock.json`. Each is hand-made, not evidence, and says so in its `_note`.
 
 | Mock | Used for |
 |---|---|
-| `grid` | `GET /api/grid`, the grid in `docs/data/grid.json`, the job result |
-| `solver` | `GET /api/solver`, `docs/data/solver.json`, the job result |
-| `txlog` | `POST /api/try`, `POST /api/proposal/:id/submit` |
-| `proposal` | `POST /api/proposal`, `GET /api/proposal/:id` |
-| `census`, `datum-disputed`, `utxo-disputed` | `?source=mock` in the UI. The UTxO file is a real Koios row; the other two are decoded by hand from it |
+| `census`, `datum-disputed`, `utxo-disputed` | the escrow list and header. The UTxO file is a real Koios row; the other two are decoded by hand from it |
+| `grid`, `solver`, `proposal`, `txlog` | the grid, solver and settle views |
 | `job-result` | shape reference for the MIP-003 result |
-
-Live agent routes answer mocks with the header `x-brume-source: mock`, and the UI then shows "Live, partly mock". The job result carries `"mock": ["grid","solver"]`. The Pages snapshot does not flag them: its grid cells read "mock" and nothing else says so.
 
 ## Agent interface (MIP-003)
 
@@ -84,15 +83,70 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 `HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. One test purchase of 2 ADA on preprod from the service's own purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes; withdrawal of the funds after the unlock time was not observed.
 
-## Transactions sent
+## Transactions sent (preprod, 6 Oct 2026)
 
-None yet. Every write will be on preprod, against escrows we locked ourselves, and each hash will be listed here with its state and the second-indexer read-back.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. Each run below is logged entry by entry in `fixtures/preprod/` and can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+
+A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
+- **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
+- **phase 2**: the validator ran and refused it.
+
+### The pre-signed exit, on the shared V1 script
+
+The buyer signs leg 2 against leg 1's output before that output exists. The seller then concedes (leg 1), and both legs go out. Script `bd2adb68…`: the same script hash as the mainnet escrows.
+
+| Run | Leg 1, the concession (`AuthorizeRefund`) | Leg 2, the pre-signed exit (`WithdrawRefund`) | Block | Replay of leg 2 |
+|---|---|---|---|---|
+| A2 spike | `4cd4dd854be5b6d71ab7d62d9ef329846a89dc21926b19c3c549a3680ca386b3` | `ecfd489b84d60da78bc03f6826ee1348714a4afbc6a895c1430e08d4b1e90117` | 5259491 | refused by the ledger (phase 1) |
+| Token pot, through `prepare` → `sign` → `submit` | `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8` | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` | 5259570 | refused by the ledger (phase 1) |
+| Rewritten submit path | `764f803f96fc4f0c950d1dd0f00bb98437f3bab2a6ff3f9478d0e2ce09a507db` | `ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee` | 5259631 | refused by the ledger (phase 1) |
+
+### Try anyway: an action the engine predicts refused, sent to the chain
+
+| Escrow | Action | Engine | Result |
+|---|---|---|---|
+| `8e0d6df4…#0` (Disputed) | buyer `WithdrawRefund` | needs FundsLocked or RefundRequested | refused by the validator (phase 2), body `ae8c0418…` |
+
+### After a concession alone (claim C11, shared script)
+
+The seller concedes without any exit signed (`fd9eb4f3ab29f6aa997289a05c252d16e43973022862c22e9e09d34b74452423`, block 5259672). Every branch the concession closes is then sent anyway:
+- seller `SubmitResult`: refused by the validator (phase 2), body `bf2f54c7…`;
+- seller `AuthorizeRefund` again: refused by the validator (phase 2), body `b13daa1b…`;
+- buyer `SetRefundRequested`: refused by the validator (phase 2), body `4c409776…`.
+
+The buyer, the only party left, exits: `43c16e6b845b2f4e237b85d27864c1d03eda49b4dc31082258bf526941a68bd5`, block 5259675.
+
+### The admin pair, on our own deployment (claim S-2)
+
+This is **our own deployment**, never the deployed bytes: the same compiled V1 code with only the admin set changed (our key three times, threshold 2). Script `d2e72e104b6b4908412f0facfd669821c3587819179ec8d0acf1400d`, not the shared `bd2adb68…`. Details are in `fixtures/preprod/own-deployment.json`.
+
+| Step | Transaction | Block | Result |
+|---|---|---|---|
+| admin `WithdrawDisputed` on a Disputed escrow | `8e5c49cb3c3077bb77b7cff1054e18c972f8359c5bdf69699bca8523cc6a5fe5` | 5259662 | accepted |
+| seller concedes (`AuthorizeRefund`) | `64299c10ef1b75dca69b9de19b3860f43125f2e7bb8cd1a0c111ae0bcde6dad8` | 5259664 | accepted |
+| the same admin's `WithdrawDisputed` after the concession | body `a776a247…` | none | refused by the validator (phase 2) |
+| buyer exits (`WithdrawRefund`) | `2b0f89ac0df8e81aa89b0a0fff6115c326e8ef1d9afce990e19923c320e2f03d` | 5259665 | accepted |
+
+### The race, measured once (S-1)
+
+In one measured run, the pre-signed exit landed in the same block as the concession, 0.7 s behind it, and a competing exit fired on first sight of the concession was refused.
+- Leg 1: `92089c4c57865cea872c496b6e0dd0ae85f8630afc54448bfcbaf3108dc41e47`.
+- Leg 2: `bb928f2ea4ecd82d9ad009b3fcd555652de61a9ffa2a6236eb127b87db955cf9`.
+- Both legs are in block 5259678.
+- The rival was the buyer's own `WithdrawRefund` taking the whole pot. It was refused by the ledger (phase 1, leg 1's output already spent), body `533e4981…`.
+
+This is one run, not a probability. It says nothing about a rival submitting on the same node. The solver keeps the front-run probability at its worst case. Details are in `fixtures/preprod/race-18268b5a…_0.json`.
+
+### Setup transactions
+
+Bank lock: `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d`, block 5259528. Each escrow was then raised to Disputed by its buyer (`SetRefundRequested`, blocks 5259535 to 5259549). Wallet splits and funding are in `fixtures/preprod/txlog-bank.json` and `txlog-wallet-*.json`.
 
 ## Limits and rules we hold
 
 - Mainnet is read-only. No transaction is built, evaluated or submitted against a mainnet escrow.
 - An HTTP error is a hole, counted and printed, never a data point.
-- Until a guard has been exercised on preprod, its cell says "the validator's source says". The deployed V1 addresses were reproduced by stream A from the committed blueprint with the deployed parameters (PLAN §10, 6 Oct); a script a judge can run follows with the own-deployment work.
+- Until a guard has been exercised on preprod, its cell says "the validator's source says"; the guards exercised so far are listed under Transactions sent. The deployed V1 addresses are reproduced from the committed blueprint with the deployed parameters (`vendor/PROVENANCE.md`).
+- Our own deployment (the admin control) is always labelled as ours and never presented as the deployed bytes.
 - Only the 16-field V1 datum is supported. A 19-field V2 escrow shows as not decodable.
 - Keys come from `.env` only. Nothing secret is printed or committed.
 
