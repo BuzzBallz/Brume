@@ -6,6 +6,7 @@ import { getBank } from './bank.ts'
 import { PARAMS } from '../../shared/constants.ts'
 import { reach } from '../engine/reach.ts'
 import { proposalFile, txLogFile } from '../preprod/settle.ts'
+import { witnessSummary } from '../preprod/witnesses.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { ROOT } from './escrow.ts'
 
@@ -36,6 +37,7 @@ write('bank', { bank })
 const proposal = readOr(proposalFile(RUN_REF), null)
 write('settle', { proposal })
 write('txlog', { txlog: readOr(txLogFile(RUN_REF), []) })
+if (existsSync(txLogFile(RUN_REF))) write('witnesses', { witnesses: await witnessSummary(RUN_REF) })
 
 console.log(`docs/data written · hero ${HERO_REF} · tip ${census.tip.height} · ${census.open} open · ${census.holes} holes`)
 console.log(`preprod bank: ${bank.length} escrows · settled run ${RUN_REF}: ${proposal ? 'proposal and log written' : 'NO proposal file here, settle.json is empty'}`)

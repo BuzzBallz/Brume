@@ -10,6 +10,7 @@ import { runCensus } from '../census/census.ts'
 import { reach } from '../engine/reach.ts'
 import { tryAnyway } from '../preprod/controls.ts'
 import { checkForBuyer, prepare, proposalFile, SettleError, submit, txLogFile, witness } from '../preprod/settle.ts'
+import { witnessSummary } from '../preprod/witnesses.ts'
 import { solve, solverInputFor } from '../solver/solve.ts'
 import { body, escrowFor, HttpError, parseNet, parseRef, readDatum, ROOT } from './escrow.ts'
 import { getBank } from './bank.ts'
@@ -104,6 +105,12 @@ const routes: Record<string, Handler> = {
   'GET /api/datum': async (url) => ({ body: await readDatum(parseNet(url.searchParams.get('net') ?? 'mainnet'), parseRef(url.searchParams.get('ref'))) }),
   'GET /api/bank': async () => ({ body: { bank: await getBank() } }),
   'GET /api/txlog': (url) => ({ body: { txlog: readOr(txLogFile(parseRef(url.searchParams.get('ref'))), []) } }),
+  // Who signed each leg of a settled escrow, read from the chain (stream A's walk): 404 until a settlement is logged.
+  'GET /api/witnesses': async (url) => {
+    const ref = parseRef(url.searchParams.get('ref'))
+    if (!existsSync(txLogFile(ref))) throw new HttpError(404, 'no settlement logged for this escrow')
+    return { body: { witnesses: await witnessSummary(ref) } }
+  },
   'GET /api/grid': async (url) => {
     const e = await escrowFor(url)
     return { body: { grid: reach(e.datum, e.value, Date.now(), PARAMS, e.ref) } }

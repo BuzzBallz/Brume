@@ -26,10 +26,11 @@ const LIVE = {
   proposal: ref => `/api/proposal/${enc(ref)}`,
   settle: ref => `/api/proposal/${enc(ref)}`, // the whole answer: { proposal, sending, error }
   txlog: ref => `/api/txlog?ref=${enc(ref)}`,
+  witnesses: ref => `/api/witnesses?ref=${enc(ref)}`,
 }
 
 // A 404 on these means "nothing yet" (no proposal, no run, empty bank), not a failed read.
-const NOTHING_YET = { proposal: null, settle: null, txlog: [], bank: [] }
+const NOTHING_YET = { proposal: null, settle: null, txlog: [], bank: [], witnesses: null }
 
 // ponytail: snapshot and mock hold one escrow per kind; per-ref files once the list shows more than the hero escrow.
 async function load(kind, ref, net) {
@@ -604,8 +605,24 @@ function renderLog(log) {
 // True of the demo as run: the agent loads both keys from .env, so the note says so rather than "Brume holds no key".
 const keysNote = () => h('p', { class: 'hint keys-note' }, 'Each party signs with its own key, in pnpm sign or its wallet\'s own screen. Here we play both parties, so both throwaway preprod keys sit on this machine. The settlement needs no third key.')
 
+// A3: who signed each leg, read from the chain and named against the escrow's datum, with the explicit admin-key check.
+function renderWitnesses(w) {
+  const none = `none of the ${w.adminKeys}`
+  const names = list => list.length ? list.join(', ') : 'none'
+  return h('section', { class: 'witnesses' },
+    h('h2', {}, 'Who signed'),
+    h('p', { class: 'hint' }, `Read back from the chain: every key that signed, named against this escrow's datum. Admin keys among the signers: ${w.noAdminKey ? none : 'present'}.`),
+    h('ol', { class: 'timeline' }, w.legs.map(l => h('li', { class: 'accepted' },
+      h('span', { class: 'mark', 'aria-hidden': 'true' }),
+      h('span', {}, `Leg ${l.leg}, ${l.redeemer.name}`),
+      txLink(l.txHash),
+      h('span', { class: 'hint' }, l.block ? `block ${l.block.height.toLocaleString('en')}` : 'no block'),
+      h('span', { class: 'signers' }, `required signer: ${names(l.requiredSigners)} · signed by: ${names(l.witnesses)} · admin keys: ${l.adminKeysSigned.length ? l.adminKeysSigned.length : none}`)))))
+}
+
 async function settleView(row) {
   const panel = h('div', { class: 'settle' })
+  let witnessEl = null, witnessAsked = false // read once, when the run is complete
   const solver = row.spent ? null : await load('solver', row.ref) // a spent escrow has no solver; its share is in the proposal
   const band = solver?.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30 && b.feasible !== false) : null
   let shown = null // label of the step last scrolled into view
@@ -632,7 +649,14 @@ async function settleView(row) {
     const steps = settleSteps(row, mine, log, rerun, band, wait)
     const waiting = steps.find(s => !s.done)?.label ?? null
     if (waiting !== wait.label) Object.assign(wait, { label: waiting, since: Date.now() })
-    panel.replaceChildren(...[keysNote(), renderSteps(steps), renderLog(log)].filter(Boolean))
+    if (source !== 'mock' && !witnessAsked && log.length && steps.every(s => s.done)) {
+      witnessAsked = true
+      load('witnesses', row.ref).then(
+        w => w?.escrowRef === row.ref && (witnessEl = renderWitnesses(w)), // a snapshot holds one run: show it on its own escrow only
+        x => (witnessEl = h('p', { class: 'hint' }, `Signers not read: ${x.message}`)),
+      ).then(() => witnessEl && panel.isConnected && panel.append(witnessEl))
+    }
+    panel.replaceChildren(...[keysNote(), renderSteps(steps), renderLog(log), witnessEl].filter(Boolean))
     if (!seeded || (panel.isConnected && seq === renderSeq)) panel.querySelectorAll('.step').forEach((li, i) => { // a left panel never writes, even while still on screen
       cueStep(li, `${row.ref}:${i}`, i, !seeded)
       li.querySelectorAll('[data-cue]').forEach(el => cueValue(el, `${row.ref}:${i}:${el.dataset.cue}`, !seeded))
