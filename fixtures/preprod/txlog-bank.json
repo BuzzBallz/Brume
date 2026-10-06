@@ -502,5 +502,20 @@
       "hash": "68b0ef39964684add866466afb58297474075f7dbd36d85beb24eafd08be9b80",
       "slot": 135593753
     }
+  },
+  {
+    "step": "lock 2 fixture escrow(s)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6",
+    "atMs": 1791298288768,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260968,
+      "hash": "34f573331943081e2d2937d856f299c1efa91bda529352e27a9b258885e727e7",
+      "slot": 135615099
+    }
   }
 ]
