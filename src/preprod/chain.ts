@@ -103,6 +103,13 @@ export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise
 // answers 429 it is set aside for 30 min and every read below goes to Blockfrost alone, said once on stderr: a degraded mode
 // with one provider, never a silent one. Submits then default to Blockfrost too (SUBMIT_VIA still wins when set).
 const KOIOS_REST_MS = 30 * 60_000
+// KOIOS_PREPROD_API_TOKEN (optional, a registered koios.rest token) goes in this header only: never in a URL, a log or an
+// error. Without it Koios is called keyless, with its daily cap.
+export function koiosHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  loadEnv()
+  const token = process.env.KOIOS_PREPROD_API_TOKEN?.trim()
+  return { ...extra, ...(token ? { authorization: `Bearer ${token}` } : {}) }
+}
 let koiosDownUntil = 0
 let koiosDownSaid = false
 export const koiosAvailable = (now = Date.now()): boolean => now >= koiosDownUntil
@@ -122,7 +129,7 @@ export async function utxoInfo(refs: string[]): Promise<Map<string, { spent: boo
   if (refs.length === 0) return out
   if (koiosAvailable()) {
     const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
+      method: 'POST', headers: koiosHeaders({ 'content-type': 'application/json' }), body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
     })
     if (res.ok) {
       for (const r of (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean; address: string }[]) {
@@ -188,7 +195,7 @@ export async function liveUtxos(address: string): Promise<UTxO[]> {
   let koiosRows: KoiosUtxo[] = []
   if (koiosAvailable()) {
     const kres = await fetch(`${KOIOS.preprod}/address_utxos`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _addresses: [address], _extended: true }), signal: AbortSignal.timeout(30_000),
+      method: 'POST', headers: koiosHeaders({ 'content-type': 'application/json' }), body: JSON.stringify({ _addresses: [address], _extended: true }), signal: AbortSignal.timeout(30_000),
     })
     if (kres.ok) koiosRows = (await kres.json()) as KoiosUtxo[]
     else if (kres.status === 429) koiosLimited(kres.status) // degraded: Blockfrost's listing alone, each candidate still checked per tx
@@ -271,7 +278,7 @@ export async function seenByChain(txHash: string, ms = 90_000): Promise<boolean>
   return false
 }
 
-// SUBMIT_VIA=koios|blockfrost (PLAN §9 R-3). Koios is keyless: no auth header is sent at all.
+// SUBMIT_VIA=koios|blockfrost (PLAN §9 R-3). Koios gets only its optional registered token (koiosHeaders), nothing else.
 export function preprodSubmitter(via?: 'koios' | 'blockfrost'): Submitter {
   loadEnv()
   // An empty SUBMIT_VIA= line (as .env.example ships it) counts as unset. Koios, by default or from SUBMIT_VIA, gives way
@@ -282,5 +289,5 @@ export function preprodSubmitter(via?: 'koios' | 'blockfrost'): Submitter {
     if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
     return { via: 'blockfrost', submitTx: (cborHex) => postCbor(`${BLOCKFROST_PREPROD}/tx/submit`, cborHex, { project_id: id }) }
   }
-  return { via: 'koios', submitTx: (cborHex) => postCbor(`${KOIOS.preprod}/submittx`, cborHex, {}, koiosLimited) }
+  return { via: 'koios', submitTx: (cborHex) => postCbor(`${KOIOS.preprod}/submittx`, cborHex, koiosHeaders(), koiosLimited) }
 }

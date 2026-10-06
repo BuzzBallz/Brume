@@ -11,7 +11,7 @@ import { parseArgs } from 'node:util'
 import type { UTxO } from '@meshsdk/core'
 import type { TxLogEntry } from '../../shared/types.ts'
 import { SCRIPT_HASH, V1_ADDRESS } from '../../shared/constants.ts'
-import { blockfrostGet, liveUtxos, preprodSubmitter, refusalPhase } from './chain.ts'
+import { blockfrostGet, koiosHeaders, liveUtxos, preprodSubmitter, refusalPhase } from './chain.ts'
 import { KOIOS } from '../../shared/constants.ts'
 import { buildEscrowSpend } from './escrow.ts'
 import { ROOT } from './env.ts'
@@ -60,7 +60,7 @@ const attempts: { atMs: number; kind: string; reason: string }[] = []
 // One raw submit to Koios with a short timeout: the rival's own transport, so a slow answer never stalls its loop.
 async function fireOnce(cborHex: string): Promise<{ kind: 'accepted' | 'refused' | 'timeout' | 'http'; text: string; reason: string }> {
   try {
-    const res = await fetch(`${KOIOS.preprod}/submittx`, { method: 'POST', headers: { 'content-type': 'application/cbor' }, body: Buffer.from(cborHex, 'hex'), signal: AbortSignal.timeout(2_500) })
+    const res = await fetch(`${KOIOS.preprod}/submittx`, { method: 'POST', headers: koiosHeaders({ 'content-type': 'application/cbor' }), body: Buffer.from(cborHex, 'hex'), signal: AbortSignal.timeout(2_500) })
     const text = (await res.text()).replace(/[A-Za-z0-9+/]{200,}={0,2}/g, '<script bytes>')
     const reason = /BadInputsUTxO/.test(text) ? 'BadInputsUTxO' : /All inputs are spent/.test(text) ? 'All inputs are spent' : text.slice(0, 80)
     if (res.ok) return { kind: 'accepted', text, reason: 'accepted' }

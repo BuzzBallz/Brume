@@ -56,7 +56,8 @@ The seller concedes in leg 1 (`AuthorizeRefund`: Disputed → RefundRequested, r
 | `txlog-9e7c0991…_0.json` | Integration 1 dry run through stream B's agent API (A's machine) | 5259954 | 12 tADA + 1.2 tUSDM / 8 tADA + 0.8 tUSDM |
 | `txlog-824bbdd3…_0.json` | `pnpm demo:preprod`, from nothing in one command | 5260101 | 6 / 4 tADA |
 | `txlog-3165d9de…_0.json` | `pnpm demo:preprod` rerun on the code fixed after the contract review | 5260164 | 6 / 4 tADA |
-| `txlog-3afaacc7…_0.json` | `pnpm demo:preprod` with Koios at its keyless daily cap (Blockfrost alone, announced) | 5260570 | read-back pending: it must come from the other indexer, Koios, until its cap resets |
+| `txlog-3afaacc7…_0.json` | `pnpm demo:preprod` with Koios at its keyless daily cap (Blockfrost alone, announced) | 5260570 | 6 / 4 tADA, read back on Koios once a registered token lifted the cap |
+| `txlog-47f62a57…_0.json` | `pnpm demo:preprod` with the registered Koios token, 132 s, exit code 0 | 5260621 | 6 / 4 tADA |
 
 On our logged settles (`7a37751b`, `b475bad5`, `9e7c0991`, and the demo runs `824bbdd3` and `3165d9de`, which check it themselves) the readback equals the proposal's `payout` to the unit, and Koios and Blockfrost give the same balances (checked on `b475bad5` and `9e7c0991`). `9054b1d8…#6`'s proposal is on stream B's machine: its UI makes that comparison.
 
@@ -160,6 +161,17 @@ Generated from the logs (step, role, the engine's prediction, result, block, ful
 | AuthorizeRefund (leg 1) | seller | accept | accepted | 5260570 | `99ea2e4cc23f873078a8826f201b93002c64bf37240ac858a6d3d1b56075c89c` |
 | WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260570 | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
 | replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `685a27d95b771c40f0bdd257c9c1f5d613169a0a48a369176e4d3d9e3b2156ff` |
+
+### `txlog-47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50_0.json`
+
+| Step | Role | Expected | Result | Block | Tx |
+|---|---|---|---|---|---|
+| lock 1 fixture escrow(s) | - | - | accepted | 5260617 | `3513d0afc318c4dce0276d1f4d6226c0c307effb1fafa74fab121038690c7496` |
+| SetRefundRequested (buyer raises) | buyer | accept | accepted | 5260619 | `47f62a57b8c78e51c69e4f54b6a9c9c994da6c8b48bf3ed95cf7b9611a5a5d50` |
+| try anyway: WithdrawRefund by the buyer | buyer | refuse | refused, phase 2 | - | `ba4aeda88ae908737d30288f70bc2b63cf9587beb9c0812bef3aee5ce96f2a23` |
+| AuthorizeRefund (leg 1) | seller | accept | accepted | 5260621 | `8b672673d3fc4973ed0a3db57efca416c5741a82bce1c350fd2ffbedd3e2f4fe` |
+| WithdrawRefund (leg 2, pre-signed) | buyer | accept | accepted | 5260621 | `07298001424908cb3ee0aca58ff14be616a1a1d85174cd68e7a6d08a3f5bc6ef` |
+| replay leg 2 (same bytes) | seller | refuse | refused, phase 1 | - | `07298001424908cb3ee0aca58ff14be616a1a1d85174cd68e7a6d08a3f5bc6ef` |
 
 ### `txlog-5aee2110a6a7c407a24258899ed051aa6c878c8cfe7105c2674c3ce79b071386_0.json`
 
