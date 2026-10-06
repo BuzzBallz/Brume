@@ -493,6 +493,7 @@ const brumeMotion = new Map() // "<escrowRef>:<step index>" → { state, status 
 
 function stepCue(i, from, to) {
   if (to.status === 'Refused') return from.status === 'Refused' ? null : 'refused'
+  if (to.status === 'Expired') return from.status === 'Expired' ? null : 'expired' // leg 1 ran out while on screen; the countdown is simply gone
   if (from.state === 'later' && to.state === 'current') return 'await-in'
   if (from.state === 'current' && to.state === 'done') return i === 4 ? 'confirmed' : 'tick' // step 4 done = both legs in a block
   if (from.status === 'Ready to send' && to.status === 'Waiting for confirmation') return 'tick'

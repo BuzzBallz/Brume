@@ -358,8 +358,8 @@ button, a { touch-action: manipulation; }
 /* Settle step cues: data-motion is set by brumeMotion (app.js) for the render that sees a step change, removed on animationend.
    The tan of .step.current is the row's own background, so it is not animated. A done step's mark is ink (neutral): no flash. */
 .step[data-motion] .mark, .step[data-motion] .status, .step[data-motion="await-in"] .cmd { animation: resolve var(--dur-in) var(--ease) both; }
-.step[data-motion="refused"] { isolation: isolate; --flash-color: var(--bad); --flash-from: .12; }
-.step[data-motion="refused"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; background: var(--flash-color); animation: brume-flash var(--dur-flash) var(--ease-exit) both; }
+.step[data-motion="refused"], .step[data-motion="expired"] { isolation: isolate; --flash-color: var(--bad); --flash-from: .12; }
+.step[data-motion="refused"]::after, .step[data-motion="expired"]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: -1; background: var(--flash-color); animation: brume-flash var(--dur-flash) var(--ease-exit) both; }
 @keyframes brume-flash { from { opacity: var(--flash-from); } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { @keyframes resolve { from { opacity: 0; } } }
 /* Settle values: data-motion is set by cueValue (app.js). Inline-block so resolve's translate applies to a span. */
