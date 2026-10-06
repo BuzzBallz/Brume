@@ -4,7 +4,7 @@
 
 On 10 August 2026 Masumi published [*The Return Counter Nobody Built*](https://www.masumi.network/blogs/the-return-counter-nobody-built). It opens: "Everyone spent 18 months building the checkout for AI agents. Nobody built the return counter."
 
-On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with their arbitration window open for a median of **333 days** (census at block 14031954). Across all **120** arbitrations in the contract's lifetime, the seller received **nothing** in every one (PLAN §10 D14, and [the annex](paper/PAPER.pdf)). None of the **215** live agents on Masumi's mainnet registries (189 V1, 26 V2) mentions dispute, refund, split, mediation or arbitration in its registration (Koios, two independent routes agreeing at block 14033540: `node src/census/registry.ts` and `node src/census/registry-check.ts`, receipt `fixtures/masumi/registry-14033540.json`).
+On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with their arbitration window open for a median of **333 days** (census at block 14031954). Across all **120** arbitrations in the contract's lifetime, the seller received **nothing** in every one (receipt `fixtures/arbitrations-14034022.json`, `node src/solver/history.ts`, Koios, 0 holes; derivation in [the annex](paper/PAPER.pdf)). None of the **215** live agents on Masumi's mainnet registries (189 V1, 26 V2) mentions dispute, refund, split, mediation or arbitration in its registration (Koios, two independent routes agreeing at block 14033540: `node src/census/registry.ts` and `node src/census/registry-check.ts`, receipt `fixtures/masumi/registry-14033540.json`).
 
 TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
