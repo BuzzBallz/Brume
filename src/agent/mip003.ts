@@ -5,8 +5,21 @@ import { body, HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } 
 import { assertConfigured, createPayment, inputHash, resolvePayment, resultHash, submitResult } from './payment.ts'
 import type { Payment } from './payment.ts'
 
-type Job = { status: 'awaiting_payment' | 'running' | 'completed' | 'failed'; result?: string }
+type Job = { status: 'awaiting_payment' | 'running' | 'completed' | 'failed'; result?: string; createdAt: number }
 const jobs = new Map<string, Job>()
+
+// start_job is public behind the tunnel: each call can open a payment at the Masumi service, so open jobs are capped and old ones dropped.
+const MAX_OPEN_JOBS = 10
+const KEEP_JOBS_MS = 24 * 3600_000
+function admit() {
+  const now = Date.now()
+  let open = 0
+  for (const [id, j] of jobs) {
+    if (now - j.createdAt > KEEP_JOBS_MS) jobs.delete(id)
+    else if (j.status === 'awaiting_payment' || j.status === 'running') open++
+  }
+  if (open >= MAX_OPEN_JOBS) throw new HttpError(429, 'too many open jobs, try again later')
+}
 
 const INPUT_SCHEMA = {
   input_data: [
@@ -69,9 +82,10 @@ export const mip003 = {
     const ref = parseRef(data.escrowRef)
     const net = parseNet(data.network ?? 'mainnet')
     const identifier: string = input.identifier_from_purchaser
+    admit()
     const id = randomUUID()
     if (HIRE_VIA === 'direct') {
-      const job: Job = { status: 'running' }
+      const job: Job = { status: 'running', createdAt: Date.now() }
       jobs.set(id, job)
       run(net, ref).then(
         (result) => Object.assign(job, { status: 'completed', result }),
@@ -84,7 +98,7 @@ export const mip003 = {
     const payment = await createPayment(identifier, hash).catch((e) => {
       throw new HttpError(500, (e as Error).message)
     })
-    const job: Job = { status: 'awaiting_payment' }
+    const job: Job = { status: 'awaiting_payment', createdAt: Date.now() }
     jobs.set(id, job)
     settle(job, payment, identifier, net, ref).catch((e) => Object.assign(job, { status: 'failed', result: (e as Error).message }))
     return {
@@ -105,6 +119,6 @@ export const mip003 = {
   'GET /status': (url: URL) => {
     const job = jobs.get(url.searchParams.get('job_id') ?? '')
     if (!job) throw new HttpError(404, 'unknown job_id')
-    return { body: job }
+    return { body: { status: job.status, result: job.result } }
   },
 }
