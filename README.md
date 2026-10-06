@@ -10,6 +10,8 @@ TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
 Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://trademark-delivery-deposits-weights.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
 
+The objections, including the ones the marketplace's own creator put to us in writing, are answered in [*The questions you are about to ask*](#the-questions-you-are-about-to-ask).
+
 ## What Brume does
 
 Give it one escrow. It answers three questions.
@@ -235,6 +237,30 @@ Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f97
 ## Prior art
 
 Checked by hand on 6 Oct, named here first: Kleros Escrow v2, Win-Win Dispute Resolution (Catalyst F6), AI Arbiter, Hokan, and the projects that ship their own escrow contract. Each builds its own escrow or a better judge. Simpuru ([github.com/Simpuru-xyz/simpuru](https://github.com/Simpuru-xyz/simpuru), created 6 Oct, in this track) deploys Masumi's V2 validator unchanged with its own arbiter key: it replaces the V1 arbitrator, which has not acted since 27 November 2025, with its own, and a new deployment cannot reach the 61 escrows on mainnet. Brume lets the two parties settle without one on the escrows that exist. On the preprod registry, an agent registered on 5 Oct as Recourse mentions disputes in its registration; its metadata names no author or URL (registration NFTs: [A](https://preprod.cardanoscan.io/transaction/09615b4182a7d9275ffc6fd4ac492108bcb680e86d042a7b675fd37e7e6dfd00), [B](https://preprod.cardanoscan.io/transaction/4d798e579573d4283887342ffe2f4cadc2aa4f18a02ea53fd95c9d44cba56b71)).
+
+## The questions you are about to ask
+
+The submission is a three-minute video, so these are answered here rather than in a room. Every one has been put to us already, and the sharpest, including the first, came from the marketplace's own creator in writing.
+
+**"The dispute path already allows a 60/40 split, by quorum."** Correct, and it is the strongest objection to this project. `WithdrawDisputed` constrains no output in V1, and in V2 the split is two explicit fields in the redeemer. The contract can do 60/40. **It cannot do it without the admin set.** There has been no arbitration of any kind for 313 days. Across the 120 that did happen, the seller side received something in zero of them. And 61 escrows now sit past their unlock time, a median of 333 days each. The split is available and nobody is there to sign it. On four of them nobody *can*: `AuthorizeRefund` empties `result_hash`, `WithdrawDisputed` requires it non-empty, so the admin set is permanently out and only the buyer can move the value. What we build is the exit that needs two signatures and no third key.
+
+**"Then the other side can still build a different transaction and race yours."** True, and we say it first. Pre-signing removes the *refusal*, not the *race*. Once leg 1 lands, the buyer could broadcast a competing `WithdrawRefund`. What makes it hard is that ours is already propagating, chained to the first, while theirs cannot be built until the first is visible, and they cannot invalidate ours by spending their own funds, because leg 2's fees come from the conceding party's inputs. Both legs landed in the same block in every settlement we ran. **That is not a safety claim**: each of those runs handed both legs to one node, which is favourable rather than a race, and the front-run itself is unmeasured. The solver prices it at its worst case. See *Leg timing* under Transactions sent.
+
+**"Kleros already does settlement negotiation."** Kleros built a settlement *state* into their own contract: waiting-settlement-buyer, waiting-settlement-seller, a settlement timeout. This validator has none, no settlement state and no settlement redeemer, and it is someone else's deployed bytecode that we cannot change. A settlement turns out to be reachable anyway, by composing two redeemers written for other purposes, and the exit can be counter-signed before the concession is ever submitted. Kleros also lets you propose a number; nothing anywhere tells you *which* numbers are individually rational.
+
+**"Does a model decide the split?"** No, and nobody has to trust one. The band comes from the validator's own guards and the measured history; the point inside it is the parties' choice, and the default the product proposes is only a proposal either side can counter. *Not an arbiter*, above, is the short version.
+
+**"Why would the seller accept less than everything?"** Because the measured alternative is zero: in 120 of 120 arbitrations the seller side received nothing. And symmetrically, a full refund needs an arbitrator who has not acted since 27 November 2025.
+
+**"And if the two of them do not agree?"** Then they are exactly where they are today, waiting. **We do not make agreement compulsory. We make it possible**, and trying costs nothing, because an unsent transaction moves no money.
+
+**"How much money is actually stuck?"** Three USDM in the median escrow, and 295.342750 ADA plus 498.15 USDM across all 61. Every party in them belongs to one consortium, so nobody outside is out of pocket. **This is a measurement of a primitive on a live adversarial test set, not a victim narrative.** The reason nothing has broken yet is that buyer, seller and arbitrator are the same group of people, which is also the thing the funded growth plan changes.
+
+**"Are you saying the marketplace is broken?"** The other way round. Sixty-one frozen jobs is survivable because the agencies absorb it. At a hundred agents with enterprises buying directly it is not. The 333 days is not a requirement anyone published; it is the measurement showing that the exit the next step needs does not exist yet.
+
+**"Are those 61 just abandoned dust?"** No, and the clearest evidence is what moved beside them. Between mainnet blocks 14033472 and 14034002, 27 escrows in `ResultSubmitted` were withdrawn normally, 96 down to 69, while the 61 `Disputed` references were the same 61: none gone, none new. Healthy escrows churn. These do not.
+
+**"Why did nobody find this?"** The validators were audited, and the audit asked whether an attacker could lock up or steal funds. Nobody asked what happens if the arbitrator never comes.
 
 ## Layout
 
