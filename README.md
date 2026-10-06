@@ -4,7 +4,7 @@
 
 On 10 August 2026 Masumi published [*The Return Counter Nobody Built*](https://www.masumi.network/blogs/the-return-counter-nobody-built). It opens: "Everyone spent 18 months building the checkout for AI agents. Nobody built the return counter."
 
-On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with their arbitration window open for a median of **333 days** (census at block 14031954). Across all **120** arbitrations in the contract's lifetime, the seller received **nothing** in every one (PLAN §10 D14, and [the annex](paper/PAPER.pdf)).
+On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with their arbitration window open for a median of **333 days** (census at block 14031954). Across all **120** arbitrations in the contract's lifetime, the seller received **nothing** in every one (PLAN §10 D14, and [the annex](paper/PAPER.pdf)). None of the **215** live agents on Masumi's mainnet registries (189 V1, 26 V2) mentions dispute, refund, split, mediation or arbitration in its registration (Koios, two independent routes agreeing at block 14033540: `node src/census/registry.ts` and `node src/census/registry-check.ts`, receipt `fixtures/masumi/registry-14033540.json`).
 
 TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
@@ -219,7 +219,7 @@ Bank escrows were locked from block 5259528 (`9054b1d81c9ce47db1e3ea993aa34f0f97
 
 ## Prior art
 
-Checked by hand on 6 Oct, named here first: Kleros Escrow v2, Win-Win Dispute Resolution (Catalyst F6), AI Arbiter, Hokan, and the projects that ship their own escrow contract. Each builds its own escrow or a better judge. Simpuru ([github.com/Simpuru-xyz/simpuru](https://github.com/Simpuru-xyz/simpuru), created 6 Oct, in this track) deploys Masumi's V2 validator unchanged with its own arbiter key: it replaces the V1 arbitrator, which has not acted since 27 November 2025, with its own, and a new deployment cannot reach the 61 escrows on mainnet. Brume lets the two parties settle without one on the escrows that exist.
+Checked by hand on 6 Oct, named here first: Kleros Escrow v2, Win-Win Dispute Resolution (Catalyst F6), AI Arbiter, Hokan, and the projects that ship their own escrow contract. Each builds its own escrow or a better judge. Simpuru ([github.com/Simpuru-xyz/simpuru](https://github.com/Simpuru-xyz/simpuru), created 6 Oct, in this track) deploys Masumi's V2 validator unchanged with its own arbiter key: it replaces the V1 arbitrator, which has not acted since 27 November 2025, with its own, and a new deployment cannot reach the 61 escrows on mainnet. Brume lets the two parties settle without one on the escrows that exist. On the preprod registry, an agent registered on 5 Oct as Recourse mentions disputes in its registration; its metadata names no author or URL (registration NFTs: [A](https://preprod.cardanoscan.io/transaction/09615b4182a7d9275ffc6fd4ac492108bcb680e86d042a7b675fd37e7e6dfd00), [B](https://preprod.cardanoscan.io/transaction/4d798e579573d4283887342ffe2f4cadc2aa4f18a02ea53fd95c9d44cba56b71)).
 
 ## Layout
 
