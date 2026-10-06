@@ -110,12 +110,17 @@ The buyer signs leg 2 against leg 1's output before that output exists. The sell
 
 ### After a concession alone (claim C11, shared script)
 
-The seller concedes without any exit signed (`fd9eb4f3ab29f6aa997289a05c252d16e43973022862c22e9e09d34b74452423`, block 5259672). Every branch the concession closes is then sent anyway:
-- seller `SubmitResult`: refused by the validator (phase 2), body `bf2f54c7…`;
-- seller `AuthorizeRefund` again: refused by the validator (phase 2), body `b13daa1b…`;
-- buyer `SetRefundRequested`: refused by the validator (phase 2), body `4c409776…`.
+After the seller's `AuthorizeRefund` alone, with no exit signed, every branch the concession closes was sent anyway. Each one counts only when the guard we name is the only one failing.
+- **First run** (`fixtures/preprod/txlog-c11-8e0d6df4…_0.json`). The concession is `fd9eb4f3ab29f6aa997289a05c252d16e43973022862c22e9e09d34b74452423`, block 5259672.
+  - The buyer's `SetRefundRequested` was refused by the validator (phase 2), the state guard being the only one failing (body `4c409776…`).
+  - The seller's `SubmitResult` and second `AuthorizeRefund` were refused too. The concession's seller cooldown was still running, so that cooldown alone explains them: they are not counted.
+  - The buyer then exits: `43c16e6b845b2f4e237b85d27864c1d03eda49b4dc31082258bf526941a68bd5`, block 5259675.
+- **Isolated re-run** (`fixtures/preprod/txlog-c11-isolated-7e37dc3f…_0.json`). The concession is `794370a207b45c07c397ea9662e80011a0eb1b24bd121e19d2bc0e9fa352d5a8`, block 5259745, written with the minimal seller cooldown. Each seller control was sent only after that cooldown expired.
+  - The seller's `SubmitResult` was refused by the validator (phase 2), the emptied result hash being the only guard failing (body `97282a2b…`).
+  - The seller's second `AuthorizeRefund` was refused by the validator (phase 2), the state being the only guard failing (body `cb5bfbe5…`).
+  - The buyer then exits: `b6019d87369106952e5f69440c5251a6be526de9f935c04d2475e7100eaf9b65`, block 5259786.
 
-The buyer, the only party left, exits: `43c16e6b845b2f4e237b85d27864c1d03eda49b4dc31082258bf526941a68bd5`, block 5259675.
+`Withdraw` was not sent: its mandatory tagged outputs, not the state guard, would decide. On the shared script, the admin branch still reads "the validator's source says"; it was run on our own deployment only (below).
 
 ### The admin pair, on our own deployment (claim S-2)
 
@@ -128,15 +133,11 @@ This is **our own deployment**, never the deployed bytes: the same compiled V1 c
 | the same admin's `WithdrawDisputed` after the concession | body `a776a247…` | none | refused by the validator (phase 2) |
 | buyer exits (`WithdrawRefund`) | `2b0f89ac0df8e81aa89b0a0fff6115c326e8ef1d9afce990e19923c320e2f03d` | 5259665 | accepted |
 
-### The race, measured once (S-1)
+### Leg timing, five runs (S-1)
 
-In one measured run, the pre-signed exit landed in the same block as the concession, 0.7 s behind it, and a competing exit fired on first sight of the concession was refused.
-- Leg 1: `92089c4c57865cea872c496b6e0dd0ae85f8630afc54448bfcbaf3108dc41e47`.
-- Leg 2: `bb928f2ea4ecd82d9ad009b3fcd555652de61a9ffa2a6236eb127b87db955cf9`.
-- Both legs are in block 5259678.
-- The rival was the buyer's own `WithdrawRefund` taking the whole pot. It was refused by the ledger (phase 1, leg 1's output already spent), body `533e4981…`.
+Over five runs (`fixtures/preprod/race-*.json`), both legs landed in the same block five times out of five (blocks 5259678, 5259750, 5259751, 5259754 and 5259799). Leg 2 was accepted 503 to 711 ms after leg 1 was sent, both legs handed to one provider.
 
-This is one run, not a probability. It says nothing about a rival submitting on the same node. The solver keeps the front-run probability at its worst case. Details are in `fixtures/preprod/race-18268b5a…_0.json`.
+Front-running is **not measured**, and we make no safety claim about it. A rival exit, pre-built by the buyer and checked to be valid, never landed, but no run gave it a clean window. The seller's gap between the legs (249 to 296 ms in the contended runs) is the same order of magnitude as an attacker's first sight of leg 1 (about 300 ms here). The solver keeps the front-run probability at its worst case.
 
 ### Setup transactions
 
