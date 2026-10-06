@@ -15,7 +15,7 @@ This README states what exists today. The status table says what does not.
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
 | Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod, see Transactions sent |
-| Masumi payment leg | built; exercised once with a test purchase from our own local payment service (its log is local, not in `fixtures/`) |
+| Masumi payment leg | built; one test purchase completed on preprod, exported to `fixtures/masumi/test-purchase.json` |
 | Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000000`); not yet visible on the marketplace |
 | Transactions | every preprod run is listed below with its hashes and blocks |
 
@@ -82,7 +82,7 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 `input_data.network` is `mainnet` (default, read-only) or `preprod`. The result is a JSON string: escrow reference, grid, solver output, and a link into the UI. Shapes follow the [MIP-003 text](https://github.com/masumi-network/masumi-improvement-proposals).
 
-`HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. It was exercised once: a test purchase of 2 tADA from our own local payment service's purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes. That run's log stayed on the payment service and is not in `fixtures/`; withdrawal of the funds after the unlock time was not observed.
+`HIRE_VIA=direct` (default) answers `start_job` with a job id only, for scripted calls. `HIRE_VIA=sokosumi` opens a payment at the Masumi payment service (preprod, `.env` holds `PAYMENT_SERVICE_URL`, `PAYMENT_API_KEY`, `AGENT_IDENTIFIER`) and answers with the specification's payment fields, with the times as the payment service returns them (unix milliseconds, strings) and an `amounts` list. The job runs once the funds are locked and the result hash is then submitted to the service. It was exercised once: a test purchase of 2 tADA from our own local payment service's purchasing wallet went from `awaiting_payment` to `completed` in about 3 minutes. The buyer locked the funds in `6b359cff0b44064b5e4fc3b5da8e79850b04a46be507b3e6cc596f1f8c770b0c` (block 5259425) and the agent's result was submitted in `eaaf7c516ecf9f6cdb8ef9fdc674a54b2c109e7553a4d1a8da1cc33564fad1f6` (block 5259429). Both run on the Masumi payment contract, not the V1 escrow. The record is exported from the service's database to `fixtures/masumi/test-purchase.json` (public fields only). Withdrawal of the funds after the unlock time was not observed.
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
