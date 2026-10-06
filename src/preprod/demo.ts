@@ -27,7 +27,7 @@ import { readDatum } from './datum.ts'
 import { loadEnv, ROOT } from './env.ts'
 import { byLovelace, escrowAt, lovelace, pureAda } from './fixture.ts'
 import { mesh } from './mesh.ts'
-import { prepare, sign, submit, txLogFile, upsertTxLog } from './settle.ts'
+import { prepare, reservedUtxos, sign, submit, txLogFile, upsertTxLog } from './settle.ts'
 import { addWitness, buildPlain, submitAndConfirm, txWindow } from './tx.ts'
 import { party, type Party } from './wallet.ts'
 
@@ -52,12 +52,15 @@ async function keygen(): Promise<void> {
   for (const role of ['BUYER', 'SELLER'] as const) {
     const name = `PREPROD_${role}_SKEY`
     if (process.env[name]?.trim()) console.log(`${name} is already set: kept`)
-    else add.push(`${name}=${mesh.resolvePrivateKey(mesh.MeshWallet.brew() as string[])}`)
+    else {
+      const key = mesh.resolvePrivateKey(mesh.MeshWallet.brew() as string[])
+      add.push(`${name}=${key}`)
+      process.env[name] = key // set here too: loadEnvFile never overrides an existing empty `NAME=` line
+    }
   }
   if (add.length) {
     const lead = existsSync(file) && !readFileSync(file, 'utf8').endsWith('\n') ? '\n' : ''
     appendFileSync(file, `${lead}${add.join('\n')}\n`)
-    process.loadEnvFile(file)
   }
   const [buyer, seller] = [await party('buyer'), await party('seller')]
   console.log(`buyer  ${buyer.address}   ← fund this one (≥ 80 tADA) from the preprod faucet`)
@@ -67,7 +70,8 @@ async function keygen(): Promise<void> {
 // Step 1: the separate UTxOs the later steps need, in one tx paid by the buyer. The buyer: one large UTxO for the lock
 // plus two of its own for the dispute's and try anyway's collateral; the seller: two (leg 1 and leg 2 never share one).
 async function wallets(buyer: Party, seller: Party, force: boolean): Promise<TxLogEntry | null> {
-  const ready = async (p: Party): Promise<number> => pureAda(await liveUtxos(p.address)).filter((u) => lovelace(u) >= 5_000_000n).length
+  const reserved = reservedUtxos() // a UTxO another proposal's legs need does not count as ready (D13)
+  const ready = async (p: Party): Promise<number> => pureAda(await liveUtxos(p.address)).filter((u) => lovelace(u) >= 5_000_000n && !reserved.has(`${u.input.txHash}#${u.input.outputIndex}`)).length
   const buyerNeeds = force ? 2 : Math.max(0, 3 - (await ready(buyer)))
   const sellerNeeds = force ? 2 : Math.max(0, 2 - (await ready(seller)))
   if (!buyerNeeds && !sellerNeeds) {
@@ -160,6 +164,10 @@ async function run(): Promise<boolean> {
   const proposal = await sign('buyer', await indexed('the disputed escrow', () => prepare(ref, SHARE)))
   console.log(`  leg 2 signed by the buyer before leg 1 exists: leg 1 ${proposal.leg1?.txHash}, leg 2 ${proposal.leg2?.txHash}`)
   const [leg1, leg2, replay] = await submit(proposal)
+  if (!leg2) {
+    console.log(`  leg 1 (AuthorizeRefund, seller): ${line(leg1)}: leg 1 did not go out, so nothing was exposed and leg 2 was not sent`)
+    return false
+  }
   console.log(`  leg 1 (AuthorizeRefund, seller): ${line(leg1)}\n  leg 2 (WithdrawRefund, buyer's): ${line(leg2)}${replay ? `\n  leg 2 replayed: ${line(replay)}` : ''}`)
   expect(!!leg1.block && !!leg2.block, 'both legs confirmed')
   if (leg1.block && leg2.block) console.log(`  ${leg1.block.height === leg2.block.height ? 'same block' : `blocks ${leg1.block.height} and ${leg2.block.height}`}`)
