@@ -2,9 +2,9 @@
  "census": {
   "network": "mainnet",
   "tip": {
-   "height": 14031774,
-   "hash": "2d05adb324e330ba8cfc901135db93aa16e7f99a6d0380a94ec29d8c187fd237",
-   "timeMs": 1791261144000
+   "height": 14032015,
+   "hash": "df658983e9165aa9a9628dc21d16f4e1167b3a6876a73a618d85dc0a2d5c2e6c",
+   "timeMs": 1791265710000
   },
   "provider": "koios",
   "open": 141,
@@ -1140,6 +1140,10 @@
     }
    }
   ],
-  "secondProvider": null
+  "secondProvider": {
+   "provider": "blockfrost",
+   "holes": 0,
+   "diff": []
+  }
  }
 }
