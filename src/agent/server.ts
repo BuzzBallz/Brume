@@ -1,3 +1,4 @@
+import './env.ts'
 import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import type { IncomingMessage, ServerResponse } from 'node:http'
@@ -80,7 +81,7 @@ async function handle(req: IncomingMessage, res: ServerResponse) {
 
 createServer((req, res) => {
   handle(req, res).catch((e) => {
-    const status = e instanceof HttpError ? e.status : 502
+    const status = e instanceof HttpError ? e.status : 500
     if (!(e instanceof HttpError)) console.error(e)
     res.writeHead(status, { 'content-type': 'application/json' }).end(JSON.stringify({ error: (e as Error).message }))
   })

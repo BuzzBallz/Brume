@@ -2,8 +2,10 @@ import { randomUUID } from 'node:crypto'
 import type { IncomingMessage } from 'node:http'
 import type { JobResult } from '../../shared/types.ts'
 import { HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } from './escrow.ts'
+import { assertConfigured, createPayment, inputHash, resolvePayment, resultHash, submitResult } from './payment.ts'
+import type { Payment } from './payment.ts'
 
-type Job = { status: 'running' | 'completed' | 'failed'; result?: string }
+type Job = { status: 'awaiting_payment' | 'running' | 'completed' | 'failed'; result?: string }
 const jobs = new Map<string, Job>()
 
 const INPUT_SCHEMA = {
@@ -28,7 +30,16 @@ async function body(req: IncomingMessage) {
   }
 }
 
-// ponytail: grid and solver come from shared/mock until stream A's engine and solver land, and the result says so. No payment leg yet: start_job answers without the Masumi payment fields.
+// HIRE_VIA=sokosumi: start_job opens a payment at the Masumi payment service and the job runs once the funds are locked. direct (default): no payment, for scripted calls.
+const HIRE_VIA = process.env.HIRE_VIA ?? 'direct'
+if (HIRE_VIA !== 'direct' && HIRE_VIA !== 'sokosumi') throw new Error('HIRE_VIA must be sokosumi or direct')
+if (HIRE_VIA === 'sokosumi') assertConfigured()
+
+const POLL_MS = 10_000
+const MAX_POLL_ERRORS = 5
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+// ponytail: grid and solver come from shared/mock until stream A's engine and solver land, and the result says so.
 const ORIGIN = process.env.PUBLIC_URL ?? `http://127.0.0.1:${process.env.PORT ?? 8787}`
 
 async function run(net: 'mainnet' | 'preprod', ref: string) {
@@ -43,6 +54,26 @@ async function run(net: 'mainnet' | 'preprod', ref: string) {
   return JSON.stringify(result)
 }
 
+// Wait for the buyer's funds, run the job, hand the result hash to the payment service. A job that cannot run after payment is left failed and unsubmitted, so the buyer can ask for a refund.
+async function settle(job: Job, payment: Payment, identifier: string, net: 'mainnet' | 'preprod', ref: string) {
+  const deadline = Number(payment.payByTime) + 60_000
+  let errors = 0
+  while (job.status === 'awaiting_payment') {
+    try {
+      const now = await resolvePayment(payment.blockchainIdentifier)
+      errors = 0
+      if (now.onChainState === 'FundsLocked') job.status = 'running'
+      else if (Date.now() > deadline) throw new Error('not paid before payByTime')
+    } catch (e) {
+      if (++errors >= MAX_POLL_ERRORS || Date.now() > deadline) throw e
+    }
+    if (job.status === 'awaiting_payment') await sleep(POLL_MS)
+  }
+  const result = await run(net, ref)
+  await submitResult(payment.blockchainIdentifier, resultHash(identifier, result))
+  Object.assign(job, { status: 'completed', result })
+}
+
 export const mip003 = {
   'GET /availability': () => ({ body: { status: 'available', type: 'masumi-agent' } }),
   'GET /input_schema': () => ({ body: INPUT_SCHEMA }),
@@ -52,14 +83,39 @@ export const mip003 = {
     const data = input.input_data ?? {}
     const ref = parseRef(data.escrowRef)
     const net = parseNet(data.network ?? 'mainnet')
+    const identifier: string = input.identifier_from_purchaser
     const id = randomUUID()
-    const job: Job = { status: 'running' }
+    if (HIRE_VIA === 'direct') {
+      const job: Job = { status: 'running' }
+      jobs.set(id, job)
+      run(net, ref).then(
+        (result) => Object.assign(job, { status: 'completed', result }),
+        (e) => Object.assign(job, { status: 'failed', result: (e as Error).message }),
+      )
+      return { body: { id, identifierFromPurchaser: identifier } }
+    }
+    if (!/^[0-9a-f]{14,26}$/i.test(identifier)) throw new HttpError(400, 'identifier_from_purchaser must be 14 to 26 hex characters')
+    const hash = inputHash(identifier, data)
+    const payment = await createPayment(identifier, hash).catch((e) => {
+      throw new HttpError(500, (e as Error).message)
+    })
+    const job: Job = { status: 'awaiting_payment' }
     jobs.set(id, job)
-    run(net, ref).then(
-      (result) => Object.assign(job, { status: 'completed', result }),
-      (e) => Object.assign(job, { status: 'failed', result: (e as Error).message }),
-    )
-    return { body: { id, identifierFromPurchaser: input.identifier_from_purchaser } }
+    settle(job, payment, identifier, net, ref).catch((e) => Object.assign(job, { status: 'failed', result: (e as Error).message }))
+    return {
+      body: {
+        id,
+        blockchainIdentifier: payment.blockchainIdentifier,
+        payByTime: Number(payment.payByTime),
+        submitResultTime: Number(payment.submitResultTime),
+        unlockTime: Number(payment.unlockTime),
+        externalDisputeUnlockTime: Number(payment.externalDisputeUnlockTime),
+        agentIdentifier: process.env.AGENT_IDENTIFIER,
+        sellerVKey: payment.SmartContractWallet?.walletVkey,
+        identifierFromPurchaser: identifier,
+        input_hash: hash,
+      },
+    }
   },
   'GET /status': (url: URL) => {
     const job = jobs.get(url.searchParams.get('job_id') ?? '')
