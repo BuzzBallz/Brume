@@ -21,7 +21,17 @@ export type Redeemer = (typeof REDEEMER)[number]
 export type Role = 'buyer' | 'seller' | 'admin'
 
 export type Credential = { type: 'key' | 'script'; hash: string }
+// Plutus Address: credentials only, no network id. Pointer stake credentials are not represented: the decoder throws on them.
 export type Address = { payment: Credential; stake: Credential | null }
+
+// Validator parameters (SPEC-VALIDATOR §8). The deployed V1 set is PARAMS in constants.ts; our own deployment (S-2) has its own.
+export type Params = {
+  requiredAdmins: number
+  adminKeyHashes: string[] // a key listed n times counts n times
+  feeAddress: Address
+  feePermille: number
+  cooldownMs: number
+}
 
 // The 16 V1 datum fields, in declaration order (SPEC-TRANSACTIONS §0). Times in POSIX ms. Hex strings for bytes.
 export type Datum = {
@@ -78,33 +88,61 @@ export type SolverInput = {
   collateralReturnLovelace: number
   feePermille: number
   buyerArbShare: Record<string, number> // unit → observed buyer share in arbitration (C9)
+  sellerArbShare: Record<string, number> // unit → observed seller share in arbitration (C9: 0 in 120 of 120)
   dormancyDays: number
   horizonsDays: number[]
   frontRunP: number | null // null until 5b measures it; solver shows the worst case
 }
 export type PathTerms = { fee: Value; exposedParty: 'buyer' | 'seller'; exposedFloor: Value; defectorKeeps: Value }
+// Everything is per unit of that asset's locked quantity. Assets differ (C9: buyer took 100 % of the ADA, 73.6 % of the token).
+export type UnitTerms = { rBuyer: number; rSeller: number; sellerShareMin: number; sellerShareMax: number }
+export type Band = {
+  horizonDays: number
+  sellerShareMin: number // scalar band: one share applied to every asset = intersection of the per-unit bands
+  sellerShareMax: number
+  perUnit: Record<string, UnitTerms>
+}
 export type SolverOutput = {
   ref: string
   pathA: PathTerms
   pathB: PathTerms
-  bands: { horizonDays: number; sellerShareMin: number; sellerShareMax: number }[] // per unit of V
+  bands: Band[]
+  arbitrationLeak: Record<string, number> // unit → share reaching neither party in arbitration (1 − buyer − seller)
+  frontRunP: { used: number; measured: boolean }
 }
 
 export type TxLogEntry = {
   step: string
+  network: Network
   txHash: string
   status: 'accepted' | 'refused'
+  atMs: number
+  expected?: 'accept' | 'refuse' // set on controls: the prediction made before submitting
+  stage?: 'evaluate' | 'submit' | 'confirm' // where the outcome was decided; a validator refusal shown as such must be 'submit'
+  blockHeight?: number // when accepted: the block that pins it
   error?: string
   readback?: { provider: Provider; validContract: boolean }
 }
 
+// B = seller first: AuthorizeRefund (leg 1) → WithdrawRefund (leg 2). A = buyer first: UnSetRefundRequested → Withdraw.
+export type SettlePath = 'A' | 'B'
+export type Leg = {
+  redeemer: Redeemer
+  cborHex: string
+  txHash: string // fixed by the body; no signature may change it
+  validFromMs: number
+  validToMs: number // leg 2 must still be valid when leg 1 confirms
+  inputs: string[] // every input ref, escrow + funding + collateral; leg 1 never spends leg 2's funding inputs
+}
 export type Proposal = {
   escrowRef: string
   network: Network
-  sellerShare: number
-  leg1?: { cborHex: string; txHash: string }
-  leg2?: { cborHex: string; txHash: string }
-  signedBy: Role[]
+  path: SettlePath
+  sellerShare: number // fraction of every asset paid to the seller
+  payout: { buyer: Value; seller: Value; fee: Value } // exact amounts written in the exit leg
+  leg1?: Leg
+  leg2?: Leg
+  signedBy: Role[] // UI state only; submit() verifies the witnesses inside the CBOR, never this field
 }
 
 // MIP-003 job output
@@ -115,7 +153,7 @@ export type UtxosAt = (net: Network, address: string) => Promise<Read<RawUtxo[]>
 export type UtxoByRef = (net: Network, ref: string) => Promise<Read<RawUtxo | null>>
 export type TipOf = (net: Network) => Promise<Read<Tip>>
 export type DecodeDatum = (cborHex: string) => Datum // throws on malformed
-export type Reach = (datum: Datum, value: Value, nowMs: number) => Grid
+export type Reach = (datum: Datum, value: Value, nowMs: number, params: Params) => Grid
 export type Solve = (input: SolverInput) => SolverOutput
 export type Prepare = (escrowRef: string, sellerShare: number) => Promise<Proposal>
 export type Sign = (role: Role, proposal: Proposal) => Promise<Proposal>

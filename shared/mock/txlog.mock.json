@@ -3,18 +3,30 @@
   "txlog": [
     {
       "step": "SetRefundRequested",
+      "network": "preprod",
       "txHash": "2222222222222222222222222222222222222222222222222222222222222222",
-      "status": "accepted"
+      "status": "accepted",
+      "atMs": 1791262000000,
+      "stage": "confirm",
+      "blockHeight": 5259350
     },
     {
       "step": "AuthorizeRefund (leg 1)",
+      "network": "preprod",
       "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
-      "status": "accepted"
+      "status": "accepted",
+      "atMs": 1791262300000,
+      "stage": "confirm",
+      "blockHeight": 5259362
     },
     {
       "step": "WithdrawRefund (leg 2)",
+      "network": "preprod",
       "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
       "status": "accepted",
+      "atMs": 1791262301000,
+      "stage": "confirm",
+      "blockHeight": 5259363,
       "readback": {
         "provider": "blockfrost",
         "validContract": true
@@ -22,8 +34,12 @@
     },
     {
       "step": "replay leg 2",
+      "network": "preprod",
       "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
       "status": "refused",
+      "atMs": 1791262400000,
+      "expected": "refuse",
+      "stage": "submit",
       "error": "BadInputsUTxO"
     }
   ]

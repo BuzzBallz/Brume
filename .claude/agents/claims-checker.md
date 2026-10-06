@@ -18,6 +18,6 @@ Flag:
 - the platform name, unless PLAN.md records W5 as cleared;
 - the 26.4 % admin figure anywhere outside the repo's caveated docs;
 - "does" instead of "can" for arbitration custody;
-- any number that differs from the pinned fixtures (tip block, 132 open / 131 decoded, 61, day counts).
+- any number that differs from the pinned fixtures (tip block, 141 open / 140 decoded at mainnet block 14031828 in `fixtures/kickoff-2026-10-06.md`, 61, day counts). "132 / 131" is dead: flag it anywhere.
 
 Output one line per finding: quote, location, rule broken, compliant rewrite. Nothing else.
