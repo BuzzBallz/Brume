@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { IncomingMessage } from 'node:http'
 import type { JobResult } from '../../shared/types.ts'
-import { HttpError, mockFile, parseNet, parseRef, readDatum } from './escrow.ts'
+import { HttpError, mockGrid, mockSolver, parseNet, parseRef, readDatum } from './escrow.ts'
 
 type Job = { status: 'running' | 'completed' | 'failed'; result?: string }
 const jobs = new Map<string, Job>()
@@ -35,8 +35,8 @@ async function run(net: 'mainnet' | 'preprod', ref: string) {
   const { datum } = await readDatum(net, ref)
   const result: JobResult & { mock: string[] } = {
     escrowRef: ref,
-    grid: { ...mockFile('grid').grid, ref, state: datum.state },
-    solver: { ...mockFile('solver').solver, ref },
+    grid: mockGrid(ref, datum.state),
+    solver: mockSolver(ref),
     uiUrl: `${ORIGIN}/?escrow=${ref}`,
     mock: ['grid', 'solver'],
   }

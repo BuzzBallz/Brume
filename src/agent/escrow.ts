@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { V1_ADDRESS } from '../../shared/constants.ts'
-import type { Datum, Network, Value } from '../../shared/types.ts'
+import type { Datum, Grid, Network, SolverOutput, State, Value } from '../../shared/types.ts'
 import { decodeDatum } from '../census/decode.ts'
 import { utxo } from '../read/koios.ts'
 
@@ -27,6 +27,10 @@ export const parseNet = (net: unknown): Network => {
 }
 
 export const mockFile = (name: string) => JSON.parse(readFileSync(join(ROOT, 'shared/mock', `${name}.mock.json`), 'utf8'))
+
+// Stand-ins until stream A's engine and solver land: the mock's shape, retargeted at the asked escrow.
+export const mockGrid = (ref: string, state: State): Grid => ({ ...mockFile('grid').grid, ref, state })
+export const mockSolver = (ref: string): SolverOutput => ({ ...mockFile('solver').solver, ref })
 
 export async function readDatum(net: Network, ref: string): Promise<{ ref: string; datum: Datum; value: Value }> {
   const read = await utxo(net, ref)
