@@ -280,6 +280,7 @@ function walletSign(wallet, role, ctx) {
     msg.hidden = true
     wait.errors[role] = null
     wait.busy = true // polling holds while the wallet is open, so this button is not re-rendered under the user
+    wait.busySince = Date.now()
     try {
       btn.textContent = 'Connecting to the wallet…'
       const api = await wallet.enable()
@@ -436,8 +437,9 @@ async function settleView(row) {
   let timer = 0 // one polling chain per panel, whoever triggers the re-render
   const poll = () => {
     if (!panel.isConnected) return // the view was left
-    if (wait.busy) timer = setTimeout(poll, POLL_MS)
-    else rerun()
+    // A wallet left open holds polling for 60 s at most, so a file-drop signature is still picked up.
+    if (wait.busy && Date.now() - wait.busySince < 60_000) timer = setTimeout(poll, POLL_MS)
+    else rerun().catch(() => { if (panel.isConnected) timer = setTimeout(poll, POLL_MS) }) // a failed read retries next cycle
   }
   const rerun = async justSent => {
     if (Array.isArray(justSent)) sent = justSent
