@@ -36,7 +36,8 @@ export async function utxosAt(net: Network, address: string, cfg: Cfg = {}): Pro
   const data: RawUtxo[] = []
   let holes = 0
   for (let offset = 0; ; offset += PAGE) {
-    const res = await request(`${base}/address_utxos?limit=${PAGE}&offset=${offset}`, post(net, { _addresses: [address], _extended: true }), cfg.backoffMs)
+    // Offsets are only stable under an explicit order: without one, pages past the first can skip or repeat rows.
+    const res = await request(`${base}/address_utxos?order=tx_hash.asc,tx_index.asc&limit=${PAGE}&offset=${offset}`, post(net, { _addresses: [address], _extended: true }), cfg.backoffMs)
     if (!res || res.status !== 200) {
       holes++
       break
