@@ -28,7 +28,13 @@ export const CONFIRM_MARGIN_MS = 10 * MIN
 
 export class SettleError extends Error {} // one readable sentence, shown as-is by the UI
 
-const slug = (ref: string): string => ref.replace('#', '_')
+// Every file of a settlement is named from its escrow reference, which can come from the counterparty's proposal file:
+// only <64 hex>#<index> is a reference, so no other string can name a path (out/seller/../proposals/... was one).
+const REF = /^[0-9a-f]{64}#\d+$/
+const slug = (ref: string): string => {
+  if (typeof ref !== 'string' || !REF.test(ref)) throw new SettleError(`Not an escrow reference (<64 hex>#<index>): ${String(ref).slice(0, 80)}`)
+  return ref.replace('#', '_')
+}
 export const txLogFile = (ref: string): string => join(ROOT, 'fixtures', 'preprod', `txlog-${slug(ref)}.json`)
 export const proposalFile = (ref: string): string => join(ROOT, 'out', 'proposals', `${slug(ref)}.json`)
 const sellerRecordFile = (ref: string): string => join(ROOT, 'out', 'seller', `${slug(ref)}.json`)
