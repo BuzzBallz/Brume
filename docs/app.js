@@ -21,7 +21,6 @@ const LIVE = {
   census: () => '/api/census',
   bank: () => '/api/bank',
   datum: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`,
-  value: (ref, net) => `/api/datum?net=${net}&ref=${enc(ref)}`, // the same answer carries the escrow's value
   grid: ref => `/api/grid?ref=${enc(ref)}`,
   solver: ref => `/api/solver?ref=${enc(ref)}`,
   proposal: ref => `/api/proposal/${enc(ref)}`,
@@ -652,9 +651,7 @@ function renderPaths(solver, value) {
 async function solverView(row) {
   const solver = await load('solver', row.ref)
   if (solver.ref !== row.ref) return blank('No solver output for this escrow', 'The solver has not priced this reference in this data set.', false)
-  // Bank rows carry no value (only census rows do); without it the path costs would print as quantities, not shares.
-  const value = row.value ?? (live ? await load('value', row.ref, row.network) : null)
-  return [renderBands(solver), renderPaths(solver, value)]
+  return [renderBands(solver), renderPaths(solver, row.value)] // census and bank rows both carry the escrow's value
 }
 
 /* Shell */
