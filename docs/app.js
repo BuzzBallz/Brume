@@ -183,9 +183,7 @@ function tryAnyway(row, v, anchor) {
       btn.remove()
       // expected = the engine's prediction recorded before submitting; stage = where the outcome was decided.
       const predicted = e.expected === 'accept' ? 'accepted' : 'refused'
-      const result = e.status === 'accepted'
-        ? ['the node accepted it: ', txLink(e.txHash)]
-        : [`${e.stage === 'evaluate' ? 'refused when evaluated, before submission' : 'the node refused it'}: ${e.error ?? 'no reason given'}.`]
+      const result = e.status === 'accepted' ? ['the node accepted it: ', txLink(e.txHash)] : [`${refusal(e)}.`]
       const matched = (e.status === 'accepted') === (e.expected === 'accept')
       out.replaceChildren(matched
         ? h('p', { class: 'matched' }, `Engine predicted ${predicted}, and `, result)
@@ -377,7 +375,15 @@ function sendButton(row, rerun) {
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
 }
 
-const outcome = e => e.blockHeight ? `confirmed in block ${e.blockHeight.toLocaleString('en')}` : 'accepted'
+const outcome = e => e.block ? `confirmed in block ${e.block.height.toLocaleString('en')}` : 'accepted'
+
+// Claims rule: only a phase-2 failure (the script failed) may be called the validator refusing. Phase 1 is a ledger rule, e.g. a spent input.
+function refusal(e) {
+  if (e.stage === 'evaluate') return `refused when evaluated, before submission: ${e.refusal?.ledgerError ?? e.error ?? 'no reason given'}`
+  if (e.refusal?.phase === 2) return `the validator refused it: ${e.error ?? e.refusal.ledgerError}`
+  if (e.refusal?.phase === 1) return `the ledger refused it: ${e.refusal.ledgerError}`
+  return `refused: ${e.error ?? 'no reason given'}`
+}
 
 function settleSteps(row, proposal, log, rerun, band, wait) {
   const ctx = { row, proposal, rerun, wait }
@@ -407,14 +413,14 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
       body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
     { label: `${cap(conceder)} sends both legs`, done: leg1?.status === 'accepted' && leg2?.status === 'accepted', error: refused, waiting: 'Ready to send',
       body: refused
-        ? [h('p', {}, `Refused by the node: ${refused.error ?? 'no reason given'}. Start over on the next bank escrow.`)]
+        ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: ${outcome(e)}, `, txLink(e.txHash)))]
           : [sendButton(row, rerun), validity] },
     { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
       body: leg2?.readback ? [
         h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
-        leg2.readback.balances && renderBalances(leg2.readback.balances),
+        leg2.readback.balances && proposal.payout && renderBalances(proposal.payout, leg2.readback.balances),
       ] : [] },
   ]
   // Leg 1 expired before it was sent: the first step still waiting turns into the re-prepare step.
@@ -433,21 +439,23 @@ function qty(unit, q) {
   return `${sign}${(abs / 1_000_000n).toLocaleString('en')}.${String(abs % 1_000_000n).padStart(6, '0')}`
 }
 
-// Carbon data-table pattern: compact rows, mono numbers right-aligned, before and after side by side.
-function renderBalances(balances) {
-  const signed = (unit, d) => `${d > 0n ? '+' : ''}${qty(unit, d)}`
-  return h('div', { class: 'balances-wrap' }, h('table', { class: 'balances' },
-    h('thead', {}, h('tr', {}, ['Party', 'Asset', 'Before', 'After', 'Change'].map((c, i) => h('th', { scope: 'col', class: i > 1 ? 'num' : null }, c)))),
-    h('tbody', {}, balances.map(b => {
-      const before = BigInt(b.before)
-      const after = BigInt(b.after)
+// Carbon data-table pattern. What leg 2 wrote for each party (Proposal.payout) against what the second indexer reads back
+// (readback.balances, taken as the amount each party received from leg 2): the split landed as signed, or it did not.
+function renderBalances(written, readBack) {
+  const rows = ['buyer', 'seller'].flatMap(party =>
+    [...new Set([...Object.keys(written[party] ?? {}), ...Object.keys(readBack[party] ?? {})])].map(unit => {
+      const w = BigInt(written[party]?.[unit] ?? 0)
+      const r = BigInt(readBack[party]?.[unit] ?? 0)
       return h('tr', {},
-        h('td', {}, cap(b.party)),
-        h('td', {}, b.asset === 'lovelace' ? 'ADA' : `${assetName(b.asset)} (base units)`),
-        h('td', { class: 'num mono' }, qty(b.asset, before)),
-        h('td', { class: 'num mono' }, qty(b.asset, after)),
-        h('td', { class: 'num mono' }, signed(b.asset, after - before)))
-    }))))
+        h('td', {}, cap(party)),
+        h('td', {}, unit === 'lovelace' ? 'ADA' : `${assetName(unit)} (base units)`),
+        h('td', { class: 'num mono' }, qty(unit, w)),
+        h('td', { class: 'num mono' }, qty(unit, r)),
+        h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs'))
+    }))
+  return h('div', { class: 'balances-wrap' }, h('table', { class: 'balances' },
+    h('thead', {}, h('tr', {}, ['Party', 'Asset', 'Written in leg 2', 'Read back', ''].map((c, i) => h('th', { scope: 'col', class: i === 2 || i === 3 ? 'num' : null }, c)))),
+    h('tbody', {}, rows)))
 }
 
 function renderSteps(steps) {
@@ -472,14 +480,14 @@ function renderLog(log) {
     h('ol', { class: 'timeline' }, log.map(e => h('li', { class: e.status },
       h('span', { class: 'mark', 'aria-hidden': 'true' }),
       h('span', {}, e.step),
-      h('span', { class: 'status' }, e.status === 'accepted' ? cap(outcome(e)) : `Refused: ${e.error ?? 'no reason given'}`),
+      h('span', { class: 'status' }, cap(e.status === 'accepted' ? outcome(e) : refusal(e))),
       txRef(e)))))
 }
 
 async function settleView(row) {
   const panel = h('div', { class: 'settle' })
   const solver = await load('solver', row.ref)
-  const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30) : null
+  const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30 && b.feasible !== false) : null
   let sent = [] // the submit response, shown while GET /api/txlog has nothing for this escrow
   let shown = null // label of the step last scrolled into view
   const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
@@ -526,17 +534,20 @@ function perAsset(terms, value) {
   }).join(', ')
 }
 
-function renderBands(bands) {
+function renderBands(solver) {
   const ticks = [0, 0.25, 0.5, 0.75, 1]
+  const who = solver.path === 'A' ? 'buyer' : 'seller' // the bands are priced for one settle path
   return h('section', { class: 'bands' },
-    h('h2', {}, 'Splits both sides can accept'),
+    h('h2', {}, `Splits both sides can accept, ${who} concedes first`),
     h('p', { class: 'hint' }, 'Seller\'s share of the escrow value, by how long the buyer is willing to wait for an arbiter.'),
     h('div', { class: 'band-grid' },
-      bands.map(b => [
+      solver.bands.map(b => [
         h('span', { class: 'band-label' }, `Buyer waits ${b.horizonDays} days`),
-        h('div', { class: 'track', title: `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)} of the value` },
-          h('span', { class: 'range', style: `left:${b.sellerShareMin * 100}%;width:${(b.sellerShareMax - b.sellerShareMin) * 100}%` })),
-        h('span', { class: 'band-value mono' }, `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)}`),
+        b.feasible === false
+          ? h('span', { class: 'band-none' }, 'No split both sides accept at this horizon.')
+          : [h('div', { class: 'track', title: `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)} of the value` },
+              h('span', { class: 'range', style: `left:${b.sellerShareMin * 100}%;width:${(b.sellerShareMax - b.sellerShareMin) * 100}%` })),
+            h('span', { class: 'band-value mono' }, `${pct(b.sellerShareMin)} to ${pct(b.sellerShareMax)}`)],
       ]),
       h('span'),
       h('div', { class: 'axis', 'aria-hidden': 'true' }, ticks.map(t => h('span', { style: `left:${t * 100}%` }, pct(t)))),
@@ -554,7 +565,8 @@ function renderPaths(solver, value) {
         row('Protocol fee', p => Object.keys(p.fee).length ? perAsset(p.fee, value) : 'None'),
         row('Exposed on the second leg', p => cap(p.exposedParty)),
         row('Least the exposed party keeps', p => perAsset(p.exposedFloor, value)),
-        row('What a defector can take', p => perAsset(p.defectorKeeps, value))),
+        row('What a defector can take', p => perAsset(p.defectorKeeps, value)),
+        row('Paid in on top to cover the fee', p => Object.keys(p.topUp ?? {}).length ? perAsset(p.topUp, value) : 'None')),
     ),
     solver.frontRunP && h('p', { class: 'hint front-run' }, solver.frontRunP.measured
       ? `Front-run risk on the second leg is priced at p = ${solver.frontRunP.used}, measured on preprod.`
@@ -564,7 +576,7 @@ function renderPaths(solver, value) {
 async function solverView(row) {
   const solver = await load('solver', row.ref)
   if (solver.ref !== row.ref) return blank('No solver output for this escrow', 'The solver has not priced this reference in this data set.', false)
-  return [renderBands(solver.bands), renderPaths(solver, row.value)]
+  return [renderBands(solver), renderPaths(solver, row.value)]
 }
 
 /* Shell */
