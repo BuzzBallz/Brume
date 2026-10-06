@@ -144,6 +144,18 @@ curl 'http://127.0.0.1:8787/status?job_id=<id from start_job>'
 
 A provider that rate-limits or fails (HTTP 429 or 5xx) is answered as a 503 hole, in one sentence: nothing was built or sent. A witness set that is not valid CBOR, or not signed by the expected key, is a 400 with its reason.
 
+## Sokosumi Coworker
+
+Brume also runs as a private Sokosumi Coworker on preprod: Vendor `BuzzBallz` (`01a1128d-bfce-72c6-82de-a73ffd028a38`), Coworker `Brume` (`01a1128d-de6e-700b-b929-c5b4289c2a05`). A Task names one escrow in its text (`<64-hex tx hash>#<index>`, and "preprod" for a preprod escrow); the worker answers with the same paragraph and JSON as MIP-003 `/start_job`. No model is involved.
+
+```
+COWORKER_ID=01a1128d-de6e-700b-b929-c5b4289c2a05 node src/agent/worker.ts   # needs `sokosumi --preprod auth login` and the Coworker runtime key in the CLI vault
+```
+
+The worker lists the Tasks assigned to the Coworker, starts each READY one, computes the answer and completes the Task. It writes a journal per Task in `out/worker/` before every external write, so a restart resumes instead of redoing work, and an uncertain start or completion is checked against the Task's status first. A failed chain read leaves the Task running for the next poll; it is never answered from a hole.
+
+First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on the mainnet escrow `a7084c50…#0`, CREATED → READY → RUNNING → COMPLETED (completion event `01a11290-6d79-722c-bbfc-1b7b71df6aeb`). A paid Task and event approval are not done yet.
+
 ## Transactions sent (preprod, 6 Oct 2026)
 
 Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles and the take on `#7`; the others are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
