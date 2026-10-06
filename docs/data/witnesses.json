@@ -1,0 +1,75 @@
+{
+ "witnesses": {
+  "escrowRef": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+  "adminKeys": 3,
+  "legs": [
+   {
+    "leg": 1,
+    "txHash": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3",
+    "block": {
+     "height": 5260711,
+     "slot": 135609721
+    },
+    "redeemer": {
+     "name": "AuthorizeRefund",
+     "constructor": 6
+    },
+    "spends": {
+     "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+     "state": "Disputed"
+    },
+    "leaves": {
+     "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+     "state": "RefundRequested"
+    },
+    "requiredSigners": [
+     "seller"
+    ],
+    "witnesses": [
+     "seller"
+    ],
+    "adminKeysSigned": [],
+    "paid": {
+     "buyer": {},
+     "seller": {}
+    }
+   },
+   {
+    "leg": 2,
+    "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+    "block": {
+     "height": 5260711,
+     "slot": 135609721
+    },
+    "redeemer": {
+     "name": "WithdrawRefund",
+     "constructor": 3
+    },
+    "spends": {
+     "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+     "state": "RefundRequested"
+    },
+    "leaves": null,
+    "requiredSigners": [
+     "buyer"
+    ],
+    "witnesses": [
+     "buyer",
+     "seller"
+    ],
+    "adminKeysSigned": [],
+    "paid": {
+     "buyer": {
+      "lovelace": "5000000",
+      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2500000"
+     },
+     "seller": {
+      "lovelace": "15000000",
+      "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "7500000"
+     }
+    }
+   }
+  ],
+  "noAdminKey": true
+ }
+}

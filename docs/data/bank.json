@@ -1,6 +1,22 @@
 {
  "bank": [
   {
+   "ref": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+   }
+  },
+  {
+   "ref": "0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#1",
+   "state": "Disputed",
+   "value": {
+    "lovelace": "20000000",
+    "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+   }
+  },
+  {
    "ref": "47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0",
    "state": "Disputed",
    "value": {
