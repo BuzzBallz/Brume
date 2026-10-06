@@ -158,7 +158,21 @@ COWORKER_ID=01a1128d-de6e-700b-b929-c5b4289c2a05 node src/agent/worker.ts   # ne
 
 The worker lists the Tasks assigned to the Coworker, starts each READY one, computes the answer and completes the Task. It writes a journal per Task in `out/worker/` before every external write, so a restart resumes instead of redoing work, and an uncertain start or completion is checked against the Task's status first. A failed chain read leaves the Task running for the next poll; it is never answered from a hole.
 
-First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on the mainnet escrow `a7084c50…#0`, CREATED → READY → RUNNING → COMPLETED (completion event `01a11290-6d79-722c-bbfc-1b7b71df6aeb`). A paid Task and event approval are not done yet.
+First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on the mainnet escrow `a7084c50…#0`, CREATED → READY → RUNNING → COMPLETED (completion event `01a11290-6d79-722c-bbfc-1b7b71df6aeb`). Event access is granted (TOKEN2049 Workspace, access `01a11296-82e0-7031-992e-117e7fafdbec`), and an event Task ran through the same worker (`01a112bf-cf3c-772c-8f52-3a50e33d3c8d`).
+
+**Paid Task, seller paid.** With `PAID_TASKS=true` the worker asks our payment service for signed terms (1 test USDM, Preprod, Web3CardanoV2, agent registered with Dynamic pricing), posts them on the Task as a `masumiPayment` event, runs the job once the escrow is confirmed funded, submits the result hash, completes the Task, and reads the seller receipt after the payment service has collected.
+
+| | |
+|---|---|
+| Task | `01a112ac-6780-748a-ab29-8334a9eb9a73`, Coworker `01a1128d-de6e-700b-b929-c5b4289c2a05`, COMPLETED |
+| Payment event on the Task | `01a112ac-833f-76fc-9e57-9367ee131eba` |
+| Escrow funded by Sokosumi's buyer (FundsLocked) | [`f442d3e8a300209e454ce99cc717cf3ce69a45cb6bb90e23c893cb835261076d`](https://preprod.cardanoscan.io/transaction/f442d3e8a300209e454ce99cc717cf3ce69a45cb6bb90e23c893cb835261076d), block 5261661 |
+| Result hash submitted (ResultSubmitted) | [`05aec9c142e46ac0ade001b7eaa8c995176fa1f0129e69108f166fee41fcdaa6`](https://preprod.cardanoscan.io/transaction/05aec9c142e46ac0ade001b7eaa8c995176fa1f0129e69108f166fee41fcdaa6), block 5261664 |
+| Collection by the seller (Withdrawn) | [`45265f867b734e62346b28d45381d997277d99c5b44ffeb888bc5b08241fbd50`](https://preprod.cardanoscan.io/transaction/45265f867b734e62346b28d45381d997277d99c5b44ffeb888bc5b08241fbd50), block 5261770, `valid_contract` true |
+| Seller address | `addr_test1qrdzza4nsmh28dfu8mxm35gagu5njs4r7jlugamrvr9ur0z88zdqlqflvhxe5wlaxpegs3g7kfrgxchussjx66dyxlqqwejgfk` |
+| Token, net received | test USDM `16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d`, **1 tUSDM** (1000000 units) net to the seller address |
+
+The receipt from `sokosumi runtime receipt` says `settled: true`, `onChainState: Withdrawn`, with the same transaction hash. The net amount was checked separately on Blockfrost, from that transaction's inputs and outputs at the seller address.
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
