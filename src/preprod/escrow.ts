@@ -14,7 +14,7 @@ export type EscrowSpend = {
   window: TxWindow
   escrow: UTxO
   redeemer: Redeemer
-  signers: Party[] // declared as required signers (SPEC-VALIDATOR §1: a witness alone does not satisfy the check)
+  signers: Pick<Party, 'pkh'>[] // declared as required signers (SPEC-VALIDATOR §1: a witness alone does not satisfy the check)
   funding: UTxO[] // key inputs that pay the fee, chosen by the caller (the two-UTxO rule depends on it)
   collateral: UTxO // key-owned, pure ADA
   continuation?: { datumCbor: string; amount: Asset[] } // the escrow output, for continuation branches
@@ -29,10 +29,15 @@ export type EscrowSpend = {
 // with the chain's cost model before anyone signs: blake2b-256(redeemers || datums || language views), as Mesh does.
 let chainV3: Promise<number[]> | null = null
 const chainCostModelV3 = (): Promise<number[]> =>
-  (chainV3 ??= blockfrostGet<{ cost_models_raw: { PlutusV3: number[] } }>('/epochs/latest/parameters').then((p) => {
-    if (!p?.cost_models_raw?.PlutusV3?.length) throw new TxRuleError('no PlutusV3 cost model in the preprod protocol parameters')
-    return p.cost_models_raw.PlutusV3
-  }))
+  (chainV3 ??= blockfrostGet<{ cost_models_raw: { PlutusV3: number[] } }>('/epochs/latest/parameters')
+    .then((p) => {
+      if (!p?.cost_models_raw?.PlutusV3?.length) throw new TxRuleError('no PlutusV3 cost model in the preprod protocol parameters')
+      return p.cost_models_raw.PlutusV3
+    })
+    .catch((error: unknown) => {
+      chainV3 = null // a failed read is a hole, never a cached value
+      throw error
+    }))
 
 export async function withChainScriptDataHash(cborHex: string): Promise<string> {
   const c = builderCst
@@ -80,13 +85,22 @@ export async function buildEscrowSpend(spec: EscrowSpend): Promise<Built> {
     if (!check || check.mem > units.mem || check.steps > units.steps) throw new TxRuleError('the final body needs more than the declared execution units')
   }
 
+  const pp = await protocol()
   checkTx(cborHex, {
     signers: spec.signers.map((s) => s.pkh),
     inputs: [ref(spec.escrow), ...spec.funding.map(ref)],
     window: spec.window,
     maxScriptOutputs: spec.continuation ? 1 : 0,
     scriptAddress: script.address.preprod,
+    coinsPerUtxoByte: Number(pp.coinsPerUtxoSize),
   })
+  // Collateral covers collateral% of the fee once the collateral return is taken off (a phase-1 rule evaluation skips).
+  const body = cst.deserializeTx(cborHex).body()
+  const fee = body.fee()
+  const back = body.collateralReturn()?.amount().coin() ?? 0n
+  const posted = BigInt(spec.collateral.output.amount.find((a) => a.unit === 'lovelace')?.quantity ?? '0') - back
+  const needed = (fee * BigInt(pp.collateralPercent) + 99n) / 100n
+  if (posted < needed) throw new TxRuleError(`collateral ${posted} lovelace is under ${pp.collateralPercent}% of the fee (${needed})`)
   if (spec.continuation && cst.deserializeTx(cborHex).body().outputs()[0]?.address().toBech32() !== script.address.preprod) {
     throw new TxRuleError('the escrow continuation is not output 0: a pre-signed next leg would name the wrong output')
   }

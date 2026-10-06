@@ -38,12 +38,13 @@ export type PlainTx = {
   outputs: TxOut[]
   changeAddress: string
   maxScriptOutputs?: number // 1 for a lock into the escrow, 0 otherwise
+  scriptAddress?: string // the escrow address in use (the shared V1 by default, our own deployment for S-2)
 }
 
 export type Built = { cborHex: string; txHash: string }
 
 // What every built body must satisfy before anyone signs it. Reads the CBOR, not the spec that produced it.
-export function checkTx(cborHex: string, expect: { signers: string[]; inputs: string[]; window: TxWindow; maxScriptOutputs?: number; scriptAddress?: string }): void {
+export function checkTx(cborHex: string, expect: { signers: string[]; inputs: string[]; window: TxWindow; maxScriptOutputs?: number; scriptAddress?: string; coinsPerUtxoByte?: number }): void {
   const body = cst.deserializeTx(cborHex).body()
   // The body must carry the window the datum was computed from: a cooldown is only safe relative to this upper bound.
   if (body.ttl() !== undefined && Number(body.ttl()) !== expect.window.toSlot) throw new TxRuleError(`upper bound ${body.ttl()} is not the window's ${expect.window.toSlot}`)
@@ -68,7 +69,19 @@ export function checkTx(cborHex: string, expect: { signers: string[]; inputs: st
     }
   }
   if (scriptOutputs > (expect.maxScriptOutputs ?? 0)) throw new TxRuleError(`${scriptOutputs} escrow outputs, at most ${expect.maxScriptOutputs ?? 0} allowed`)
+  // Min-UTxO is a phase-1 rule evaluation never runs: a pre-signed leg 2 that passes evaluation but leaves an output under
+  // it would be refused AFTER the concession. Ledger rule: lovelace ≥ (160 + serialized output size) × coinsPerUTxOByte.
+  if (expect.coinsPerUtxoByte !== undefined) {
+    body.outputs().forEach((o, i) => {
+      const min = BigInt(160 + o.toCbor().length / 2) * BigInt(expect.coinsPerUtxoByte as number)
+      const has = o.amount().coin()
+      if (has < min) throw new TxRuleError(`output ${i} holds ${has} lovelace, under its ${min} minimum: this split would be refused by the ledger`)
+    })
+  }
 }
+
+// The minimum lovelace an output needs, for a check made before a tx is built (e.g. a proposed split).
+export const minLovelaceFor = (outputCborBytes: number, coinsPerUtxoByte: number): bigint => BigInt(160 + outputCborBytes) * BigInt(coinsPerUtxoByte)
 
 let params: Promise<Protocol> | null = null
 // A failed fetch is not cached: the next build retries (an HTTP error is a hole, never a cached value).
@@ -85,7 +98,8 @@ export async function buildPlain(spec: PlainTx): Promise<Built> {
   for (const o of spec.outputs) assertPreprodAddress(o.address)
   assertPreprodAddress(spec.changeAddress)
   // The fetcher only completes the given inputs; no input selection is ever called on this builder.
-  const b = new mesh.MeshTxBuilder({ fetcher: preprodChain(), params: await protocol() }).setNetwork('preprod')
+  const pp = await protocol()
+  const b = new mesh.MeshTxBuilder({ fetcher: preprodChain(), params: pp }).setNetwork('preprod')
   for (const u of spec.inputs) b.txIn(u.input.txHash, u.input.outputIndex, u.output.amount, u.output.address)
   for (const o of spec.outputs) {
     b.txOut(o.address, o.amount)
@@ -94,7 +108,7 @@ export async function buildPlain(spec: PlainTx): Promise<Built> {
   for (const s of spec.signers) b.requiredSignerHash(s.pkh)
   b.invalidBefore(spec.window.fromSlot).invalidHereafter(spec.window.toSlot).changeAddress(spec.changeAddress)
   const cborHex = await b.complete()
-  checkTx(cborHex, { signers: spec.signers.map((s) => s.pkh), inputs: spec.inputs.map((u) => `${u.input.txHash}#${u.input.outputIndex}`), window: spec.window, maxScriptOutputs: spec.maxScriptOutputs ?? 0 })
+  checkTx(cborHex, { signers: spec.signers.map((s) => s.pkh), inputs: spec.inputs.map((u) => `${u.input.txHash}#${u.input.outputIndex}`), window: spec.window, maxScriptOutputs: spec.maxScriptOutputs ?? 0, scriptAddress: spec.scriptAddress, coinsPerUtxoByte: Number(pp.coinsPerUtxoSize) })
   return { cborHex, txHash: mesh.resolveTxHash(cborHex) }
 }
 

@@ -71,14 +71,18 @@ export class EvaluationFailure extends Error {}
 export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise<ExUnits[]> {
   const id = requireEnv('BLOCKFROST_PREPROD_PROJECT_ID')
   if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
+  // Value shape Blockfrost's endpoint accepts (as Mesh sends it): { coins, <policyId>: { <assetNameHex>: quantity } }.
+  // The Ogmios v5 { coins, assets: { "policy.name": q } } form is rejected ("failed to decode payload").
   const additionalUtxoSet = extra.map((u) => {
-    const assets: Record<string, number> = {}
-    let coins = 0
+    const value: Record<string, unknown> = { coins: 0 }
     for (const a of u.output.amount) {
-      if (a.unit === 'lovelace') coins = Number(a.quantity)
-      else assets[`${a.unit.slice(0, 56)}.${a.unit.slice(56)}`] = Number(a.quantity)
+      if (a.unit === 'lovelace') value.coins = Number(a.quantity)
+      else {
+        const policy = a.unit.slice(0, 56)
+        value[policy] = { ...((value[policy] as Record<string, number> | undefined) ?? {}), [a.unit.slice(56)]: Number(a.quantity) }
+      }
     }
-    const out: Record<string, unknown> = { address: u.output.address, value: Object.keys(assets).length ? { coins, assets } : { coins } }
+    const out: Record<string, unknown> = { address: u.output.address, value }
     if (u.output.plutusData) out.datum = u.output.plutusData
     return [{ txId: u.input.txHash, index: u.input.outputIndex }, out]
   })
@@ -95,6 +99,24 @@ export async function evaluateWithUtxos(cborHex: string, extra: UTxO[]): Promise
 
 // Blockfrost's address listing lags a fresh spend (seen 6 Oct: an input spent one block earlier was still listed), so every
 // UTxO we are about to spend is cross-checked on Koios. Spent, or unknown to Koios: dropped. A Koios failure throws.
+// Koios utxo_info for a set of refs: spent or not, and at which address. A ref Koios does not know is absent from the map.
+export async function utxoInfo(refs: string[]): Promise<Map<string, { spent: boolean; address: string }>> {
+  const out = new Map<string, { spent: boolean; address: string }>()
+  if (refs.length === 0) return out
+  const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
+  })
+  if (!res.ok) throw new Error(`Koios utxo_info HTTP ${res.status}: cannot confirm which UTxOs are unspent`)
+  for (const r of (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean; address: string }[]) {
+    out.set(`${r.tx_hash}#${r.tx_index}`, { spent: r.is_spent, address: r.address })
+  }
+  return out
+}
+export async function utxoStatus(refs: string[]): Promise<Map<string, 'spent' | 'unspent'>> {
+  const info = await utxoInfo(refs)
+  return new Map([...info].map(([ref, i]) => [ref, i.spent ? 'spent' : 'unspent']))
+}
+
 // It also lags the other way: a fresh output can be missing from it. So the candidates are the union of the Blockfrost
 // and Koios listings, and only what Koios confirms unspent is kept.
 type KoiosUtxo = { tx_hash: string; tx_index: number; address: string; value: string; asset_list: { policy_id: string; asset_name: string; quantity: string }[] | null }
@@ -112,14 +134,8 @@ export async function liveUtxos(address: string): Promise<UTxO[]> {
   for (const u of [...fromKoios, ...fromBlockfrost]) byRef.set(`${u.input.txHash}#${u.input.outputIndex}`, u)
   const listed = [...byRef.values()]
   if (listed.length === 0) return []
-  const refs = [...byRef.keys()]
-  const res = await fetch(`${KOIOS.preprod}/utxo_info`, {
-    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ _utxo_refs: refs }), signal: AbortSignal.timeout(30_000),
-  })
-  if (!res.ok) throw new Error(`Koios utxo_info HTTP ${res.status}: cannot confirm which UTxOs are unspent`)
-  const rows = (await res.json()) as { tx_hash: string; tx_index: number; is_spent: boolean }[]
-  const unspent = new Set(rows.filter((r) => !r.is_spent).map((r) => `${r.tx_hash}#${r.tx_index}`))
-  return listed.filter((u) => unspent.has(`${u.input.txHash}#${u.input.outputIndex}`))
+  const status = await utxoStatus([...byRef.keys()])
+  return listed.filter((u) => status.get(`${u.input.txHash}#${u.input.outputIndex}`) === 'unspent')
 }
 
 // A submit has three outcomes besides success, and only one is a refusal:
@@ -185,9 +201,9 @@ export async function seenByChain(txHash: string, ms = 90_000): Promise<boolean>
 }
 
 // SUBMIT_VIA=koios|blockfrost (PLAN §9 R-3). Koios is keyless: no auth header is sent at all.
-export function preprodSubmitter(): Submitter {
+export function preprodSubmitter(via?: 'koios' | 'blockfrost'): Submitter {
   loadEnv()
-  if (process.env.SUBMIT_VIA === 'blockfrost') {
+  if ((via ?? process.env.SUBMIT_VIA) === 'blockfrost') {
     const id = requireEnv('BLOCKFROST_PREPROD_PROJECT_ID')
     if (!id.startsWith('preprod')) throw new PreprodOnlyError('BLOCKFROST_PREPROD_PROJECT_ID is not a preprod project id')
     return { via: 'blockfrost', submitTx: (cborHex) => postCbor(`${BLOCKFROST_PREPROD}/tx/submit`, cborHex, { project_id: id }) }
