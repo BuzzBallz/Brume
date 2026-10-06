@@ -12,6 +12,12 @@ import { HttpError, parseNet, parseRef, ROOT } from './escrow.ts'
 import { run } from './mip003.ts'
 
 type Task = { id: string; status: string; coworkerId?: string; description?: string | null }
+// Where Tasks come from: the personal Workspace, and the TOKEN2049 event Workspace once the Coworker's access is granted.
+type Scope = { name: string; list: string[]; runtime: string[] }
+const SCOPES: Scope[] = [
+  { name: 'personal', list: [], runtime: ['--personal'] },
+  { name: 'event', list: ['--organization-slug', 'token2049-origins-hackathon-2026-nws2r7'], runtime: ['--organization-id', '01a109d1-32a9-71a3-a0e3-658b2a7987cd'] },
+]
 type Journal = { phase: 'starting' | 'started' | 'result-saved' | 'completing' | 'completed'; input?: string; completedAt?: string }
 
 const COWORKER_ID = process.env.COWORKER_ID ?? ''
@@ -26,7 +32,10 @@ const journalFile = (id: string) => join(DIR, `${id}.json`)
 const resultFile = (id: string) => join(DIR, `${id}.txt`)
 const read = (id: string): Journal | null => (existsSync(journalFile(id)) ? JSON.parse(readFileSync(journalFile(id), 'utf8')) : null)
 const write = (id: string, j: Journal) => writeFileSync(journalFile(id), JSON.stringify(j, null, 1))
-const taskNow = (id: string): Task => cli(['tasks', 'get', id]).task ?? cli(['tasks', 'get', id])
+const taskNow = (id: string, s: Scope): Task => {
+  const r = cli(['tasks', 'get', id, ...s.list])
+  return r.task ?? r
+}
 
 // The Task names its escrow in free text: the first `<64 hex>#<index>`, on mainnet unless the text says preprod.
 export async function answer(input: string): Promise<string> {
@@ -40,15 +49,15 @@ export async function answer(input: string): Promise<string> {
   }
 }
 
-async function advance(t: Task) {
+async function advance(t: Task, s: Scope) {
   let j = read(t.id)
   if (j?.phase === 'completed') return
   if (!j || j.phase === 'starting') {
     if (t.status === 'READY') {
       write(t.id, { phase: 'starting' })
-      const started = cli(['runtime', 'start', t.id, '--personal', '--coworker-id', COWORKER_ID])
+      const started = cli(['runtime', 'start', t.id, ...s.runtime, '--coworker-id', COWORKER_ID])
       j = { phase: 'started', input: (started.task ?? started).description ?? t.description ?? '' }
-    } else if (t.status === 'RUNNING') j = { phase: 'started', input: taskNow(t.id).description ?? '' } // a start whose answer was lost
+    } else if (t.status === 'RUNNING') j = { phase: 'started', input: taskNow(t.id, s).description ?? '' } // a start whose answer was lost
     else return
     write(t.id, j)
   }
@@ -59,22 +68,30 @@ async function advance(t: Task) {
   }
   if (j.phase === 'result-saved' || j.phase === 'completing') {
     // an uncertain completion is retried only if the Task is not COMPLETED already
-    if (taskNow(t.id).status !== 'COMPLETED') {
+    if (taskNow(t.id, s).status !== 'COMPLETED') {
       write(t.id, { ...j, phase: 'completing' })
-      cli(['runtime', 'complete', t.id, '--personal', '--coworker-id', COWORKER_ID, '--result-file', resultFile(t.id)])
+      cli(['runtime', 'complete', t.id, ...s.runtime, '--coworker-id', COWORKER_ID, '--result-file', resultFile(t.id)])
     }
     write(t.id, { ...j, phase: 'completed', completedAt: new Date().toISOString() })
-    console.log(`completed ${t.id}`)
+    console.log(`completed ${t.id} (${s.name})`)
   }
 }
 
 async function poll() {
-  const tasks: Task[] = cli(['tasks', 'list', '--coworker-id', COWORKER_ID]).tasks ?? []
-  for (const t of tasks.filter((t) => t.coworkerId === COWORKER_ID && (t.status === 'READY' || t.status === 'RUNNING'))) {
+  for (const s of SCOPES) {
+    let tasks: Task[]
     try {
-      await advance(t)
+      tasks = cli(['tasks', 'list', '--coworker-id', COWORKER_ID, ...s.list]).tasks ?? []
     } catch (e) {
-      console.error(`task ${t.id} not advanced this round: ${(e as Error).message.slice(0, 200)}`)
+      console.error(`${s.name}: list failed: ${(e as Error).message.slice(0, 200)}`)
+      continue
+    }
+    for (const t of tasks.filter((t) => t.coworkerId === COWORKER_ID && (t.status === 'READY' || t.status === 'RUNNING'))) {
+      try {
+        await advance(t, s)
+      } catch (e) {
+        console.error(`task ${t.id} not advanced this round: ${(e as Error).message.slice(0, 200)}`)
+      }
     }
   }
 }
