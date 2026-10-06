@@ -3,7 +3,7 @@
 // Usage: node src/preprod/split.ts --role seller --outputs 5 --each 15 [--dry-run]
 import { parseArgs } from 'node:util'
 import type { Role } from '../../shared/types.ts'
-import { preprodChain, preprodSubmitter } from './chain.ts'
+import { liveUtxos, preprodChain, preprodSubmitter } from './chain.ts'
 import { addWitness, appendTxLog, buildPlain, submitAndConfirm, txWindow } from './tx.ts'
 import { party } from './wallet.ts'
 
@@ -22,7 +22,7 @@ const each = BigInt(Math.round(Number(values.each) * 1e6))
 if (!Number.isInteger(n) || n < 1 || n > 20 || each < 2_000_000n) throw new Error('--outputs 1..20, --each ≥ 2 (tADA)')
 
 const p = await party(role)
-const utxos = await preprodChain().fetchAddressUTxOs(p.address)
+const utxos = await liveUtxos(p.address)
 const lovelace = (u: (typeof utxos)[number]): bigint => BigInt(u.output.amount.find((a) => a.unit === 'lovelace')?.quantity ?? '0')
 const byLovelace = [...utxos].sort((a, b) => (lovelace(b) > lovelace(a) ? 1 : -1))
 const input = byLovelace.find((u) => lovelace(u) >= each * BigInt(n) + 3_000_000n)
