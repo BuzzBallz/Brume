@@ -8,13 +8,13 @@
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
 | Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`) |
-| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the video. `#6` was the rehearsal and is spent |
+| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the settle (20 tADA + 10 tUSDM). Backup with the same content: `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `#6` was the rehearsal and is spent |
 | Split proposed by the seller | 0.75 to the seller, as in the rehearsal (seller 15 tADA + 7.5 tUSDM, buyer 5 tADA + 2.5 tUSDM on a 20 tADA + 10 tUSDM pot) |
 | Action the engine marks impossible, for "try anyway" | buyer `WithdrawRefund` on a Disputed bank escrow (needs FundsLocked or RefundRequested): refused by the validator, phase 2, as stream A ran it on `8e0d6df4…#0` |
 
 ## Order of the take
 
-Settling spends the escrow, and only `#7` is left unspent. "Try anyway" must therefore run on `#7` **before** the settle, or on another bank escrow if stream A locks one more for us. The script's order (settle 0:40, try anyway 1:40) needs that third escrow; otherwise record try anyway first and cut it into place.
+Settling spends the escrow, so "try anyway" runs on another bank escrow: one of `c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#0` to `#3` (Disputed, wallets 1 and 2, but only 20 tADA + 2 tUSDM each, so not for the settle). A refusal does not consume the escrow. Order as in the script: settle `#7` (0:40), then try anyway on `c3e0b68a…#0` (1:40). If the settle take fails, redo it on `47db047f…#0`.
 
 ## Rehearsal, 6 Oct (escrow `#6`, from the UI)
 
