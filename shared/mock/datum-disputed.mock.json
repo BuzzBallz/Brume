@@ -1,0 +1,41 @@
+{
+  "_note": "MOCK, hand-made for building before the real producer exists. Not evidence.",
+  "_source": "decoded by hand from utxo-disputed.mock.json (real escrow)",
+  "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+  "datum": {
+    "buyer": {
+      "payment": {
+        "type": "key",
+        "hash": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2"
+      },
+      "stake": {
+        "type": "key",
+        "hash": "3ecccc6a2fccae86a2fb80b11c33b2ffe30592f2f226b8037655f85d"
+      }
+    },
+    "seller": {
+      "payment": {
+        "type": "key",
+        "hash": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+      },
+      "stake": {
+        "type": "key",
+        "hash": "2fe99600943aebd7e1c897eff6613a727878190a42c4916599eb7e4e"
+      }
+    },
+    "referenceKey": "(see utxo-disputed)",
+    "referenceSignature": "(see utxo-disputed)",
+    "sellerNonce": "(see utxo-disputed)",
+    "buyerNonce": "865de3a3c27942ea8e31",
+    "collateralReturnLovelace": 4029850,
+    "inputHash": "c814495a94202a5df7c633d4fa89de97b3270aef7f161ded73a8b5d5aa69a400",
+    "resultHash": "f9ed49786cd5df1766216dd9be9dee757c1d2e04c5c23a41baa7d2c8cdf5b3b9",
+    "payByTime": 1759279021972,
+    "submitResultTime": 1759322221973,
+    "unlockTime": 1759343821973,
+    "externalDisputeUnlockTime": 1759365421973,
+    "sellerCooldownTime": 0,
+    "buyerCooldownTime": 1759237196700,
+    "state": "Disputed"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "_note": "MOCK, hand-made for building before the real producer exists. Not evidence.",
+  "txlog": [
+    {
+      "step": "SetRefundRequested",
+      "txHash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "status": "accepted"
+    },
+    {
+      "step": "AuthorizeRefund (leg 1)",
+      "txHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "status": "accepted"
+    },
+    {
+      "step": "WithdrawRefund (leg 2)",
+      "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "accepted",
+      "readback": {
+        "provider": "blockfrost",
+        "validContract": true
+      }
+    },
+    {
+      "step": "replay leg 2",
+      "txHash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "refused",
+      "error": "BadInputsUTxO"
+    }
+  ]
+}

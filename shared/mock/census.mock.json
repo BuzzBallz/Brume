@@ -1,0 +1,37 @@
+{
+  "_note": "MOCK, hand-made for building before the real producer exists. Not evidence.",
+  "census": {
+    "network": "mainnet",
+    "tip": {
+      "height": 14031699,
+      "hash": "4c9e2121387c601b3c691a04fad2b61d9bbdf6a268a8d69ab930a17e4e0de595",
+      "timeMs": 1791259308000
+    },
+    "provider": "koios",
+    "open": 141,
+    "decoded": 140,
+    "undecodable": 1,
+    "holes": 0,
+    "byState": {
+      "FundsLocked": 6,
+      "ResultSubmitted": 69,
+      "RefundRequested": 4,
+      "Disputed": 61
+    },
+    "disputedTotals": {
+      "lovelace": "0",
+      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
+    },
+    "rows": [
+      {
+        "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+        "state": "Disputed",
+        "value": {
+          "lovelace": "4029850",
+          "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+        }
+      }
+    ],
+    "secondProvider": null
+  }
+}

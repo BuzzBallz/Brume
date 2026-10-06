@@ -1,0 +1,26 @@
+{
+  "name": "brume",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.30.0",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "check": "tsc && node --test",
+    "census:mainnet": "node src/census/census.ts",
+    "verify": "node src/census/verify.ts",
+    "engine": "node src/engine/cli.ts",
+    "solver": "node src/solver/cli.ts",
+    "agent": "node src/agent/server.ts",
+    "site:data": "node src/agent/site-data.ts",
+    "sign": "node src/preprod/sign.ts",
+    "demo:preprod": "node src/preprod/demo.ts"
+  },
+  "dependencies": {
+    "@meshsdk/core": "1.9.0-beta.96",
+    "@meshsdk/core-cst": "1.9.0-beta.90"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "typescript": "5.9.3"
+  }
+}

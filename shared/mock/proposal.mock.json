@@ -1,0 +1,19 @@
+{
+  "_note": "MOCK, hand-made for building before the real producer exists. Not evidence.",
+  "proposal": {
+    "escrowRef": "<preprod bank ref>",
+    "network": "preprod",
+    "sellerShare": 0.4,
+    "leg1": {
+      "cborHex": "84a4…",
+      "txHash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "leg2": {
+      "cborHex": "84a5…",
+      "txHash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "signedBy": [
+      "buyer"
+    ]
+  }
+}
