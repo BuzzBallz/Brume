@@ -138,7 +138,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 **M1 — Ugly end-to-end · Tue 13:00 → Wed 00:00 · spike gate 18:00**
 - [ ] A1 tx helper + preprod guard [opus/high] — no tx without upper bound (test)
 - [ ] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A
-- [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice
+- [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
 - [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
@@ -237,4 +237,4 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 | Tue 13:05 | `constants.ts`: `PARAMS` typed `Params`, admin key hashes + fee credentials added, all R5 (§10); `FEE_ADDRESS` per network; `SELLER_ARB_SHARE` | A | B, 13:30 |
 | Tue 13:05 | `shared/mock/` proposal, solver, txlog follow the new shapes | A | B, 13:30 |
 | Tue 13:05 | `.env.example`: key format stated (`xprv` root key); `.claude/agents/claims-checker.md`: dead 132/131 replaced by the kickoff pin | A | B, 13:30 |
-| Tue 13:25 | after independent review: `SolverOutput.path` + `Band.feasible` + `PathTerms.topUp` (bands differ by path); `arbitrationLeak` removed from the shared output (it would reach the MIP-003 result, §3 WON'T); `TxLogEntry` gets `scriptHash`, `redeemer?`, `role?`, `via?`, `block {height, hash, slot}` (replaces `blockHeight`), `refusal {phase 1\|2, ledgerError}`, `stage` required — only phase 2 is "the validator refuses"; `Reach` documents its window; the first-mover signing rule (§4); `readback.balances?` (B's request) | A | pending B |
+| Tue 13:25 | after independent review: `SolverOutput.path` + `Band.feasible` + `PathTerms.topUp` (bands differ by path); `arbitrationLeak` removed from the shared output (it would reach the MIP-003 result, §3 WON'T); `TxLogEntry` gets `scriptHash`, `redeemer?`, `role?`, `via?`, `block {height, hash, slot}` (replaces `blockHeight`), `refusal {phase 1\|2, ledgerError}`, `stage` required — only phase 2 is "the validator refuses"; `Reach` documents its window; the first-mover signing rule (§4); `readback.balances?` (B's request) | A | B, 13:40 |
