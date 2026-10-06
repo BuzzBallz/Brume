@@ -13,5 +13,20 @@
       "hash": "ed13cf460f6c942ce0049a8e73aba16d5cde10a04bab5cfef7af7308f981fd1c",
       "slot": 135582751
     }
+  },
+  {
+    "step": "split buyer into 4 × 10 tADA",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "38cb5e017c18667a3e0d1f605bc68c892f82603727ee2473341f77af6a4e6479",
+    "atMs": 1791294879713,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5260807,
+      "hash": "74ff412853e3d08903b25c5c584de8bda4c9f00a5b526ab90309ec4a78113d67",
+      "slot": 135611709
+    }
   }
 ]
