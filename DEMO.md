@@ -8,13 +8,13 @@
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
 | Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`). `?source=snapshot` and Pages show tip 14034352 (141 open, 61 Disputed): say which one is on screen |
-| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the settle (20 tADA + 10 tUSDM). Backup with the same content: `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `#6` was the rehearsal and `#7` the take: both are spent, the backup is not |
-| Split proposed by the seller | 0.75 to the seller, as in the rehearsal (seller 15 tADA + 7.5 tUSDM, buyer 5 tADA + 2.5 tUSDM on a 20 tADA + 10 tUSDM pot) |
+| `<BANK_REF>`, a preprod escrow we locked | `0452fc53b168baad73414e4980ccc4cbb7cd69df9a95fd3a132b15b4612658c6#0` for the settle at 0.40 (20 tADA + 10 tUSDM). Unspent backups with the same content: `0452fc53…#1`, `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `9054b1d8…#6` (rehearsal), `#7` (first take, 0.75) and `0452fc53…#0` (take at 0.40) are spent |
+| Split proposed by the seller | 0.40 to the seller, typed in the UI (seller 8 tADA + 4 tUSDM, buyer 12 tADA + 6 tUSDM on a 20 tADA + 10 tUSDM pot). The UI prefills the top of the solver's band, 0.75 |
 | Action the engine marks impossible, for "try anyway" | buyer `WithdrawRefund` on a Disputed bank escrow (needs FundsLocked or RefundRequested): refused by the validator, phase 2, as stream A ran it on `8e0d6df4…#0` |
 
 ## Order of the take
 
-Settling spends the escrow, so "try anyway" runs on another bank escrow: one of `c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#0` to `#3` (Disputed, wallets 1 and 2, but only 20 tADA + 2 tUSDM each, so not for the settle). A refusal does not consume the escrow. Order as in the script: settle `#7` (0:40), then try anyway on `c3e0b68a…#0` (1:40). If the settle take fails, redo it on `47db047f…#0`.
+Settling spends the escrow, so "try anyway" runs on another bank escrow: one of `c3e0b68acf3e8307dd962b6ee6f2b436640878086c19d5c2827ec9abbb7999c0#0` to `#3` (Disputed, wallets 1 and 2, but only 20 tADA + 2 tUSDM each, so not for the settle). A refusal does not consume the escrow. Order as in the script: settle `0452fc53…#0`, then try anyway on `c3e0b68a…#0`. If the settle take fails, redo it on `0452fc53…#1` or `47db047f…#0`. Run `node src/preprod/preflight.ts --escrow <ref>` first: all PASS.
 
 ## Rehearsal, 6 Oct (escrow `#6`, from the UI)
 
@@ -35,6 +35,16 @@ Both legs found on two indexers in the same block, `valid_contract` true (`pnpm 
 | Replay of leg 2 | same body | none | refused by the ledger (phase 1) |
 
 Both legs found on two indexers in the same block, `valid_contract` true. Leg 2 read back on Koios: the buyer received 5 tADA + 2.5 tUSDM, the seller 15 tADA + 7.5 tUSDM, as proposed. Log: `fixtures/preprod/txlog-9054b1d8…_7.json`.
+
+## Take at 0.40, 7 Oct (escrow `0452fc53…#0`, from the UI on B's machine)
+
+| Step | Transaction | Block | Result |
+|---|---|---|---|
+| Leg 1, concession (`AuthorizeRefund`) | `5f3d960ab279f6ba4e329534aa67bfd65b2d39e81a61490ca4248dcf24c221a8` | 5261685 | accepted |
+| Leg 2, pre-signed exit (`WithdrawRefund`) | `5db25159151261d1c352cf5281f880bd6a809fc35415bcaa1e72c32692f8f382` | 5261685 | accepted |
+| Replay of leg 2 | same body | none | refused by the ledger (phase 1) |
+
+Both legs found on two indexers in the same block, `valid_contract` true. Leg 2 read back on Koios: the buyer received 12 tADA + 6 tUSDM, the seller 8 tADA + 4 tUSDM, as proposed. Signers: seller on leg 1; buyer required on leg 2, seller also signing for its own fee input; admin keys: none of the 3 (`fixtures/preprod/witnesses-0452fc53…_0.json`). Log: `fixtures/preprod/txlog-0452fc53…_0.json`.
 
 ## Wallets
 

@@ -36,7 +36,7 @@ The full derivation, both theorems, the fee-incidence result and the quantitativ
 
 ## The evidence, up front
 
-Eleven settlements on preprod, both legs of each in one block, all indexed in `fixtures/preprod/README.md` §1 (the take on `9054b1d8…#7` also under *Transactions sent*). For all eleven, twenty-two legs, the witness walk (`fixtures/preprod/witnesses-*.json`) read each leg's CBOR back from the chain, checked its hash, and found every vkey witness hashing to the buyer or the seller of that escrow's own datum: **no admin key in any of them**.
+Twelve settlements on preprod, both legs of each in one block, indexed in `fixtures/preprod/README.md` §1; the two takes from the UI (`9054b1d8…#7` and `0452fc53…#0`) are also under *Transactions sent*. For all twelve, twenty-four legs, the witness walk (`fixtures/preprod/witnesses-*.json`) read each leg's CBOR back from the chain, checked its hash, and found every vkey witness hashing to the buyer or the seller of that escrow's own datum: **no admin key in any of them**.
 
 One to read, a token pot in **block 5259570**:
 
@@ -63,7 +63,7 @@ This README states what exists today. The status table says what does not.
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
-| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 11 logged settles on path B and 5 race runs, see Transactions sent |
+| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 12 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed and withdrawn on preprod, exported to `fixtures/masumi/test-purchase.json` |
 | Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000001`; a metadata update replaced `…cc8c16000000`, the identifier the test purchase used); not yet visible on preprod Sokosumi |
 | Transactions | listed below with hashes and blocks; the full index, the earlier settles included, is `fixtures/preprod/README.md` |
@@ -160,7 +160,7 @@ First Task, unpaid execution test: `01a11290-45b8-7728-bb4c-8bee4c51da2f`, on th
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
-Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles and the take on `#7`; the others are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles and the two takes; the others are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
 
 A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
 - **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
@@ -177,6 +177,7 @@ The buyer signs leg 2 against leg 1's output before that output exists. The sell
 | Rewritten submit path | `764f803f96fc4f0c950d1dd0f00bb98437f3bab2a6ff3f9478d0e2ce09a507db` | `ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee` | 5259631 | refused by the ledger (phase 1) |
 | Stream B rehearsal from the UI, through the agent (escrow `9054b1d8…#6`) | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` | 5259766 | refused by the ledger (phase 1) |
 | Stream B take from the UI, through the agent (escrow `9054b1d8…#7`, 75 % to the seller) | `5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3` | `90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c` | 5260711 | refused by the ledger (phase 1) |
+| Stream B take at 40 % to the seller, from the UI on B's machine (escrow `0452fc53…#0`) | `5f3d960ab279f6ba4e329534aa67bfd65b2d39e81a61490ca4248dcf24c221a8` | `5db25159151261d1c352cf5281f880bd6a809fc35415bcaa1e72c32692f8f382` | 5261685 | refused by the ledger (phase 1) |
 
 ### Try anyway: an action the engine predicts refused, sent to the chain
 
