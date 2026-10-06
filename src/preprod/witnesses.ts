@@ -15,7 +15,7 @@ import { ROOT } from './env.ts'
 import { cst, mesh } from './mesh.ts'
 import { txLogFile } from './settle.ts'
 
-type Who = 'buyer' | 'seller' | 'admin' | 'other'
+export type Who = 'buyer' | 'seller' | 'admin' | 'other'
 type Value = Record<string, string>
 export type LegWalk = {
   leg: 1 | 2
@@ -113,6 +113,74 @@ export async function walkSettlement(escrowRef: string): Promise<{ escrowRef: st
   const d = readDatum(await datumAt(escrowRef))
   const parties = { buyer: d.buyer.payment.hash, seller: d.seller.payment.hash }
   return { escrowRef, parties, legs: [await walkLeg(1, leg1.txHash, parties), await walkLeg(2, leg2.txHash, parties)] }
+}
+
+export type Settlement = Awaited<ReturnType<typeof walkSettlement>>
+
+// The compact shape the UI shows per settled escrow: what each leg spent and left, who had to sign and who did, the
+// explicit admin check, and what each party was paid.
+export type LegSummary = {
+  leg: 1 | 2
+  txHash: string
+  block: { height: number; slot: number } | null
+  redeemer: { name: string; constructor: number }
+  spends: { ref: string; state: string }
+  leaves: { ref: string; state: string } | null // null: the escrow left the script
+  requiredSigners: Who[]
+  witnesses: Who[]
+  adminKeysSigned: string[]
+  paid: { buyer: Value; seller: Value }
+}
+export type WitnessSummary = { escrowRef: string; adminKeys: number; legs: LegSummary[]; noAdminKey: boolean }
+
+const addInto = (into: Value, v: Value): Value => {
+  for (const [u, q] of Object.entries(v)) into[u] = (BigInt(into[u] ?? '0') + BigInt(q)).toString()
+  return into
+}
+
+// What a leg paid each party. Both legs are built with the seller as change address (settle.ts prepare) and the builder
+// appends the change after the explicit outputs, so the tx's last output, when it is the seller's, is the seller's change
+// (its own funding UTxO back, less the fee), never a payout: leg 1 pays the seller nothing (its one seller output is the
+// change), leg 2 pays it the split output that comes before the change. A buyer output is never change.
+export function paidOf(outputs: LegWalk['outputs']): { buyer: Value; seller: Value } {
+  const last = outputs.length - 1
+  const paid = { buyer: {} as Value, seller: {} as Value }
+  outputs.forEach((o, i) => {
+    if (o.party === 'buyer') addInto(paid.buyer, o.value)
+    else if (o.party === 'seller' && i !== last) addInto(paid.seller, o.value)
+  })
+  return paid
+}
+
+// Pure: a walked settlement → the UI's summary. noAdminKey holds only when no leg has an admin key among its required
+// signers or its witnesses.
+export function summarize(walk: Settlement): WitnessSummary {
+  const legs = walk.legs.map((l): LegSummary => ({
+    leg: l.leg,
+    txHash: l.txHash,
+    block: l.block,
+    redeemer: { name: l.redeemer.name, constructor: l.redeemer.constructor },
+    spends: { ...l.escrowBefore },
+    leaves: l.escrowAfter ? { ...l.escrowAfter } : null,
+    requiredSigners: l.requiredSigners.map((s) => s.party),
+    witnesses: l.witnesses.map((s) => s.party),
+    adminKeysSigned: [...l.adminKeysSigned],
+    paid: paidOf(l.outputs),
+  }))
+  const noAdminKey = legs.every((l) => l.adminKeysSigned.length === 0 && !l.requiredSigners.includes('admin') && !l.witnesses.includes('admin'))
+  return { escrowRef: walk.escrowRef, adminKeys: PARAMS.adminKeyHashes.length, legs, noAdminKey }
+}
+
+// Settled transactions never change, so each escrow's summary is read from the chain once per process. A failed read is
+// not kept: the next call reads again.
+const summaries = new Map<string, Promise<WitnessSummary>>()
+export function witnessSummary(escrowRef: string): Promise<WitnessSummary> {
+  const known = summaries.get(escrowRef)
+  if (known) return known
+  const read = walkSettlement(escrowRef).then(summarize)
+  read.catch(() => summaries.delete(escrowRef))
+  summaries.set(escrowRef, read)
+  return read
 }
 
 if (process.argv[1]?.endsWith('witnesses.ts')) {
