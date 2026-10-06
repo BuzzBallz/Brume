@@ -4,8 +4,8 @@
    "step": "AuthorizeRefund (leg 1)",
    "network": "preprod",
    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-   "txHash": "1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84",
-   "atMs": 1791271603346,
+   "txHash": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3",
+   "atMs": 1791292911821,
    "via": "koios",
    "redeemer": "AuthorizeRefund",
    "role": "seller",
@@ -13,30 +13,30 @@
    "status": "accepted",
    "stage": "confirm",
    "block": {
-    "height": 5259766,
-    "hash": "6ca9fcecbcf4af9d5d3f118564b9e2edc3ad3e9b53bcc160351b1a044ef28412",
-    "slot": 135588413
+    "height": 5260711,
+    "hash": "80ba8a03b78a231560575976f9b956510989aac60dff841aaacaa4fb4066499e",
+    "slot": 135609721
    }
   },
   {
    "step": "WithdrawRefund (leg 2, pre-signed)",
    "network": "preprod",
    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-   "txHash": "b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4",
-   "atMs": 1791271603709,
-   "via": "koios",
+   "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+   "atMs": 1791292917612,
+   "via": "blockfrost",
    "redeemer": "WithdrawRefund",
    "role": "buyer",
    "expected": "accept",
    "status": "accepted",
    "stage": "confirm",
    "block": {
-    "height": 5259766,
-    "hash": "6ca9fcecbcf4af9d5d3f118564b9e2edc3ad3e9b53bcc160351b1a044ef28412",
-    "slot": 135588413
+    "height": 5260711,
+    "hash": "80ba8a03b78a231560575976f9b956510989aac60dff841aaacaa4fb4066499e",
+    "slot": 135609721
    },
    "readback": {
-    "provider": "blockfrost",
+    "provider": "koios",
     "validContract": true,
     "balances": {
      "buyer": {
@@ -54,8 +54,8 @@
    "step": "replay leg 2 (same bytes)",
    "network": "preprod",
    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
-   "txHash": "b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4",
-   "atMs": 1791271619784,
+   "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+   "atMs": 1791292929109,
    "via": "koios",
    "redeemer": "WithdrawRefund",
    "role": "seller",
