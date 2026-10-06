@@ -28,7 +28,7 @@ function admit() {
 const INPUT_SCHEMA = {
   input_data: [
     { id: 'escrowRef', type: 'string', name: 'Escrow UTxO reference', data: { description: '<tx hash>#<index> of a V1 escrow output' } },
-    { id: 'network', type: 'option', name: 'Network', data: { description: 'mainnet is read-only', values: ['mainnet', 'preprod'] } },
+    { id: 'network', type: 'option', name: 'Network', data: { description: 'mainnet is read-only', values: ['mainnet', 'preprod'] }, validations: [{ validation: 'min', value: '1' }, { validation: 'max', value: '1' }] },
   ],
 }
 
@@ -97,16 +97,23 @@ async function settle(job: Job, payment: Payment, identifier: string, net: 'main
   Object.assign(job, { status: 'completed', result })
 }
 
+// An option field may arrive as its value, a one-element list of it, or the index of the chosen value (MIP-003 Attachment 01).
+const NETWORKS = ['mainnet', 'preprod']
+function optionValue(v: unknown): unknown {
+  const one = Array.isArray(v) ? v[0] : v
+  return typeof one === 'number' ? NETWORKS[one] : one
+}
+
 export const mip003 = {
-  'GET /availability': () => ({ body: { status: 'available', type: 'masumi-agent' } }),
+  'GET /availability': () => ({ body: { status: 'available', type: 'masumi-agent', message: 'Brume reads a V1 escrow and answers who can do what now, and which splits beat waiting' } }),
   'GET /input_schema': () => ({ body: INPUT_SCHEMA }),
   'POST /start_job': async (_url: URL, req: IncomingMessage) => {
     const input = await body(req)
     if (typeof input?.identifier_from_purchaser !== 'string') throw new HttpError(400, 'identifier_from_purchaser is required')
     const data = input.input_data ?? {}
-    if (typeof data !== 'object' || Object.values(data).some((v) => typeof v !== 'string')) throw new HttpError(400, 'input_data must be an object of strings')
+    if (typeof data !== 'object' || Array.isArray(data)) throw new HttpError(400, 'input_data must be an object')
     const ref = parseRef(data.escrowRef)
-    const net = parseNet(data.network ?? 'mainnet')
+    const net = parseNet(optionValue(data.network) ?? 'mainnet')
     const identifier: string = input.identifier_from_purchaser
     admit()
     const id = randomUUID()
@@ -119,7 +126,7 @@ export const mip003 = {
       )
       return { body: { id, identifierFromPurchaser: identifier } }
     }
-    if (!/^[0-9a-f]{14,26}$/i.test(identifier)) throw new HttpError(400, 'identifier_from_purchaser must be 14 to 26 hex characters')
+    if (identifier.length < 14 || identifier.length > 26) throw new HttpError(400, 'identifier_from_purchaser must be 14 to 26 characters')
     const hash = inputHash(identifier, data)
     const job: Job = { status: 'awaiting_payment', createdAt: Date.now() }
     jobs.set(id, job) // reserve the slot before awaiting, so parallel calls cannot slip past the cap
