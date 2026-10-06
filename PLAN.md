@@ -97,10 +97,10 @@ flowchart LR
 
 **Signature path.** Guaranteed: file drop. The UI writes `proposal.json` / unsigned tx; each party signs with `pnpm sign --role buyer|seller <file>`; the UI picks up the signed file. Upgrade: CIP-30 (S-3). For the recording both demo wallets are ours (stated in DEMO.md).
 
-**Own deployment (S-2).** Upstream V1 validator compiled with Aiken v1.1.7, params applied with Mesh (`admin_vks` = our key ×3, threshold 2). Vendored in `vendor/` with licence + source commit; never presented as the deployed bytes (K45): "R5 on our copy, R4 on the deployed bytes".
+**Own deployment (S-2).** The committed V1 blueprint (unapplied hash `e6d17c48…0795`, Aiken v1.1.7) with **our** params applied by `@meshsdk/core-cst@1.9.0-beta.90` (`admin_vks` = our key ×3, threshold 2). Same call with the deployed params must first reproduce `bd2adb68…6c0` (control, §10). Vendored in `vendor/` with PROVENANCE.md (licence, source commit, unmodified). Labelled on camera as our own deployment: same compiled code, our parameters.
 
 **`/shared` contract (M0, changes logged in §11)**
-- `shared/types.ts` — `Network`, `Datum` (16 fields from SPEC-TRANSACTIONS §0), `State`, `Redeemer`, `Role`, `Verdict`, `Grid`, `Census`, `SolverInput/Output`, `TxLogEntry`, `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}`, `JobResult` (MIP-003 output: verdict + split + UI link).
+- `shared/types.ts` — `Network`, `Datum` (16 fields from SPEC-TRANSACTIONS §0), `State`, `Redeemer`, `Role`, `Verdict`, `Grid`, `Census`, `SolverInput/Output`, `TxLogEntry`, `Params`, `Proposal {escrowRef, network, path, sellerShare, payout, leg1?, leg2?, signedBy}`, `JobResult` (MIP-003 output: verdict + split + UI link).
 - `shared/constants.ts` — script hash, V1 addresses, deployed params with rung, USDM policy, provider URLs.
 - `shared/mock/*.mock.json` — one real Disputed UTxO, decoded datum, grid, census, solver output, proposal, tx log, job result.
 - Signatures (owner implements, other imports):
@@ -127,11 +127,11 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 ## 6. Milestones (SGT)
 
 **M0 — Skeleton + shared contract · Tue 12:00–13:00 · both**
-- [ ] A+B: `shared/types.ts` with the 16 datum fields of §4 (A reviews) [opus/high]
+- [x] A+B: `shared/types.ts` with the 16 datum fields of §4 (A reviews) [opus/high] — A's revision logged in §11, awaiting B
 - [ ] B: `package.json` (all scripts, Mesh exact pins), `tsconfig.json`, `.gitignore`, `.env.example`, `.githooks/pre-commit` secret grep [haiku]
 - [ ] B: one real Disputed UTxO (Koios + Blockfrost) + mocks in `shared/mock/` [haiku]
 - [ ] A+B: `shared/constants.ts` [sonnet/medium]
-- [ ] A: kickoff freshness output → `fixtures/kickoff-2026-10-06.md` (no probe code) [haiku]
+- [x] A: kickoff freshness output → `fixtures/kickoff-2026-10-06.md` (no probe code) [haiku] — tip 14031823 → 14031828
 - [ ] B: start 5c early: Coworker API opens at 12:00; dispenser-fund the Masumi wallets [—]
 - Done when: first commit ≥ 12:00, `pnpm check` green, branches created.
 
@@ -142,7 +142,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 - [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [ ] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
-- [ ] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 132/131 printed
+- [ ] B2 decoder + census [sonnet/high] — totals = UTxO sum on both providers; corrupted datum fails; 141 open / 140 decoded reproduced against `fixtures/kickoff-2026-10-06.md`
 - [ ] B3 agent server: UI API over mocks, then real calls [sonnet/medium]
 - [ ] B4 UI v0: escrow + grid + propose/accept/sign/submit flow over mocks [sonnet/medium]
 - [ ] B5 5c: Masumi payment service, agent registered, MIP-003 endpoint answering, listed on preprod Sokosumi [sonnet/high] — done when a hire from Sokosumi reaches `/start_job`
@@ -199,8 +199,14 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 
 **Open**
 - Q-F Which escrow does Sokosumi preprod pay into, V1 or V2? (Alexandre asking the marketplace creator.) Build against V1 either way.
-- Q-H Preprod slot-conversion constants (SPEC-TRANSACTIONS §5.3): an off-by-one fails a guard silently. A settles at A1.
-- Q-C Seller preprod wallet funded (dispenser)?
+- Q-C Seller preprod wallet funded (dispenser), in ≥ 2 independent UTxOs (A2 two-UTxO rule)?
+- Q-K (A raises, B decides with A) K45 / C14 look wrong: the deployed V1 bytes ARE reproduced (see "Measured 6 Oct" below). Wording rule unchanged until the team agrees: "the validator's source says" until a guard has run on preprod.
+
+**Measured 6 Oct (A, read-only)**
+- Q-H settled: preprod slot = 86400 + (POSIX s − 1655769600), 1 s slots. Koios preprod tip block 5259347: `abs_slot − (block_time − 1655769600) = 86400`, 0 s error; epoch 317 / epoch_slot 276622 consistent.
+- V1 params R5 by address reproduction: the committed V1 blueprint (`e6d17c48…0795`, the hash Aiken v1.1.7 rebuilds from source, K42) + `applyParamsToScript` from `@meshsdk/core-cst@1.9.0-beta.90` with `[2, [fc16a1fc…, 7f781613…, 89eef9ea…], fee address, 50, 420000]` gives exactly `addr_test1wz7j4kmg…` and `addr1wx7j4kmg…` (6,326-byte applied hex). The same call through `@meshsdk/core` (core-cst beta.96) gives 6,011 bytes and another address. **Rule: apply params only via the direct `@meshsdk/core-cst` import (beta.90); pass only hex strings between the two copies.**
+- Signing: `chacha-native`'s build is skipped, so `chacha` (used only by `@cardano-sdk/key-management`) runs its pure-JS fallback. MeshWallet signing goes through libsodium. Offline check with throwaway keys: two partial signatures (buyer then seller) leave the tx hash and body bytes unchanged, both witnesses verify, the wrong-message control fails.
+- Key format (A1): `PREPROD_*_SKEY` = bech32 root key with the `xprv` prefix (CIP-1852 account 0 / key 0, same address as the original mnemonic). The pre-commit hook matches that prefix; a mnemonic would not be caught, so mnemonics never go in `.env`.
 
 **Settled 6 Oct**: split A/B · MeshSDK pinned · "cannot be raced" retracted · name **Brume** (repo `BuzzBallz/Brume`, private → public at M5) · S1 naming allowed (Masumi + the contract; money rule kept) · S2 x402 optional, hosted facilitator · demo = end-to-end product, proof in the README · prior art checked by hand (Kleros v2, Win-Win F6, F11 escrow, AI Arbiter, Warden, Trulo, KARMA, NoxEscrow: all build their own escrow or a better judge).
 
@@ -222,4 +228,10 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 
 | When (SGT) | Change | By | Agreed |
 |---|---|---|---|
-| — | — | — | — |
+| Tue 13:05 | `types.ts`: `Params` type; `Reach` takes `params` (as §4 already says) — our own deployment has other admins | A | pending B |
+| Tue 13:05 | `types.ts`: `Proposal` gets `path`, `payout` (exact amounts) and `Leg {redeemer, cborHex, txHash, validFromMs, validToMs, inputs}` (additive: `txHash`, `signedBy`, `sellerShare` unchanged for the UI). `signedBy` is UI state only: `submit()` verifies the witnesses inside the CBOR | A | pending B |
+| Tue 13:05 | `types.ts`: solver per asset — `SolverInput.sellerArbShare`; `Band.perUnit` (r_b, r_s, band per unit), `arbitrationLeak`, `frontRunP {used, measured}`; scalar band kept for the UI slider | A | pending B |
+| Tue 13:05 | `types.ts`: `TxLogEntry` gets `network`, `atMs`, `expected?`, `stage?`, `blockHeight?` — a refusal shown on camera must be `stage: 'submit'` | A | pending B |
+| Tue 13:05 | `constants.ts`: `PARAMS` typed `Params`, admin key hashes + fee credentials added, all R5 (§10); `FEE_ADDRESS` per network; `SELLER_ARB_SHARE` | A | pending B |
+| Tue 13:05 | `shared/mock/` proposal, solver, txlog follow the new shapes | A | pending B |
+| Tue 13:05 | `.env.example`: key format stated (`xprv` root key); `.claude/agents/claims-checker.md`: dead 132/131 replaced by the kickoff pin | A | pending B |
