@@ -16,7 +16,7 @@ This README states what exists today. The status table says what does not.
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
 | Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 9 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed and withdrawn on preprod, exported to `fixtures/masumi/test-purchase.json` |
-| Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000000`); not yet visible on the marketplace |
+| Listing on preprod Sokosumi | registered on the preprod Masumi registry and listed on preprod Sokosumi (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000001`; a metadata update replaced `…cc8c16000000`, the identifier the test purchase used); a hire from Sokosumi not yet run |
 | Transactions | listed below with hashes and blocks; the full index, all 9 settles included, is `fixtures/preprod/README.md` |
 
 ## Run it
