@@ -317,6 +317,36 @@ async function replayControl(escrowRef: string, leg2: Built): Promise<TxLogEntry
   return null
 }
 
+// The parties, from the continuation datum of the leg 1 we built (its output 0, the one leg 2 spends).
+function partiesOf(leg1Cbor: string): { buyer: string; seller: string } {
+  const datum = cst.deserializeTx(leg1Cbor).body().outputs()[0]?.datum()?.asInlineData()?.toCbor()
+  if (!datum) throw new SettleError('leg 1 output 0 carries no inline datum')
+  const d = readDatum(datum)
+  return { buyer: bech32Of(d.buyer), seller: bech32Of(d.seller) }
+}
+
+// The confirmed leg 2 gets its balances read back from the second indexer, retried every 5 s for 60 s while that indexer
+// catches up. A failed read is a hole: counted and printed, never a balance. With no read-back the entry stays as it
+// was (confirmed, no readback): the settlement stands, and `node src/preprod/readback.ts <ref>` backfills it later.
+async function withReadback(escrowRef: string, confirmed: TxLogEntry, parties: () => Promise<{ buyer: string; seller: string }>): Promise<TxLogEntry> {
+  const { readBack } = await import('./readback.ts')
+  let holes = 0
+  let last = ''
+  for (let i = 0; i < 12; i++) {
+    try {
+      const { buyer, seller } = await parties()
+      const rb = await readBack(confirmed.txHash, confirmed.via, buyer, seller)
+      if (rb) return upsertTxLog(escrowRef, { ...confirmed, readback: rb })
+    } catch (error: unknown) {
+      holes++
+      last = error instanceof Error ? error.message.slice(0, 160) : String(error)
+    }
+    await sleep(5_000)
+  }
+  console.error(`read-back of leg 2 ${confirmed.txHash.slice(0, 12)}… not available after 60 s (${holes} holes${last ? `, last: ${last}` : ''}); backfill: node src/preprod/readback.ts ${escrowRef}`)
+  return confirmed
+}
+
 // One settlement per escrow at a time: an exclusive lock file, released on every exit path.
 // The lock names its owner (pid, host, time). A lock whose process is gone (same host), or older than the longest a
 // settlement can run (leg 2's whole window, any host), is stale: an agent that died mid-send must not block its escrow.
@@ -437,6 +467,7 @@ export async function submit(proposal: Proposal, opts: { replay?: boolean } = {}
     const out = [c1, c2]
     if (c2.status === 'accepted' && c2.block) {
       rmSync(pendingFile(proposal.escrowRef), { force: true }) // settled: its reserved UTxOs are free again
+      out[1] = await withReadback(proposal.escrowRef, c2, async () => partiesOf(leg1.cborHex))
       if (opts.replay !== false) {
         const rc = await replayControl(proposal.escrowRef, leg2Built)
         if (rc) out.push(rc)
@@ -467,7 +498,11 @@ export async function resend(escrowRef: string): Promise<TxLogEntry> {
     const pending = JSON.parse(readFileSync(pendingFile(escrowRef), 'utf8')) as { leg1: string; leg2: string; leg2ValidToMs: number }
     const cborHex = readFileSync(join(ROOT, 'out', `leg2-${pending.leg2}.cbor.hex`), 'utf8').trim()
     const r = await landLeg2(escrowRef, pending.leg1, { cborHex, txHash: pending.leg2 }, pending.leg2ValidToMs)
-    if (r.status === 'accepted' && r.block) rmSync(pendingFile(escrowRef), { force: true })
+    if (r.status === 'accepted' && r.block) {
+      rmSync(pendingFile(escrowRef), { force: true })
+      const { partiesFromLeg1 } = await import('./readback.ts')
+      return withReadback(escrowRef, r, () => partiesFromLeg1(pending.leg1)) // only leg 1's hash is kept here
+    }
     return r
   } finally {
     release()
