@@ -383,20 +383,26 @@ function waitingFor(role, ctx) {
     live && check && check !== 'ok' && h('p', { class: 'error' }, check))
 }
 
-// Prefilled with the top of the solver's band at the 30-day horizon: the most the seller can ask that the buyer still accepts.
+// Prefilled with the top of the solver's band at the 30-day horizon: the largest seller share that beats waiting for a buyer
+// who would wait at most 30 days, at the 95 % bound (D17: never "both sides accept", the buyer's patience is not measured).
 function proposeForm(row, rerun, band) {
+  const btn = h('button', { class: 'btn primary', type: 'submit', disabled: !live }, 'Propose this split')
   const input = h('input', { type: 'number', min: '0', max: '1', step: '0.05', value: band ? band.sellerShareMax.toFixed(2) : null, required: true, class: 'mono share', 'aria-label': 'Seller share of the value' })
   const err = h('p', { class: 'error', hidden: true })
   const form = h('form', { class: 'propose', onsubmit: async e => {
     e.preventDefault()
+    // Building both legs reads the chain and takes a few seconds: the button says so until the answer.
+    btn.disabled = true
+    btn.textContent = 'Building both legs…'
+    err.hidden = true
     try { await post('proposal', { escrowRef: row.ref, sellerShare: Number(input.value) }); rerun() }
-    catch (x) { showError(err, x, () => form.requestSubmit()) }
+    catch (x) { btn.disabled = false; btn.textContent = 'Propose this split'; showError(err, x, () => form.requestSubmit()) }
   } },
   h('label', {}, 'Seller share', input),
-  h('button', { class: 'btn primary', type: 'submit', disabled: !live }, 'Propose this split'),
+  btn,
   !live && h('span', { class: 'hint' }, 'Runs in live mode'),
   h('p', { class: 'hint band-hint' }, band
-    ? `Both sides can accept ${pct(band.sellerShareMin)} to ${pct(band.sellerShareMax)} of the value (30-day horizon).`
+    ? `For a buyer who would wait at most 30 days, any seller share from ${pct(band.sellerShareMin)} to ${pct(band.sellerShareMax)} beats waiting (at the 95% bound).`
     : 'No solver band for this escrow yet.'),
   err)
   return form
