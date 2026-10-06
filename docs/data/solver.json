@@ -1,0 +1,47 @@
+{
+ "solver": {
+  "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+  "pathA": {
+   "fee": {
+    "lovelace": "201492",
+    "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "100000"
+   },
+   "exposedParty": "buyer",
+   "exposedFloor": {
+    "lovelace": "4029850"
+   },
+   "defectorKeeps": {
+    "lovelace": "0",
+    "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
+   }
+  },
+  "pathB": {
+   "fee": {},
+   "exposedParty": "seller",
+   "exposedFloor": {
+    "lovelace": "0"
+   },
+   "defectorKeeps": {
+    "lovelace": "0",
+    "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "0"
+   }
+  },
+  "bands": [
+   {
+    "horizonDays": 7,
+    "sellerShareMin": 0,
+    "sellerShareMax": 0.5
+   },
+   {
+    "horizonDays": 30,
+    "sellerShareMin": 0,
+    "sellerShareMax": 0.5
+   },
+   {
+    "horizonDays": 90,
+    "sellerShareMin": 0,
+    "sellerShareMax": 0.5
+   }
+  ]
+ }
+}

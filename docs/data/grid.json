@@ -1,0 +1,192 @@
+{
+ "grid": {
+  "ref": "a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0",
+  "atMs": 1791259308000,
+  "state": "Disputed",
+  "verdicts": [
+   {
+    "redeemer": "Withdraw",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "Withdraw",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "Withdraw",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SetRefundRequested",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "buyer",
+    "allowed": true,
+    "failed": [],
+    "outputRules": []
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "UnSetRefundRequested",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawRefund",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "WithdrawDisputed",
+    "role": "admin",
+    "allowed": true,
+    "failed": [],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "seller",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "SubmitResult",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "buyer",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "seller",
+    "allowed": true,
+    "failed": [],
+    "outputRules": []
+   },
+   {
+    "redeemer": "AuthorizeRefund",
+    "role": "admin",
+    "allowed": false,
+    "failed": [
+     "mock"
+    ],
+    "outputRules": []
+   }
+  ]
+ }
+}
