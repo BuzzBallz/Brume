@@ -1,0 +1,127 @@
+{
+  "label": "the seller-first settlement, read from the chain: redeemers, spent UTxOs, outputs, required signers and witnesses, against the deployed admin key hashes",
+  "escrowRef": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+  "parties": {
+    "buyer": "3e8d0f4e73ecd780d072857d25be38096527d650d280c745d4268c6e",
+    "seller": "d96d411295bd3830ab4465f58e3446a939c0653a7c1753140aa87467"
+  },
+  "legs": [
+    {
+      "leg": 1,
+      "txHash": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3",
+      "block": {
+        "height": 5260711,
+        "slot": 135609721
+      },
+      "redeemer": {
+        "name": "AuthorizeRefund",
+        "constructor": 6,
+        "spends": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7"
+      },
+      "escrowBefore": {
+        "ref": "9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7",
+        "state": "Disputed"
+      },
+      "escrowAfter": {
+        "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+        "state": "RefundRequested"
+      },
+      "outputs": [
+        {
+          "address": "addr_test1wz7j4kmg2cs7yf92uat3ed4a3u97kr7axxr4avaz0lhwdsqukgwfm",
+          "party": "script",
+          "value": {
+            "lovelace": "20000000",
+            "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "10000000"
+          }
+        },
+        {
+          "address": "addr_test1qrvk6sgjjk7nsv9tg3jltr35g65nnsr98f7pw5c5p258geulnltrju4208p9ej3y5tc2nsw7cftqqnssjflvurd4we9stphwwa",
+          "party": "seller",
+          "value": {
+            "lovelace": "9498527"
+          }
+        }
+      ],
+      "requiredSigners": [
+        {
+          "keyHash": "d96d411295bd3830ab4465f58e3446a939c0653a7c1753140aa87467",
+          "party": "seller"
+        }
+      ],
+      "witnesses": [
+        {
+          "keyHash": "d96d411295bd3830ab4465f58e3446a939c0653a7c1753140aa87467",
+          "party": "seller"
+        }
+      ],
+      "adminKeysSigned": [],
+      "collateral": [
+        "7033b725d83f4b903a8d54a91d8a6a237ce0e58fc80e2c402f073c22eb43d7f5#3"
+      ]
+    },
+    {
+      "leg": 2,
+      "txHash": "90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c",
+      "block": {
+        "height": 5260711,
+        "slot": 135609721
+      },
+      "redeemer": {
+        "name": "WithdrawRefund",
+        "constructor": 3,
+        "spends": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0"
+      },
+      "escrowBefore": {
+        "ref": "5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3#0",
+        "state": "RefundRequested"
+      },
+      "escrowAfter": null,
+      "outputs": [
+        {
+          "address": "addr_test1qqlg6r6ww0kd0qxsw2zh6fd78qyk2f7k2rfgp3696sngcms6y3crsh87un2wt9rkk5g7m0t3z0rturaca94vdzjhzymsfct97t",
+          "party": "buyer",
+          "value": {
+            "lovelace": "5000000",
+            "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "2500000"
+          }
+        },
+        {
+          "address": "addr_test1qrvk6sgjjk7nsv9tg3jltr35g65nnsr98f7pw5c5p258geulnltrju4208p9ej3y5tc2nsw7cftqqnssjflvurd4we9stphwwa",
+          "party": "seller",
+          "value": {
+            "lovelace": "15000000",
+            "16a55b2a349361ff88c03788f93e1e966e5d689605d044fef722ddde0014df10745553444d": "7500000"
+          }
+        },
+        {
+          "address": "addr_test1qrvk6sgjjk7nsv9tg3jltr35g65nnsr98f7pw5c5p258geulnltrju4208p9ej3y5tc2nsw7cftqqnssjflvurd4we9stphwwa",
+          "party": "seller",
+          "value": {
+            "lovelace": "9516608"
+          }
+        }
+      ],
+      "requiredSigners": [
+        {
+          "keyHash": "3e8d0f4e73ecd780d072857d25be38096527d650d280c745d4268c6e",
+          "party": "buyer"
+        }
+      ],
+      "witnesses": [
+        {
+          "keyHash": "3e8d0f4e73ecd780d072857d25be38096527d650d280c745d4268c6e",
+          "party": "buyer"
+        },
+        {
+          "keyHash": "d96d411295bd3830ab4465f58e3446a939c0653a7c1753140aa87467",
+          "party": "seller"
+        }
+      ],
+      "adminKeysSigned": [],
+      "collateral": [
+        "7033b725d83f4b903a8d54a91d8a6a237ce0e58fc80e2c402f073c22eb43d7f5#2"
+      ]
+    }
+  ]
+}
