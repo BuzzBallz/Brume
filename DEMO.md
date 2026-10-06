@@ -8,7 +8,7 @@
 |---|---|
 | `<HERO_REF>`, a real mainnet Disputed escrow, read-only | `a7084c50029798fc0530b6c9abc2bf3e203b23e11102a3e8cdb90ede0c64970d#0` |
 | Census pinned for the video | tip block 14031954, `fixtures/mainnet/utxos-*.json`, both providers (`READ_SOURCE=fixture`). `?source=snapshot` and Pages show tip 14033251 (168 open, 61 Disputed): say which one is on screen |
-| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the settle (20 tADA + 10 tUSDM). Backup with the same content: `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `#6` was the rehearsal and is spent |
+| `<BANK_REF>`, a preprod escrow we locked | `9054b1d81c9ce47db1e3ea993aa34f0f978eb95629d4319131f149619c68de9d#7` for the settle (20 tADA + 10 tUSDM). Backup with the same content: `47db047faf629b6894cbe2f9f307d1f2e1482c47291c14285531af7a2b5d7644#0`. `#6` was the rehearsal and `#7` the take: both are spent, the backup is not |
 | Split proposed by the seller | 0.75 to the seller, as in the rehearsal (seller 15 tADA + 7.5 tUSDM, buyer 5 tADA + 2.5 tUSDM on a 20 tADA + 10 tUSDM pot) |
 | Action the engine marks impossible, for "try anyway" | buyer `WithdrawRefund` on a Disputed bank escrow (needs FundsLocked or RefundRequested): refused by the validator, phase 2, as stream A ran it on `8e0d6df4…#0` |
 
@@ -25,6 +25,16 @@ Settling spends the escrow, so "try anyway" runs on another bank escrow: one of 
 | Replay of leg 2 | same body | none | refused by the ledger (phase 1) |
 
 Both legs found on two indexers in the same block, `valid_contract` true (`pnpm verify <hash> preprod`).
+
+## Take, 6 Oct (escrow `#7`, from the UI)
+
+| Step | Transaction | Block | Result |
+|---|---|---|---|
+| Leg 1, concession (`AuthorizeRefund`) | `5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3` | 5260711 | accepted |
+| Leg 2, pre-signed exit (`WithdrawRefund`) | `90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c` | 5260711 | accepted |
+| Replay of leg 2 | same body | none | refused by the ledger (phase 1) |
+
+Both legs found on two indexers in the same block, `valid_contract` true. Leg 2 read back on Koios: the buyer received 5 tADA + 2.5 tUSDM, the seller 15 tADA + 7.5 tUSDM, as proposed. Log: `fixtures/preprod/txlog-9054b1d8…_7.json`.
 
 ## Wallets
 

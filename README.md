@@ -14,10 +14,10 @@ This README states what exists today. The status table says what does not.
 | 16-field V1 datum decoder and census from the UTxO set (`src/census`) | built, tested, reproducible from a committed fixture |
 | Agent server: UI API and MIP-003 job interface (`src/agent`) | built; every route serves stream A's engine, solver and settlement, no mocks |
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
-| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 9 logged settles on path B and 5 race runs, see Transactions sent |
+| Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 10 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed and withdrawn on preprod, exported to `fixtures/masumi/test-purchase.json` |
 | Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000001`; a metadata update replaced `…cc8c16000000`, the identifier the test purchase used); not yet visible on preprod Sokosumi |
-| Transactions | listed below with hashes and blocks; the full index, all 9 settles included, is `fixtures/preprod/README.md` |
+| Transactions | listed below with hashes and blocks; the full index, the earlier settles included, is `fixtures/preprod/README.md` |
 
 ## Run it
 
@@ -99,7 +99,7 @@ A provider that rate-limits or fails (HTTP 429 or 5xx) is answered as a 503 hole
 
 ## Transactions sent (preprod, 6 Oct 2026)
 
-Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles; all nine are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
+Every write is on preprod, against escrows we locked ourselves. Mainnet is read only. The full index of the evidence files, run by run, is `fixtures/preprod/README.md`. The table below lists the first four settles and the take on `#7`; the others are indexed in its §1. Each run below is logged entry by entry in `fixtures/preprod/` and each accepted transaction can be re-read on a second indexer with `pnpm verify <tx hash> preprod`.
 
 A refused transaction never reaches a block, so its hash is a body hash, not something an explorer will show. Where the refusal was decided matters, and the log records it:
 - **phase 1**: the ledger refused it before any script ran (for example, an input already spent);
@@ -115,6 +115,7 @@ The buyer signs leg 2 against leg 1's output before that output exists. The sell
 | Token pot, through `prepare` → `sign` → `submit` | `be1a2161b8c451309549265337893cc05bd4f75e9a7e3b971ccca86d7bcb4df8` | `ccb04dd233010d1e71ca0ebacb68cc83c28247e78e16b5f84a096389b2eab637` | 5259570 | refused by the ledger (phase 1) |
 | Rewritten submit path | `764f803f96fc4f0c950d1dd0f00bb98437f3bab2a6ff3f9478d0e2ce09a507db` | `ee822b4e4c2f4a0375a5fe92b0301883adef60b138a5ef794813d80bf7d72aee` | 5259631 | refused by the ledger (phase 1) |
 | Stream B rehearsal from the UI, through the agent (escrow `9054b1d8…#6`) | `1a5e3e6e6b4526cded37046a5473d5e0fd73cd51e2d4165d7e6297b087706c84` | `b92d44e4a226d873c12fa40200f5bda40841ad6f86e0c6b298ac52153eb305d4` | 5259766 | refused by the ledger (phase 1) |
+| Stream B take from the UI, through the agent (escrow `9054b1d8…#7`, 75 % to the seller) | `5c5e323a0af1485f13c6df6a6d04de09e991397c0cead8c70bc59223a3300cf3` | `90bb281f89a3d8b5e1ebfa47fc05aaae75843e175d818428a379a5984b19420c` | 5260711 | refused by the ledger (phase 1) |
 
 ### Try anyway: an action the engine predicts refused, sent to the chain
 
