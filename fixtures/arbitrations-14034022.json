@@ -1,0 +1,2903 @@
+{
+  "label": "The V1 script's lifetime arbitration record on mainnet, read-only: every WithdrawDisputed, what each escrow's buyer and seller received, net, per asset. Shares are Σ buyer / Σ pot per unit over the valid ones; no dollar figure.",
+  "tip": {
+    "before": {
+      "height": 14034022,
+      "hash": "0d0ca2d556c047e79a3e1e6749b9c9e0ec1dda908ae4efaa3393895c3dded9bb",
+      "time": "2026-10-06T17:07:42.000Z"
+    },
+    "after": {
+      "height": 14034024,
+      "hash": "5fe1467ab5a73baeb7addece12139d894a490b3144c227c64edf094eee068d11"
+    }
+  },
+  "routes": [
+    "koios script_redeemers (every redeemer of the script)",
+    "koios tx_info (each WithdrawDisputed, its own redeemer decoding)",
+    "koios datum_info (escrow datums, blake2b-256 checked)"
+  ],
+  "skipped": [
+    "blockfrost: BLOCKFROST_MAINNET_PROJECT_ID is not set, so the list of WithdrawDisputed txs rests on one provider"
+  ],
+  "lifetime": {
+    "redeemers": 30062,
+    "txs": 30062,
+    "byRedeemer": {
+      "SetRefundRequested": 209,
+      "SubmitResult": 11965,
+      "WithdrawRefund": 6054,
+      "Withdraw": 11710,
+      "WithdrawDisputed": 120,
+      "AuthorizeRefund": 4
+    }
+  },
+  "record": {
+    "arbitrations": 120,
+    "valid": 120,
+    "failedPhase2": 0,
+    "escrows": 120,
+    "sellerReceivedIn": 0,
+    "buyerWholePotIn": 94,
+    "buyerShare": {
+      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": 0.7364,
+      "lovelace": 1
+    },
+    "neitherShare": {
+      "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": 0.2636,
+      "lovelace": 0
+    },
+    "totals": {
+      "pot": {
+        "lovelace": "476410160",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "664000000"
+      },
+      "buyer": {
+        "lovelace": "476410161",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "489000000"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "175000000",
+        "lovelace": "-1"
+      }
+    },
+    "first": {
+      "txHash": "076c575eb08b6d878e82d2de32d049d82ad789bb44c9e16d4eb3577694915e10",
+      "height": 12245002,
+      "time": "2025-08-11T21:20:47.000Z"
+    },
+    "last": {
+      "txHash": "20fa8df4d36aba0a65718294ce2b7564ab693bbd4a755a3fd851041c11901ab8",
+      "height": 12704767,
+      "time": "2025-11-27T22:27:00.000Z"
+    }
+  },
+  "againstConstants": {
+    "buyerAda": true,
+    "buyerToken": true,
+    "sellerNothing": true,
+    "lastAction": true
+  },
+  "controls": {
+    "controlTx": true,
+    "everyFourRead": true
+  },
+  "clock": {
+    "definition": "days since external_dispute_unlock_time, the moment arbitration opens (K50)",
+    "pinned": {
+      "tip": {
+        "height": 14031954,
+        "hash": "e4d15bf4126618bbf9c9ae9d0d3077e90815a1fa2aaf466fc8560fedeb2b72d1",
+        "time": "2026-10-06T05:27:40.000Z"
+      },
+      "clock": {
+        "n": 61,
+        "pastOpen": 61,
+        "medianDays": 333.25,
+        "minDays": 115.23,
+        "maxDays": 369.71
+      }
+    },
+    "live": {
+      "tip": 14034022,
+      "clock": {
+        "n": 61,
+        "pastOpen": 61,
+        "medianDays": 333.74,
+        "minDays": 115.71,
+        "maxDays": 370.2
+      }
+    }
+  },
+  "holes": 0,
+  "errors": [],
+  "arbitrations": [
+    {
+      "txHash": "00b64e1de0c3f0a392d5b4415ab33f5c9d88d33fc1170aa769c04c2cb72f9124",
+      "height": 12245351,
+      "time": "2025-08-11T23:16:27.000Z",
+      "escrows": [
+        {
+          "ref": "d203334446b84bb7089fb51de83c86a848db7c38df5da3e03577abae0a1bb83c#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "00bfcafa80a67775064db4b609a47f241dae2ed4c537a34461786765fcfc6d4b",
+      "height": 12245268,
+      "time": "2025-08-11T22:54:15.000Z",
+      "escrows": [
+        {
+          "ref": "50e07de2cbe090ef390a106ec22d0d0597039ba356d6458a8ab3ed2744ebff01#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "c792b5c801b0a699f53a67a4352a912bb140d417e8e00af6ffa85faa"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "0698587610331d6856c2c3f1f743ef9cc559dccaf00c1df40883705e48f9f748",
+      "height": 12245391,
+      "time": "2025-08-11T23:34:49.000Z",
+      "escrows": [
+        {
+          "ref": "9fb6253aafbfda30948046d284892bb1f0b5f7eedbd8046ed39bb86dec29e003#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "06acc212ade57ce9b36960cb1865376c003c2c81c534c3002c449f6b0ce96438",
+      "height": 12245443,
+      "time": "2025-08-11T23:49:46.000Z",
+      "escrows": [
+        {
+          "ref": "f9a7e87bb1ea18500a930cbe1fcb5d599e93eb208a47d95a0b4d8fb1ac2dff86#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "073175eb0c8b19a160f7afe6e7545d502764d87ae1fbebc48e2f49f2666a8de5",
+      "height": 12245264,
+      "time": "2025-08-11T22:51:26.000Z",
+      "escrows": [
+        {
+          "ref": "060b2d93d03e129ce9eec211e835ae04595264e8f4f855b56a06ad836982920d#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "076c575eb08b6d878e82d2de32d049d82ad789bb44c9e16d4eb3577694915e10",
+      "height": 12245002,
+      "time": "2025-08-11T21:20:47.000Z",
+      "escrows": [
+        {
+          "ref": "0fd8fdba2620d3ae8e25331ee8cc64518efcb7276f364e897a798b2ec4417b02#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "077c57532c06f44f839be50e88401e1425e70e8e97735bb60a5ebca7568c7d97",
+      "height": 12245375,
+      "time": "2025-08-11T23:29:44.000Z",
+      "escrows": [
+        {
+          "ref": "63a30ba0e05853283a6543cc0592601303b821be2bb6ee7bf0795c0549cb8fae#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "098167c39ea459835596766302ff0ab3d7589ddac7c826e37919c1f7ce3bd42f",
+      "height": 12703410,
+      "time": "2025-11-27T14:42:20.000Z",
+      "escrows": [
+        {
+          "ref": "24ff307a693c424c673c571f3d3bfe390c16c8c8f4362837bac3c953d4b839a7#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "09b644b61c0914642f7829f355408681410478b3f276282264917767809c6104",
+      "height": 12245127,
+      "time": "2025-08-11T22:08:04.000Z",
+      "escrows": [
+        {
+          "ref": "56e46f2e21f37b3650e26ace0390cec4ed3f8d8339a68fe52a1d07b2fac817f8#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "0cb1f36bca29e111b14e2dad7d489511bc671fb940b4cdc2e8197ce0c4e8d981",
+      "height": 12245030,
+      "time": "2025-08-11T21:30:00.000Z",
+      "escrows": [
+        {
+          "ref": "d9da4747ac03e8b0886f814666d6e283b17528c09145713342d4f242bf4daa8a#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "0ce5921151a502e3cc815ddfb96ba41e2357889fe116d87207638d09d1dfb285",
+      "height": 12245464,
+      "time": "2025-08-11T23:55:02.000Z",
+      "escrows": [
+        {
+          "ref": "5f05c8ae4c0ef788d5599e506ef8696c7d6321349067e461ffb7efe1252199a6#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "101817ac0ccec3073ab81ed74d2414b17f76033708e657893ea7d9a6918c9487",
+      "height": 12245195,
+      "time": "2025-08-11T22:29:29.000Z",
+      "escrows": [
+        {
+          "ref": "0804739da05d06a9b09e22839d4f2ef0e31f041576105b17ec3dda4d0be9bad8#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "158337632817dc65d3c0cf4c2908f65958e6a77af1994a09c4a2b2f58190989a",
+      "height": 12245182,
+      "time": "2025-08-11T22:25:19.000Z",
+      "escrows": [
+        {
+          "ref": "e36c7b845c33981ebddbcc78805e3ea8ebba028281ffd0c531ad6750f236e853#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "1895b0b236d8979cf2c0282ba02f374cf38e857e7f4e777433b794a6a6e0df9e",
+      "height": 12245358,
+      "time": "2025-08-11T23:21:12.000Z",
+      "escrows": [
+        {
+          "ref": "c9a22beb0999e83687ee4591bbd8cdbacb85973fa1594a3f769efda072ef3bb5#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "9d3684bee0f2da0de4dd2e5f78b84a6fc9ed27c48b7ee9900b573b9e"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      }
+    },
+    {
+      "txHash": "1b7aad378c8aa33fb7e5294b9f8924b4b71f54433217d1802ea68fe34b91d075",
+      "height": 12426435,
+      "time": "2025-09-23T08:56:22.000Z",
+      "escrows": [
+        {
+          "ref": "3feed58aee25ce16f3e5bade45b88c533544c8c3424b78dba7b6f4f594b5ebea#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "1bea364b8139dfa78a858a328457bf9c2bdb343b02ccbc326281c97dd21b43ba",
+      "height": 12245132,
+      "time": "2025-08-11T22:08:41.000Z",
+      "escrows": [
+        {
+          "ref": "2759b87ec97425855c75fe405c3ccf825a8a0bc1b0577a908c7394beb1204c07#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "1e00bf4406105e81371c18023967292f5b90278173de20aa150da5bb65c30c28",
+      "height": 12448238,
+      "time": "2025-09-28T12:40:30.000Z",
+      "escrows": [
+        {
+          "ref": "9b0d107405993e029bf20da8282e814f2eac1f76f31dee6712320406184f8683#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "20c8f910a24b6065fce00980e81a15949e3a95a6fd1c044e2f6a32894af52b49",
+      "height": 12245135,
+      "time": "2025-08-11T22:10:30.000Z",
+      "escrows": [
+        {
+          "ref": "5d533242d0d42b13e372ce830e5cec95ea3244b8c5ad9f1ff0763af77cffab8e#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "20fa8df4d36aba0a65718294ce2b7564ab693bbd4a755a3fd851041c11901ab8",
+      "height": 12704767,
+      "time": "2025-11-27T22:27:00.000Z",
+      "escrows": [
+        {
+          "ref": "d0d13c1f16e7974875d115b4083f2c6099ee03fce5b25fe44af6949a4294e03d#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "231278ef8f46a44819867bc2c06c691b08289e39b7b79197151db6713b2395af",
+      "height": 12245472,
+      "time": "2025-08-11T23:58:02.000Z",
+      "escrows": [
+        {
+          "ref": "26f28e343edc8abd722110a49cf6fe521eecd587c078c156d6331d696ee70a02#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "25d7b1e60df2a360c281f38208822bd58d7ce757413d7f76a4424ea2026e3f44",
+      "height": 12245375,
+      "time": "2025-08-11T23:29:44.000Z",
+      "escrows": [
+        {
+          "ref": "0786baf15cc6366a56ca4f02f0dc597ee736093ef718091f2a5c3df2b60c6994#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "2915b41a87f02e667b857523a72d20dfd15e30074e5e64427ac8db2f5dc7ac89",
+      "height": 12245395,
+      "time": "2025-08-11T23:35:32.000Z",
+      "escrows": [
+        {
+          "ref": "332eb3b98af342afc08e3f09ad5590fd855697f83bc75c40154c74b870e7f7c3#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "32c9768fae7b2f0a8ea87e16ce10938015c966f690c6ac7f7c0b3e90b92063be",
+      "height": 12245134,
+      "time": "2025-08-11T22:09:24.000Z",
+      "escrows": [
+        {
+          "ref": "ea54f98e967bd00530fba709eddf55693901c5dff04937e05143ba2bc21fc6ff#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "32fc10a486d5fbb3cc504437644521a65532a589bd5874a06a16fb77"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "333e2cf6f9e8db84e8f3f231f12a4394f9a2057c1158f900bb6ac1f141be127e",
+      "height": 12245518,
+      "time": "2025-08-12T00:15:45.000Z",
+      "escrows": [
+        {
+          "ref": "f33eab204ade7c5370ee5df30385f1f5a8b3df2888d88fd0db7f59a3c64cf643#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "33eab91c9941dab5ee93e63d1f3e91844a7d417c7f6466cebc81e8ab9d865ecc",
+      "height": 12245355,
+      "time": "2025-08-11T23:19:33.000Z",
+      "escrows": [
+        {
+          "ref": "0217d2f9f0af0ab85dcddee276fadbe8615bb06613c5b1fa33680eeda0ca36ad#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "9d3684bee0f2da0de4dd2e5f78b84a6fc9ed27c48b7ee9900b573b9e"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      }
+    },
+    {
+      "txHash": "37960451c3d2eda85b1b88f1a2960f7ec98275ccde6ad24bb8e1af61c40c3fef",
+      "height": 12245475,
+      "time": "2025-08-11T23:58:39.000Z",
+      "escrows": [
+        {
+          "ref": "9ed65fa7cc9b171c79cee611e524f70900f7e036d957cedb42eba48a3a0b6296#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "3849ba77bc7c93a9d4ea006f283efeebb57636f9a158f245c45b03e5482c6761",
+      "height": 12245509,
+      "time": "2025-08-12T00:10:51.000Z",
+      "escrows": [
+        {
+          "ref": "a7a1562804288c3832587ea12e97f0411a17993025619f0eeaa4b1d16d1d3b6c#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "3940fbe0b2586a193ee71440677632e0e210a82f37240d94518707568b2f9315",
+      "height": 12245469,
+      "time": "2025-08-11T23:56:53.000Z",
+      "escrows": [
+        {
+          "ref": "50f72cf9376c5b9eb874da2c15084c0c42c9f70a4749e9276e89d8d2576d45e8#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "3a0242386a06d572b29849852051a11e93f28b65105614ee3e372c1cfa724829",
+      "height": 12245071,
+      "time": "2025-08-11T21:40:40.000Z",
+      "escrows": [
+        {
+          "ref": "47c64cc78faba26e3ae657398f75c9ba6813d55eaac6a2d92ea200f40247b0e9#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "3d280779717f1b94f24af47f2c10300db2747b192d435faf040aaf92e60c8188",
+      "height": 12245063,
+      "time": "2025-08-11T21:38:07.000Z",
+      "escrows": [
+        {
+          "ref": "e0072878da05fa00543a5c3a3db806a2980b87036b86ec5acaed0eec0b129003#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "3d6cb91b70e525eb4d3bd916c03325af566d4caeb22265d48a5d3f52001d875c",
+      "height": 12245313,
+      "time": "2025-08-11T23:07:52.000Z",
+      "escrows": [
+        {
+          "ref": "bd3ea2fbfd457c342f6e23e5279f94743e0c5dc48dff8bb4c4723bbe4903b680#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "c792b5c801b0a699f53a67a4352a912bb140d417e8e00af6ffa85faa"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "3ecc3c5e85431db8f53225fced1eec1de7ef3c4aa154db28252ca9df6017e155",
+      "height": 12245454,
+      "time": "2025-08-11T23:52:28.000Z",
+      "escrows": [
+        {
+          "ref": "c3949644c3d6034655a571b24ac7f70a4534e0d9ea49fe95708a61cc97efcc5d#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "4170d137472acf7ffccb0dd37be45d8b695b4601a63089e7bd498268fcb6df76",
+      "height": 12245465,
+      "time": "2025-08-11T23:56:12.000Z",
+      "escrows": [
+        {
+          "ref": "4ffff2981104dcae5ebd8bd96fbf897f765c80a992e31004bfea7c8c7d37daf1#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "32fc10a486d5fbb3cc504437644521a65532a589bd5874a06a16fb77"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "42c32f890a74ce2a1567996b0ed017ba5ccfd21738b1324704bc5a62682f2763",
+      "height": 12245172,
+      "time": "2025-08-11T22:22:01.000Z",
+      "escrows": [
+        {
+          "ref": "891bc0bda408e9ee2587e877ecd20261f651a5a2ed5588758c9088d167ba859a#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "42c9704a2bac8e912bfbea1940f65fec320e57fd327e508c977fc5de435aabb8",
+      "height": 12245389,
+      "time": "2025-08-11T23:34:01.000Z",
+      "escrows": [
+        {
+          "ref": "06d6726a082d8375dbabace583571217766962a0fae224d467b9392b8d32c491#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "4ffc9f9b84ae682b6611007d1e86cd746c3019d6b5886a020f190ccc26435d93",
+      "height": 12448279,
+      "time": "2025-09-28T12:53:45.000Z",
+      "escrows": [
+        {
+          "ref": "dc9ee58117a6708e757dbdde14fe4b38baba01a02fd60538a8b2c8ecb8934205#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "58f3713d9777c4d6c7ed293d75b93845889e81f4b9b84f28036e3d34a25e81e2",
+      "height": 12245487,
+      "time": "2025-08-12T00:02:26.000Z",
+      "escrows": [
+        {
+          "ref": "a6ad9e977a5590b23e5c300fc19c3179db2ac8c05b536c1f2d3dbb09ab600c83#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "5aa9c26234be0bd90f570d653a76b42cfe35f67e9be75cfb25888172ad0c7d6e",
+      "height": 12245482,
+      "time": "2025-08-12T00:00:48.000Z",
+      "escrows": [
+        {
+          "ref": "9b6d9ca1aab05263912741087ac2f73b232fd6520224e94a25c63b0a552b86dd#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "5aba20fc5ead0daec041aa07f585eb7e434f50cd393f70433ef10276585d3bba",
+      "height": 12245445,
+      "time": "2025-08-11T23:50:46.000Z",
+      "escrows": [
+        {
+          "ref": "e068569f4fcef8d8bd26680965199a84592c242d26e51119cdd276b81d6231bd#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "607e17c609d60dd8e3f330abab9083f76693c1a1ae65b800427aae52ffcbec87",
+      "height": 12245338,
+      "time": "2025-08-11T23:13:45.000Z",
+      "escrows": [
+        {
+          "ref": "fef132b3a80e8d2545ebb5e1843c7a307f0957f67840753006c4852977c1cca2#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "c792b5c801b0a699f53a67a4352a912bb140d417e8e00af6ffa85faa"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754011"
+      },
+      "seller": {},
+      "neither": {
+        "lovelace": "-1",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "65302a232f13b38fefafc610e969161f2b812505d91ff878e0897c856599d9ee",
+      "height": 12245125,
+      "time": "2025-08-11T22:07:19.000Z",
+      "escrows": [
+        {
+          "ref": "ca9ec09cd82f95956cebb1400c6774962c6e0eeb7bceb158e0de27366d615e98#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "673a7f95b5162dc903cf6893fb2610467ea3acd79b4116d6faf7cc4c8b31b945",
+      "height": 12245507,
+      "time": "2025-08-12T00:10:13.000Z",
+      "escrows": [
+        {
+          "ref": "672797b49bd9af349536eed7b9cad54392c10797bf4fa949dd58d139c5c9f77b#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "673e0a9e5769ee2eb8deb2877d1d32cbb78df32db975cec45a4cb75eff4257c7",
+      "height": 12245373,
+      "time": "2025-08-11T23:28:12.000Z",
+      "escrows": [
+        {
+          "ref": "493029e96ba343faebe97be55013d06779999e08351fc9c8bb85e118da8f50df#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "6940d290e34f0209f49a4787f05ed40caf6c5a079599dce944bb639c7b15cd3f",
+      "height": 12245504,
+      "time": "2025-08-12T00:09:43.000Z",
+      "escrows": [
+        {
+          "ref": "41dc604b8e0150d731852922fafdd14c22a97190429d4f6382b2f7b8de38202e#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "695e9aec5cf84ac141fd252cd69447caa0f22b72cea356d31225a2c462aa7c8d",
+      "height": 12245110,
+      "time": "2025-08-11T22:01:44.000Z",
+      "escrows": [
+        {
+          "ref": "66065150c4b22028b599fbea86af6880a44e002f49448b8effc22e9bebc33231#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "6a469d215c5e95e475a5114dced4878f29d236bc0fa5073f5a9c0ed99a18ca9a",
+      "height": 12245458,
+      "time": "2025-08-11T23:53:00.000Z",
+      "escrows": [
+        {
+          "ref": "cf9b5478e0102058c5e4923e29619e19a73eb47cf2edd93b7c9453121dba7dd9#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "6b45ae4fcd32ee62f3e2e12c2b1cf956a2d2c4a69e6ee82ed6e715d99eb05d1f",
+      "height": 12245259,
+      "time": "2025-08-11T22:49:54.000Z",
+      "escrows": [
+        {
+          "ref": "b9ef86a954bf9eeadad52c719efe12ef73d0edc83e2b9603b3b0258e65beabea#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      }
+    },
+    {
+      "txHash": "6c2492a5b06623e524e9c7e41006877d9821d88f6de189b494774fed635bb0cd",
+      "height": 12245014,
+      "time": "2025-08-11T21:25:46.000Z",
+      "escrows": [
+        {
+          "ref": "a4b27bf6cd43ba2f6ad31154fd17645f57386b6fd7cc4c425e5cb7893b64b376#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "6c7fa7e925bf61ff90a913169776211adb21a7120f256a17256ccfd7bce88c94",
+      "height": 12245480,
+      "time": "2025-08-12T00:00:17.000Z",
+      "escrows": [
+        {
+          "ref": "5978b34825cf022ef5c7d0047dfd926ea885af40fc50418f77c9e39aa0aa6891#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "6e9174a88f44f191b7a15756fe941fa61138947c20fee061dbbedf04a89a8b1d",
+      "height": 12245041,
+      "time": "2025-08-11T21:32:23.000Z",
+      "escrows": [
+        {
+          "ref": "2af00b6db855573400c869f65738ef61061b9e3ae42bcf78b808c444662a8b12#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "6f47b524442ef140f249877989d3debab42c4896686fae68b71780831313a7ea",
+      "height": 12426395,
+      "time": "2025-09-23T08:40:53.000Z",
+      "escrows": [
+        {
+          "ref": "3436d9cd709c7870623581f903bdb95ca1fac7f8536d00be4fa2c910e0a7359d#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "70030ee0617c098e95b927f7e972782cc5a0ee34a29a918cc436df2cbf7810c5",
+      "height": 12307373,
+      "time": "2025-08-26T10:31:13.000Z",
+      "escrows": [
+        {
+          "ref": "e97a8c2ec32d17118d64f2dd9e92754e6bee17d4ce873505f213cfb627769cd4#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "703c1f5d7f3631774c64a263f6a2c886e83cab689a1ffae1b5bb9315e1ffd7a0",
+      "height": 12704727,
+      "time": "2025-11-27T22:13:38.000Z",
+      "escrows": [
+        {
+          "ref": "26138d6476886e4ac249c87c7338caad5001400156ba0a7e6c741425bc2724d1#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "650572467b98c101528ea159b15cb4ab059317ae1143f991a8b49cce"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "739e244c1d980b3181cd1c77344f3eeabf92001236c3939f95f35a76cb5f8c93",
+      "height": 12448485,
+      "time": "2025-09-28T13:58:40.000Z",
+      "escrows": [
+        {
+          "ref": "fb91f04f0b02350e8b85ffbcb3d007e3955de96cfa2964fcfeb9bbb410291909#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "73e45a1489c91f9261138a43a2376970a48a817dd0ef22f9a14563a7cd4ac65f",
+      "height": 12245024,
+      "time": "2025-08-11T21:28:08.000Z",
+      "escrows": [
+        {
+          "ref": "0f2a6d898af873a85747a6091849b0254a151fe7dae7901c84b27e5e97391214#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "75d9ef5c4a34e37d0d9e3bd1f272cfff103740fb6b519a78fc782ea86a4a79bf",
+      "height": 12245511,
+      "time": "2025-08-12T00:12:42.000Z",
+      "escrows": [
+        {
+          "ref": "f1f5a792f9e569426d14a175917513aba6d3edf8a2a791be1aa07859e44d7d4b#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "7c12d4a00414bb9be7440786a1b9860a85928ab19babdb37b7036d31b69909ee",
+      "height": 12448384,
+      "time": "2025-09-28T13:25:22.000Z",
+      "escrows": [
+        {
+          "ref": "620773b46e237f4a57ef280347b5297feb54d31f976b9f9bd75fe6ba5dc1ffa8#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "7c2cb111787729d0e3a2e907fd006c2b85c6bef45e6757c12e30192ab9fb3442",
+      "height": 12245285,
+      "time": "2025-08-11T22:57:01.000Z",
+      "escrows": [
+        {
+          "ref": "f3b9ecafdaab15d2eba816385855239bfb27eaf358a7897a2a0f09efa3cf08dc#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      }
+    },
+    {
+      "txHash": "7e238ee695e0f61c3f2bb74eda66134448cfd10b345ed59dca65f2a8a5e83998",
+      "height": 12245438,
+      "time": "2025-08-11T23:49:10.000Z",
+      "escrows": [
+        {
+          "ref": "680dd151024236cf30540280f097f28e0ba00941e7ac1a84baf21cf4341b7e10#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "81ab7c9bd7c051b5247fb95da4f3cea0064b3799c03a229cdae92d01e8a3023f",
+      "height": 12245362,
+      "time": "2025-08-11T23:22:48.000Z",
+      "escrows": [
+        {
+          "ref": "9885b5128aaa177e01700bdb659cfb59d9f4e13363862defb103fab63c7741ae#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "9d3684bee0f2da0de4dd2e5f78b84a6fc9ed27c48b7ee9900b573b9e"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      }
+    },
+    {
+      "txHash": "83b86585fb688427935e7e41d0f9dda0f82f00daf0cfd46ee649edbc69cc91cb",
+      "height": 12245256,
+      "time": "2025-08-11T22:49:03.000Z",
+      "escrows": [
+        {
+          "ref": "27c69ae987a8230a7eccef49bb0a724fc65fe900cf51ce45674d299a60f27239#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      }
+    },
+    {
+      "txHash": "843ad2804cb304354826068fb4a16eada29d5e3d5ad01b496a26e607da51095c",
+      "height": 12245136,
+      "time": "2025-08-11T22:11:36.000Z",
+      "escrows": [
+        {
+          "ref": "8d124b16d30252f755212ac461d31b803ea1cbc918558ba7c672e68246f0f80d#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "8bb036ac88bb1fbea0f3f1e201cecec82db0716c8a2e82263b71ca2219a36a3d",
+      "height": 12245464,
+      "time": "2025-08-11T23:55:02.000Z",
+      "escrows": [
+        {
+          "ref": "79b2368d270092db98e92e522d72aa36bbef4a62b244c63be6673199698f15d8#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "8d8306928694b4e2daa9fb8817c282ff55e7da82856da89e9046029c1f099a98",
+      "height": 12245074,
+      "time": "2025-08-11T21:42:28.000Z",
+      "escrows": [
+        {
+          "ref": "71579820b0004806df1492a37d5d0cf96cbc8147fe59598e1a5d73db6c973628#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "9366aa25a779c134b156c932e31af38cdb81b9f6c8991d78745d92fbb45365ed",
+      "height": 12245288,
+      "time": "2025-08-11T22:57:50.000Z",
+      "escrows": [
+        {
+          "ref": "9b8da46d2af0c3ee79f7d5b6e5f3732dca701d78dc9b8b1f4ee8aabd54c69616#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "c792b5c801b0a699f53a67a4352a912bb140d417e8e00af6ffa85faa"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "93977b6cb61b29bfb2fb5260a63b2355cbcf77b7c844f2ac2303e167bec28333",
+      "height": 12245345,
+      "time": "2025-08-11T23:14:57.000Z",
+      "escrows": [
+        {
+          "ref": "547c33e9f1a6abbc52bb8eb34a547c2f4cfc8cdf2e251ee464b9798a9474cb18#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "b840312d9625cf18ef330dc99567ec6903082789e28f6675fb53c49f"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "5000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "5000000"
+      }
+    },
+    {
+      "txHash": "939ca63569a265082dc0da487fac3833cc85c1c619d84771d141d9b811fab56f",
+      "height": 12245266,
+      "time": "2025-08-11T22:52:14.000Z",
+      "escrows": [
+        {
+          "ref": "928f4ba9b61845ad2caa369ed214a14c42645b2cbae94d89f62963a04e29b7b5#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      }
+    },
+    {
+      "txHash": "95e992506806068809e8553f1b222c828490afde28926859fadb9b4e03835d6a",
+      "height": 12245501,
+      "time": "2025-08-12T00:08:32.000Z",
+      "escrows": [
+        {
+          "ref": "1d5f271effc8f33eefa6e6b64cbc15502a2d5f797ef5a1d7018b02e1ac885b18#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "9694c3a88437d5f64466aa25ccc271bee5d358c1bba3973507df944aef11c996",
+      "height": 12245142,
+      "time": "2025-08-11T22:13:23.000Z",
+      "escrows": [
+        {
+          "ref": "9178cde1866670d24e7693ac354dce009cd45d100c7292bbec8b30c0456e2998#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "98b8977d23a58dd179ce27c91b82dc8ea9ac1e4a401a80ef40b687f7c77b8172",
+      "height": 12704748,
+      "time": "2025-11-27T22:18:59.000Z",
+      "escrows": [
+        {
+          "ref": "e8ac7a6bb669aa2538d74e6a3ba7276c5a0a14d93afbcb040293c87761a3430f#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "650572467b98c101528ea159b15cb4ab059317ae1143f991a8b49cce"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "99cd62541e1c168629a4922f7518782815384ad98a1ab200122dc22e2605b6e6",
+      "height": 12448424,
+      "time": "2025-09-28T13:37:19.000Z",
+      "escrows": [
+        {
+          "ref": "b2fc19389eaab81c63a23bcee2d84522db5244c2b67840955f2bd6bf8d8bc82f#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "9a1dcd94ef7a9f2d3061292fc100a1715a90d5dfdb97d5b4e98b4a71b3e17de3",
+      "height": 12448269,
+      "time": "2025-09-28T12:50:49.000Z",
+      "escrows": [
+        {
+          "ref": "d152445db56595a5552163bfd354ea6d06e75bf23b9a475d20617050f965b44a#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "a3d0524602477e55f5d2c435982fe1d5ded937fd331ee993518d5ab3a533a37c",
+      "height": 12704752,
+      "time": "2025-11-27T22:21:11.000Z",
+      "escrows": [
+        {
+          "ref": "6b0a5b7f5648fe291428c82584408fd5f482d5067dbb805656346fabd574ab3e#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "2dc55b202f5d0b1074243bf7b1a358a55b85fb3203a53e12418c9317"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "a4f3e8821f538b36873b236ddaa9f50ab7c5a20c4298e05a0af14aefaa20be67",
+      "height": 12376604,
+      "time": "2025-09-11T14:23:31.000Z",
+      "escrows": [
+        {
+          "ref": "b71cb7de5726b75320a04f696a3a1af5402f1d1bb7b093ff54a26510c6199946#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "a50894b7f1fee5180f28a090245825906e09405f01f657e6dee0c86d5effc466",
+      "height": 12704756,
+      "time": "2025-11-27T22:21:56.000Z",
+      "escrows": [
+        {
+          "ref": "db1b293360f7a6f297bd146f1ca679a1e471ab6295e389cbf6dc51a80eabf445#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "650572467b98c101528ea159b15cb4ab059317ae1143f991a8b49cce"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "a782fb5fdf20a6554c0703139493199aa5c7367d3bb533f1021266b7ba965e58",
+      "height": 12245145,
+      "time": "2025-08-11T22:14:44.000Z",
+      "escrows": [
+        {
+          "ref": "d86eaca5f01295d32f41e183234c6646528cb2fea0a73d5b41faad6eb83868ee#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "a907fd6bd2fcf1df23779323c8d97ac68855838b56959de2f85904477435e64e",
+      "height": 12704760,
+      "time": "2025-11-27T22:24:55.000Z",
+      "escrows": [
+        {
+          "ref": "ff17ffaf30e623e123a8cb970ae5b94c6db05e183ab7d6650d084f53f9d13233#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "aacc37e5d6c8bb44f0f3026fcee3cb7d7f671cffc9264710fee53a0f23bc4bbb",
+      "height": 12245308,
+      "time": "2025-08-11T23:05:54.000Z",
+      "escrows": [
+        {
+          "ref": "ab33544476785be1fba00dd49b5d84333d864a1cdd2cda50b90e19739c0d32a2#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "ad635ffd7a82e209af6717d30085075fe2d49618f04bb78ff327dd4dd722ec44",
+      "height": 12245359,
+      "time": "2025-08-11T23:22:17.000Z",
+      "escrows": [
+        {
+          "ref": "40aa96d221e308a5e08a5f3d0c5ae9ecfe8c10aa026eac56517b1c01b9998da1#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      }
+    },
+    {
+      "txHash": "b5d368fedaa7e74d2abf33b39e0114ca88460ca923870e94fc4e6b169274d0c7",
+      "height": 12245477,
+      "time": "2025-08-11T23:59:04.000Z",
+      "escrows": [
+        {
+          "ref": "2e5e1e334a99ceb44701ed5d3c85d2d3b9aa356b0efac1f1184d17496d49f3b1#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "b604574683af69111dba6b6e1c18ab4ae7dce9153a3e2e1c8e65a2a17f28e934",
+      "height": 12426347,
+      "time": "2025-09-23T08:19:54.000Z",
+      "escrows": [
+        {
+          "ref": "97e9bb13f3fdfc0e0d82a79f4d73c5ea043b061326b54a7cdc48e9a5889ff3db#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "b7c8bba6aece45c86aa47a3349a6b78542cc1783fba3d2df65556d34672575fd",
+      "height": 12245369,
+      "time": "2025-08-11T23:25:19.000Z",
+      "escrows": [
+        {
+          "ref": "55d4deb6f492984238ef4813e8c050c22321163388df91a2caa47548be7db2c5#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      }
+    },
+    {
+      "txHash": "b908e257e1b6b7862adebbfd5875048b723b6f7e4fa39f59785acbf813cdd175",
+      "height": 12245355,
+      "time": "2025-08-11T23:19:33.000Z",
+      "escrows": [
+        {
+          "ref": "b457c3396b127f874e28203ee141634c75edec67a9abd3ce8b96d85ed384350b#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "27d619c51b32c33ca24c93f2164af5702ba394864d4fc1dd6fb914b4"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "bbe527b45a4666dba585222004f22c2e63951c538bf2734146fbb3692c8bff92",
+      "height": 12449442,
+      "time": "2025-09-28T19:23:18.000Z",
+      "escrows": [
+        {
+          "ref": "65903c2b48b3521b8bca1c090317bf72fd79f7b114fd9cb77c300d52864163ab#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c0c2675933ff8723bb8ea401381113b85e17b8d4223808699c0c67795e124072",
+      "height": 12245310,
+      "time": "2025-08-11T23:06:45.000Z",
+      "escrows": [
+        {
+          "ref": "b67208690db5c129677a617e7dea08b68496b2939a94512ba7cc6a1dbeecf3a2#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "32fc10a486d5fbb3cc504437644521a65532a589bd5874a06a16fb77"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "c1547afb731ca54b109254311d65dd695060b4957e3b3380336a4161ec6ab883",
+      "height": 12245115,
+      "time": "2025-08-11T22:04:19.000Z",
+      "escrows": [
+        {
+          "ref": "f0360b56d8e9d71a8f7602db6eef91c9343e3a61fe63e03d9ac4aee4a3d6dab2#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c16713f157ac8f008c1eb30dbca68e38d63bdff53c1d719ff98f1f113b50d1cc",
+      "height": 12245137,
+      "time": "2025-08-11T22:11:47.000Z",
+      "escrows": [
+        {
+          "ref": "9176ad992f40f7a88148a7689b8bd2e49bb104741b5157c37ba1a1e1117510ad#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c16f92b06d7881f3d05d60f4a4dd20fd5b7e3914543b80f54e911c6f44278484",
+      "height": 12245261,
+      "time": "2025-08-11T22:50:44.000Z",
+      "escrows": [
+        {
+          "ref": "6bfba3606e8f55da99dd0a1e280d8b79043ffc670e6bdf5cc6a9e3ebe35fb4af#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c2cab249d087b53b5bc748f94b7e25d3721b8c8a82054b3a026016f07809f6b6",
+      "height": 12449260,
+      "time": "2025-09-28T18:10:23.000Z",
+      "escrows": [
+        {
+          "ref": "8c9aa402ff75751e9f6e6f1e15e6d94f289685588b66c5209df989cbab1218b3#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c40122573aae474be99af783ca9ff63148b369397394d1d53e72a3170b920299",
+      "height": 12245252,
+      "time": "2025-08-11T22:47:54.000Z",
+      "escrows": [
+        {
+          "ref": "5dfc9b69afab728023f5ee5161f58a18fe2d8b39aa5676c051c11d47cb631690#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c6169ba2e3f8baecfcb4f81c8997b33a21b02258dc3a754e6540b953ceed92b1",
+      "height": 12245053,
+      "time": "2025-08-11T21:35:47.000Z",
+      "escrows": [
+        {
+          "ref": "ad10e95bbe000e0c79b3bae95b9d25a2805dbf658a3f7a50e1ec68ec939969ee#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "c947a7da7f36b7d1a3746e7cb54de49d201a42262b6adeaa99154a98e6b45843",
+      "height": 12245470,
+      "time": "2025-08-11T23:57:21.000Z",
+      "escrows": [
+        {
+          "ref": "63b35811be55071b8e9a65cb5dcbea13b7afc741ab2742dc36483a8048f8b5ba#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ca6266ddcb207f600ab0176e1f1581ec19fa6fd060356384e4ea6751eb3f8c6f",
+      "height": 12245371,
+      "time": "2025-08-11T23:26:54.000Z",
+      "escrows": [
+        {
+          "ref": "1f722b4cd718c0257f77a0cc0d390b1160165d855ff0935747712ed558cfe3c4#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ca720b4a76c3c294f9f8d60460a44f4a397707cdc33adea451b8619abe3e214e",
+      "height": 12245398,
+      "time": "2025-08-11T23:36:27.000Z",
+      "escrows": [
+        {
+          "ref": "061d2bbf209f88fd3b225f2e528d2ad08fe89df2bf13425fe088dcd0a77d2a38#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "cab3a2a6f1c27cfaf1c37587e84faa92c89a8e6f51b00fa184d067d59f8e7ad3",
+      "height": 12245516,
+      "time": "2025-08-12T00:14:08.000Z",
+      "escrows": [
+        {
+          "ref": "3be7dfd52f70b726b1eda23146db6a0ab11d6a5f8e892f64dd12dec8586de408#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "cd4eb893a4b7bb2ed12667f1a002d729d4ea00d0e26ef53347ee7e12e70d2c92",
+      "height": 12449459,
+      "time": "2025-09-28T19:29:59.000Z",
+      "escrows": [
+        {
+          "ref": "a41e2043533f66f41050f0a4bfad5f1d401ca71dd188c95f01ba8b846e835668#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ce0858a3a68609334594bbf2d0613e0700190c8f506efde5604ec580c325b5ef",
+      "height": 12245046,
+      "time": "2025-08-11T21:34:03.000Z",
+      "escrows": [
+        {
+          "ref": "10874932257b47862389792892b159bdd6b890fb5b9ee27b2cf6cd89ea1ea12d#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ce81866256fd7f9456885e0af0a050d6a0c0cce3fa8d9b54556b9b1f8e761f2f",
+      "height": 12448327,
+      "time": "2025-09-28T13:11:05.000Z",
+      "escrows": [
+        {
+          "ref": "3fc6a00087f9d0bd74ce7a98190fa2f73f42475615b3f68dbcc1ec3cc8812061#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "2dc55b202f5d0b1074243bf7b1a358a55b85fb3203a53e12418c9317"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "cf5794e7dda83ab6defde09ee2b3ed10037ef070c8591129a00fb43f3ef4f0d9",
+      "height": 12245352,
+      "time": "2025-08-11T23:17:12.000Z",
+      "escrows": [
+        {
+          "ref": "b2a4ee636a436661d0a7248dd19ab63b5cd7ae888f0faaf1783336c20ac166ad#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      }
+    },
+    {
+      "txHash": "d7c940447d3ff141f537afe35affdea6b7a9954a428b909dfac78fd46eb76986",
+      "height": 12245364,
+      "time": "2025-08-11T23:23:39.000Z",
+      "escrows": [
+        {
+          "ref": "7ca2a583891e900cc6e18115daab12f15d2c189b5e6ee977a39142cb7ccfe3dc#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      }
+    },
+    {
+      "txHash": "d95c0cfa0a28115055f3ed41aead31d7df8c1dc35e2bd8de29bce360158dee52",
+      "height": 12245484,
+      "time": "2025-08-12T00:01:17.000Z",
+      "escrows": [
+        {
+          "ref": "4b2e74bad1d5a74a7faa65620630d107ebb071eadd2b97a9e9475f8a7adea015#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "053198f1ae72e081ce8e8d1de8324b89550061cd713479dd1ddc1b5d"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "db30e10a42cb135a7c6f2747bacc72bee39cc8a99df5657cc8df95a492a5075c",
+      "height": 12704758,
+      "time": "2025-11-27T22:22:52.000Z",
+      "escrows": [
+        {
+          "ref": "b226c61e662d091262b9a9e7bae507c68206260f31baea5dbfc2c6bf23a612e9#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "650572467b98c101528ea159b15cb4ab059317ae1143f991a8b49cce"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "dc096c1bdc7fc44a2533aeb6974d15c95f11611207d4d74f553468daefa203f1",
+      "height": 12245511,
+      "time": "2025-08-12T00:12:42.000Z",
+      "escrows": [
+        {
+          "ref": "8fab10ca352e97ede7fc034c40e1d166fd7f9ddf25618801db7136b155f3cb69#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "dec0d9439c200ec65b2f2a52558644c963576186fa9242a541fc76ea8a6310b9",
+      "height": 12448410,
+      "time": "2025-09-28T13:31:36.000Z",
+      "escrows": [
+        {
+          "ref": "25fdab577419d2a70270c57a78300160af2f91b373d5a3a72c160ed6eaa8ce7b#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "def359bdae0e30e4a8780a61d87d1f9026d713f7754b81a355bc9480a939d237",
+      "height": 12245367,
+      "time": "2025-08-11T23:25:00.000Z",
+      "escrows": [
+        {
+          "ref": "b10ce142428540310377fb26d3e3f16d0280311859d77256208272b5a8156697#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "3754010",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "3754010"
+      },
+      "seller": {},
+      "neither": {
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      }
+    },
+    {
+      "txHash": "e078924babaca3c1b33b9a2f46e5a1da8b8e101bbd30305d9241ddf6cbc89077",
+      "height": 12449269,
+      "time": "2025-09-28T18:16:05.000Z",
+      "escrows": [
+        {
+          "ref": "2a2711ab4333c797d20612dfba07a45457735106a44d25616086832e0e392f08#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "e24fe5e246421dc8dd679fd2de30e581b28549ce5df4ef5c475bc38483103fdb",
+      "height": 12449278,
+      "time": "2025-09-28T18:22:07.000Z",
+      "escrows": [
+        {
+          "ref": "67860a17f5ba3c1a5e5ea5f980a190889859eef52539130aa780a0dac9cdcfee#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "1000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "e28667c6b7758cb2596b967124eca82c3fadc65b999dea151b5ce271bf475625",
+      "height": 12245139,
+      "time": "2025-08-11T22:13:03.000Z",
+      "escrows": [
+        {
+          "ref": "a55e0da2c93175430f9d36e517349f60b14c662eb48285aaab86f05919c85396#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c25276aa149c135be40f2072a0bd3279fa08a2dac2853558ac293a8"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "6000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "e3e109711432827c6840de8ff9ed38f3a79bf5cd7a018a021b7d8159056bbc09",
+      "height": 12704751,
+      "time": "2025-11-27T22:20:42.000Z",
+      "escrows": [
+        {
+          "ref": "f7c218ca0d0e6523facf69df229e50e9ba89c60ddf152ba2beef29e118438ccf#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "e56721b69eea83c7929995af59fe0df73edccbfc40925cbb192af7f8692f2ac0",
+      "height": 12448417,
+      "time": "2025-09-28T13:34:26.000Z",
+      "escrows": [
+        {
+          "ref": "a0755048f33eb34b19b18e297e3dc85651b90ca278dee82c9f1233ef63632165#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "eaa87883310dde51480479aef945238eff534b59b3a1951004cfed6a6ef3f177",
+      "height": 12448231,
+      "time": "2025-09-28T12:38:01.000Z",
+      "escrows": [
+        {
+          "ref": "fea597bfb4a05f9a1c5adc03cb2c7598632224629aaed5608e7959bd3d04418e#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "2471c4a335f36711b23ae4a19b5b778ed9a130fa6635157f726b55db"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ead687033e2d4b00347a92d6567c47a79f3ec851840c82795a00adff6fad8f21",
+      "height": 12245489,
+      "time": "2025-08-12T00:03:26.000Z",
+      "escrows": [
+        {
+          "ref": "93472aab22c842e3a295ee8220e1b4e5bcc87ebcb8ec3e61e638ffdc4fcdac75#0",
+          "buyer": "98d1fbc32e7063cbc6283d178598818779f36c063b545ce4eab049d2",
+          "seller": "beb1e7af7702e91f1ad919e5949c90e83504938ad2be1afd4f27bf9c"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "4000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "eced9b30a6ec535b3fe612587793e0cea0c5112a9668a146a0dc3f21a3c62e82",
+      "height": 12307377,
+      "time": "2025-08-26T10:32:38.000Z",
+      "escrows": [
+        {
+          "ref": "24ccce4440c144c1d8009b0f127a7d417e1f1bcd50187abe956310bd0167f15c#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "14000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ed49b0f1c567c004afc017a4fa2ca5f5f52e1078d4d95d39385a2618b6a36c70",
+      "height": 12245448,
+      "time": "2025-08-11T23:51:21.000Z",
+      "escrows": [
+        {
+          "ref": "f15a95f43a48fdec386fce255b2f3206ddf06d3bbd024c381158c997b33d3f62#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "cf416110b383012f0820fc6eaad37696346ae9e89565f0abe2670edf"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "8000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "ee3cab61ff475b60755d99549b256523cea7454d91a66559fb9fb7ffdbb4d041",
+      "height": 12704763,
+      "time": "2025-11-27T22:25:09.000Z",
+      "escrows": [
+        {
+          "ref": "3635ffd34d54f269456b3f899665d75a296b1a8213415c532e94421caf477642#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "6c834b85d78061599589a10c890939d7b855620ad460e8c9f5195be6"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "3000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "efdc3dc0b19edd5ba62984297811553bb6798174b1efb57fff1f35ef8dc468f9",
+      "height": 12449196,
+      "time": "2025-09-28T17:52:15.000Z",
+      "escrows": [
+        {
+          "ref": "12e292dd311c97af4cf56ff07c7a102214713c38560ce5d805113e34d2db4ebe#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "f0dc38b0857ecd7623e64a67fa7e004d3c67adb8700834bd3689d4b6df863a26",
+      "height": 12245380,
+      "time": "2025-08-11T23:30:53.000Z",
+      "escrows": [
+        {
+          "ref": "1f9afb5951d2f6ce9779c4f4373fe7c9b7572ffbba2ea2d4d578f5a2f41ae267#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "50b8d8281300d1d3632c7d4a77c4ced68aeecc87eec57e5af67377d5"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "10000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "f39253c9bf0e8b66fc0c15a3f7afce3558431fb621d6de467eb7b0a122509849",
+      "height": 12449411,
+      "time": "2025-09-28T19:13:30.000Z",
+      "escrows": [
+        {
+          "ref": "843f3f0fe735e3424aa623cb5b0aba19affb244290cd604f9e434be5b7a71d21#0",
+          "buyer": "c131b6c521fb0d4422611b4df821e2a70fdf30ab147356b5d5d80d87",
+          "seller": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "f53ec8a42e5f97d27225aad73f3f4f2e5a4ca8b9920855ed78c70e018a0502e2",
+      "height": 12426436,
+      "time": "2025-09-23T08:56:24.000Z",
+      "escrows": [
+        {
+          "ref": "f2c5f17ca0ed0f9c8e07e09737f6410b5c0959cd9259e20d42c75d90d134a6a3#0",
+          "buyer": "e5efa8e8ee2c02fdf1fec7df2bd5799919ac41f1986ed963637b3508",
+          "seller": "fd3c539d73eb16558a548d6008bf8492111edd0a2c7555e7c354e04a"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    },
+    {
+      "txHash": "f8914a5198a4f4402ffc93ec48468b43989ad248992dbd98a7610bb39f02c306",
+      "height": 12449467,
+      "time": "2025-09-28T19:32:28.000Z",
+      "escrows": [
+        {
+          "ref": "83fdaaef01ebdc07b9b8e8d33c6e67cbc2bd6aa05fbb843803b2dd4d440eb41c#0",
+          "buyer": "296c7c38f357136b41626dcad93aa6f45ea7495fcc6ef871de22a036",
+          "seller": "b6a4dd0012febb08a87ca114b7127c51cd52901d6cc249b0551d17f3"
+        }
+      ],
+      "pot": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "validContract": true,
+      "buyer": {
+        "lovelace": "4029850",
+        "c48cbb3d5e57ed56e276bc45f99ab39abe94e6cd7ac39fb402da47ad0014df105553444d": "2000000"
+      },
+      "seller": {},
+      "neither": {}
+    }
+  ]
+}
