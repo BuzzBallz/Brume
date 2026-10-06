@@ -91,9 +91,9 @@ flowchart LR
 
 **Contracts.** None written. Target: deployed V1 validator (`bd2adb68…6c0`, same hash on preprod and mainnet). Redeemers `0 Withdraw · 1 SetRefundRequested · 2 UnSetRefundRequested · 3 WithdrawRefund · 4 WithdrawDisputed · 5 SubmitResult · 6 AuthorizeRefund`. Demo path 1 → 6 → 3; fallback 2 → 0.
 **Datum: 16 fields, in order** (SPEC-TRANSACTIONS §0): 0 buyer (Address) · 1 seller (Address) · 2 reference_key · 3 reference_signature · 4 seller_nonce · 5 buyer_nonce · 6 collateral_return_lovelace · 7 input_hash · 8 result_hash · 9 pay_by_time · 10 submit_result_time · 11 unlock_time · 12 external_dispute_unlock_time · 13 seller_cooldown_time · 14 buyer_cooldown_time · 15 state. Public examples use 11 fields, so their indices are wrong. `buyer`/`seller` are nested Address constructors, times in ms. Redeemers are bare constructors, no fields.
-**Every tx** through one helper: validity window ≈ now − 150 s / now + 150 s (each nudged one slot outward, converted to slots); continuation datums write cooldowns at ≈ now + 35 min, never the computed minimum (`current_time` = upper bound feeds the cooldown); collateral provided; explicit lower bound on `must_start_after` branches, strict `must_end_before`, signer in required signers, one escrow input, ≤ 1 escrow output, no reference script; preprod-only guard.
+**Every tx** through one helper: default validity window ≈ now − 150 s / now + 150 s (each nudged one slot outward, converted to slots); continuation datums write cooldown = **the tx upper bound + 35 min**, never the computed minimum and never relative to now (`current_time` = upper bound feeds the cooldown); pre-signed legs carry their own window (leg 1 upper ≈ now + 20 min, `leg2.validToMs` > `leg1.validToMs` + confirmation margin), same cooldown rule; collateral provided; explicit lower bound on `must_start_after` branches, strict `must_end_before`, signer in required signers, one escrow input, ≤ 1 escrow output, no reference script; preprod-only guard.
 
-**Leg-2 construction (A confirms at 18:00).** Leg 2 spends the leg-1 output + a fee/collateral input owned by the **seller**; required signer = buyer; buyer signs first, seller adds its witness later. Legs submitted chained, back to back, same node: favourable, not a guarantee (S-1 measures).
+**Leg-2 construction (A confirms at 18:00).** Leg 2 spends the leg-1 output + a fee/collateral input owned by the **seller**; required signer = buyer; buyer signs first, seller adds its witness later. **The first mover signs leg 1 only inside `submit()`**, after verifying the counterparty's witness on leg 2 (in the CBOR, not `signedBy`) and that leg 2 spends `leg1.txHash#idx`; a Proposal or file never carries a signed leg 1, or its holder could submit the concession alone. Path A mirrored (buyer is the first mover, seller pre-signs Withdraw, buyer-owned funding inputs). Legs submitted chained, back to back, same node: favourable, not a guarantee (S-1 measures).
 
 **Signature path.** Guaranteed: file drop. The UI writes `proposal.json` / unsigned tx; each party signs with `pnpm sign --role buyer|seller <file>`; the UI picks up the signed file. Upgrade: CIP-30 (S-3). For the recording both demo wallets are ours (stated in DEMO.md).
 
@@ -110,7 +110,7 @@ flowchart LR
   - A `src/solver`: `solve(SolverInput) → SolverOutput`
   - A `src/preprod`: `prepare(escrowRef, sellerShare) → Proposal`, `sign(role, Proposal) → Proposal`, `submit(Proposal) → TxLogEntry[]`, `tryAnyway(escrowRef, redeemer, role) → TxLogEntry`
 
-**Solver model (A owns).** Fee: path A `floor(q·φ/1000)` every asset, path B 0. Leg-2 defection: path A seller keeps `V − fee − c`, buyer floor `c` lovelace / 0 token; path B buyer keeps `V`, seller floor 0. Reservations: `r_s = 0` (0/120); `r_b = π_a·(1 − e^(−λ̄H))`, `π` = ADA 100 % / token 73.6 %, `λ̄ = ln 20 / T`, `H` ∈ {7, 30, 90} d. Front-run probability `p` shown at worst case until S-1 measures it. Output per unit of V, never dollars.
+**Solver model (A owns).** Fee: path A `floor(q·φ/1000)` every asset, path B 0. Leg-2 defection: path A seller keeps `V − fee − c`, buyer floor `c` lovelace / 0 token; path B buyer keeps `V`, seller floor 0. Reservations: `r_s = 0` (0/120); `r_b = π_a·(1 − e^(−λ̄H))`, `π` = ADA 100 % / token 73.6 %, `λ̄ = ln 20 / T`, `H` ∈ {7, 30, 90} d. Front-run probability `p` shown at worst case until S-1 measures it. Output per unit of V, never dollars. Bands are per path (`SolverOutput.path`): path B per-unit max = 1 − r_b; path A pot = V − fee and the buyer keeps ≥ c lovelace, so per-unit max = 1 − φ/1000 − r_b and lovelace max ≤ (V_l − fee_l − c)/V_l. A band can be infeasible (`feasible: false`) and path A may need a `topUp`. The share reaching neither party in arbitration is a solver term only, never an output field (§3 WON'T).
 
 ## 5. Streams — zero file overlap
 
@@ -138,7 +138,7 @@ Solver moved to A (quant home ground, balances load now that B carries the agent
 **M1 — Ugly end-to-end · Tue 13:00 → Wed 00:00 · spike gate 18:00**
 - [ ] A1 tx helper + preprod guard [opus/high] — no tx without upper bound (test)
 - [ ] A2 **spike by 18:00** [opus/high, ultrathink] — SPEC §5 part 5. Fail → path A
-- [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice
+- [ ] A3 fixture + bank [sonnet/high] — target state < 5 min, twice — incl. 2 bank escrows locked to B's wallet 1 (buyer) / wallet 2 (seller) from DEMO.md, so B can run the settle and the video on B's machine
 - [ ] A4 engine [sonnet/high + contract-reviewer] — all redeemer × role tested; one predicted refusal refused on preprod
 - [ ] A5 `prepare/sign/submit/tryAnyway` + `pnpm sign` file drop [sonnet/high]
 - [x] B1 read layer [sonnet/medium] — forced 429 retried and counted; nonexistent ref → 0 rows
@@ -198,9 +198,11 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 ## 10. Open questions and decisions
 
 **Open**
-- Q-F Which escrow does Sokosumi preprod pay into, V1 or V2? (Alexandre asking the marketplace creator.) Build against V1 either way.
+- Q-F Which escrow does Sokosumi preprod pay into, V1 or V2? (Alexandre asking the marketplace creator.) Build against V1 either way. **Probably V2** (B, 6 Oct): the Masumi payment service's default seed installs Web3CardanoV2; V1 only with `SEED_V1_LEGACY=true`. If confirmed, R-6 applies: the literal recursion line is dropped from the pitch.
 - Q-C Seller preprod wallet funded (dispenser), in ≥ 2 independent UTxOs (A2 two-UTxO rule)?
 - Q-K (A raises, B decides with A) K45 / C14 look wrong: the deployed V1 bytes ARE reproduced (see "Measured 6 Oct" below). Wording rule unchanged until the team agrees: "the validator's source says" until a guard has run on preprod.
+
+- Q-R (A raises; from the guard table, R4, not yet exercised) SPEC-VALIDATOR §5 says path A's leg 1 is reversible and keeps arbitration reachable. Past `unlock_time` (all 61 live disputed escrows) neither holds: `SetRefundRequested` needs upper < `unlock_time`, and after `UnSetRefundRequested` the state is `ResultSubmitted`, not `Disputed`. So pre-signing is as mandatory on path A as on path B. Path A bank escrows must be past `unlock_time` and past `buyer_cooldown_time` (≈ 35 min after the dispute). Correct before the solver or the pitch cites reversibility.
 
 **Measured 6 Oct (A, read-only)**
 - Q-H settled: preprod slot = 86400 + (POSIX s − 1655769600), 1 s slots. Koios preprod tip block 5259347: `abs_slot − (block_time − 1655769600) = 86400`, 0 s error; epoch 317 / epoch_slot 276622 consistent.
@@ -228,10 +230,11 @@ Mocks only in `shared/mock/*.mock.json`, each listed in the README.
 
 | When (SGT) | Change | By | Agreed |
 |---|---|---|---|
-| Tue 13:05 | `types.ts`: `Params` type; `Reach` takes `params` (as §4 already says) — our own deployment has other admins | A | pending B |
-| Tue 13:05 | `types.ts`: `Proposal` gets `path`, `payout` (exact amounts) and `Leg {redeemer, cborHex, txHash, validFromMs, validToMs, inputs}` (additive: `txHash`, `signedBy`, `sellerShare` unchanged for the UI). `signedBy` is UI state only: `submit()` verifies the witnesses inside the CBOR | A | pending B |
-| Tue 13:05 | `types.ts`: solver per asset — `SolverInput.sellerArbShare`; `Band.perUnit` (r_b, r_s, band per unit), `arbitrationLeak`, `frontRunP {used, measured}`; scalar band kept for the UI slider | A | pending B |
-| Tue 13:05 | `types.ts`: `TxLogEntry` gets `network`, `atMs`, `expected?`, `stage?`, `blockHeight?` — a refusal shown on camera must be `stage: 'submit'` | A | pending B |
-| Tue 13:05 | `constants.ts`: `PARAMS` typed `Params`, admin key hashes + fee credentials added, all R5 (§10); `FEE_ADDRESS` per network; `SELLER_ARB_SHARE` | A | pending B |
-| Tue 13:05 | `shared/mock/` proposal, solver, txlog follow the new shapes | A | pending B |
-| Tue 13:05 | `.env.example`: key format stated (`xprv` root key); `.claude/agents/claims-checker.md`: dead 132/131 replaced by the kickoff pin | A | pending B |
+| Tue 13:05 | `types.ts`: `Params` type; `Reach` takes `params` (as §4 already says) — our own deployment has other admins | A | B, 13:30 |
+| Tue 13:05 | `types.ts`: `Proposal` gets `path`, `payout` (exact amounts) and `Leg {redeemer, cborHex, txHash, validFromMs, validToMs, inputs}` (additive: `txHash`, `signedBy`, `sellerShare` unchanged for the UI). `signedBy` is UI state only: `submit()` verifies the witnesses inside the CBOR | A | B, 13:30 |
+| Tue 13:05 | `types.ts`: solver per asset — `SolverInput.sellerArbShare`; `Band.perUnit` (r_b, r_s, band per unit), `arbitrationLeak`, `frontRunP {used, measured}`; scalar band kept for the UI slider | A | B, 13:30 |
+| Tue 13:05 | `types.ts`: `TxLogEntry` gets `network`, `atMs`, `expected?`, `stage?`, `blockHeight?` — a refusal shown on camera must be `stage: 'submit'` | A | B, 13:30 |
+| Tue 13:05 | `constants.ts`: `PARAMS` typed `Params`, admin key hashes + fee credentials added, all R5 (§10); `FEE_ADDRESS` per network; `SELLER_ARB_SHARE` | A | B, 13:30 |
+| Tue 13:05 | `shared/mock/` proposal, solver, txlog follow the new shapes | A | B, 13:30 |
+| Tue 13:05 | `.env.example`: key format stated (`xprv` root key); `.claude/agents/claims-checker.md`: dead 132/131 replaced by the kickoff pin | A | B, 13:30 |
+| Tue 13:25 | after independent review: `SolverOutput.path` + `Band.feasible` + `PathTerms.topUp` (bands differ by path); `arbitrationLeak` removed from the shared output (it would reach the MIP-003 result, §3 WON'T); `TxLogEntry` gets `scriptHash`, `redeemer?`, `role?`, `via?`, `block {height, hash, slot}` (replaces `blockHeight`), `refusal {phase 1\|2, ledgerError}`, `stage` required — only phase 2 is "the validator refuses"; `Reach` documents its window; the first-mover signing rule (§4); `readback.balances?` (B's request) | A | B, 13:40 |

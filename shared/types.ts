@@ -93,35 +93,44 @@ export type SolverInput = {
   horizonsDays: number[]
   frontRunP: number | null // null until 5b measures it; solver shows the worst case
 }
-export type PathTerms = { fee: Value; exposedParty: 'buyer' | 'seller'; exposedFloor: Value; defectorKeeps: Value }
+// topUp: what the exiting party must add from its own inputs (path A when c is most of the ADA: the fee's lovelace).
+export type PathTerms = { fee: Value; exposedParty: 'buyer' | 'seller'; exposedFloor: Value; defectorKeeps: Value; topUp: Value }
 // Everything is per unit of that asset's locked quantity. Assets differ (C9: buyer took 100 % of the ADA, 73.6 % of the token).
 export type UnitTerms = { rBuyer: number; rSeller: number; sellerShareMin: number; sellerShareMax: number }
 export type Band = {
   horizonDays: number
+  feasible: boolean // false when no share satisfies both reservations and the path's output rules
   sellerShareMin: number // scalar band: one share applied to every asset = intersection of the per-unit bands
   sellerShareMax: number
   perUnit: Record<string, UnitTerms>
 }
+// The share that reaches neither party in arbitration stays inside src/solver: never in this output (PLAN §3 WON'T).
 export type SolverOutput = {
   ref: string
+  path: SettlePath // the path the bands are for (SETTLE_PATH); on path A the pot is V − fee and the buyer keeps ≥ c lovelace
   pathA: PathTerms
   pathB: PathTerms
   bands: Band[]
-  arbitrationLeak: Record<string, number> // unit → share reaching neither party in arbitration (1 − buyer − seller)
   frontRunP: { used: number; measured: boolean }
 }
 
 export type TxLogEntry = {
   step: string
   network: Network
+  scriptHash: string // which validator ran: the shared V1 (SCRIPT_HASH) or our own deployment (S-2)
+  redeemer?: Redeemer
+  role?: Role
   txHash: string
   status: 'accepted' | 'refused'
   atMs: number
   expected?: 'accept' | 'refuse' // set on controls: the prediction made before submitting
-  stage?: 'evaluate' | 'submit' | 'confirm' // where the outcome was decided; a validator refusal shown as such must be 'submit'
-  blockHeight?: number // when accepted: the block that pins it
+  stage: 'evaluate' | 'submit' | 'confirm' // where the outcome was decided
+  // phase 2 = the script failed (a validator refusal); phase 1 = a ledger rule (spent input, fee, bounds). Only phase 2 is "the validator refuses".
+  refusal?: { phase: 1 | 2; ledgerError: string }
+  via?: Provider
+  block?: { height: number; hash: string; slot: number } // when accepted: the block that pins it
   error?: string
-  readback?: { provider: Provider; validContract: boolean }
+  readback?: { provider: Provider; validContract: boolean; balances?: { buyer: Value; seller: Value } }
 }
 
 // B = seller first: AuthorizeRefund (leg 1) → WithdrawRefund (leg 2). A = buyer first: UnSetRefundRequested → Withdraw.
@@ -144,6 +153,9 @@ export type Proposal = {
   leg2?: Leg
   signedBy: Role[] // UI state only; submit() verifies the witnesses inside the CBOR, never this field
 }
+// Rule: leg 1 never carries the first mover's witness in a Proposal. The first mover (seller on B, buyer on A) signs leg 1
+// only inside submit(), after checking the counterparty's witness on leg 2; otherwise whoever holds the file could submit
+// the concession alone and never sign the exit.
 
 // MIP-003 job output
 export type JobResult = { escrowRef: string; grid: Grid; solver: SolverOutput; uiUrl: string }
@@ -153,6 +165,7 @@ export type UtxosAt = (net: Network, address: string) => Promise<Read<RawUtxo[]>
 export type UtxoByRef = (net: Network, ref: string) => Promise<Read<RawUtxo | null>>
 export type TipOf = (net: Network) => Promise<Read<Tip>>
 export type DecodeDatum = (cborHex: string) => Datum // throws on malformed
+// reach evaluates the default tx window [nowMs − 150 s, nowMs + 150 s] widened to slot boundaries: the window tryAnyway builds.
 export type Reach = (datum: Datum, value: Value, nowMs: number, params: Params) => Grid
 export type Solve = (input: SolverInput) => SolverOutput
 export type Prepare = (escrowRef: string, sellerShare: number) => Promise<Proposal>
