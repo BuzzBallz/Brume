@@ -43,10 +43,13 @@ async function load(kind, ref, net) {
   return json[kind] ?? json
 }
 
+// The agent answers errors as {"error": "<one readable sentence>"}, shown as is; a 202 (submit) has no body.
 async function post(path, body) {
   const res = await fetch(`/api/${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
-  if (!res.ok) throw new Error(`/api/${path} answered HTTP ${res.status}: ${await res.text()}`)
-  return res.json()
+  const text = await res.text()
+  const json = text && res.headers.get('content-type')?.includes('json') ? JSON.parse(text) : null
+  if (!res.ok) throw new Error(json?.error ?? (text || `/api/${path} answered HTTP ${res.status}`))
+  return json
 }
 
 // The preprod bank has no shared mock: in mock mode it is the escrow the mock proposal targets.
@@ -257,7 +260,8 @@ async function reachView(row) {
 
 /* Settle: SPEC-TRANSACTIONS §4 order, Carbon progress indicator glyphs, GOV.UK task-list statuses */
 
-const signCommand = role => `pnpm sign --role ${role} proposal.json`
+// The agent writes the proposal to out/proposals/<hash>_<index>.json ('#' → '_'); the seller's run also sends both legs.
+const signCommand = (role, ref) => `pnpm sign --role ${role} out/proposals/${ref.replace('#', '_')}.json`
 
 // Live m:ss since the current wait began. Each re-render makes a new span; the old one stops itself once detached.
 function elapsed(wait) {
@@ -347,7 +351,7 @@ function walletSign(wallet, role, ctx) {
 }
 
 function waitingFor(role, ctx) {
-  const cmd = signCommand(role)
+  const cmd = signCommand(role, ctx.row.ref)
   return h('div', { class: 'cmd' },
     h('code', { class: 'mono' }, cmd), copyButton(cmd),
     h('span', { class: 'hint' }, 'Waiting for the signed file', live && elapsed(ctx.wait)),
@@ -378,7 +382,8 @@ function sendButton(row, rerun) {
   const btn = h('button', { class: 'btn primary', type: 'button', disabled: !live, onclick: async () => {
     btn.disabled = true
     btn.textContent = 'Sending…'
-    try { rerun(await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref })) }
+    // The agent answers 202 at once and submits in the background (1–2 min); progress arrives through GET /api/txlog.
+    try { await post(`proposal/${enc(row.ref)}/submit`, { escrowRef: row.ref }); rerun({ submitted: true }) }
     catch (x) { err.hidden = false; err.textContent = x.message; btn.disabled = false; btn.textContent = 'Send both legs' }
   } }, 'Send both legs')
   return h('div', {}, btn, !live && h('span', { class: 'hint' }, 'Runs in live mode'), err)
@@ -405,7 +410,8 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
   const leg1 = entry('leg1')
   const leg2 = entry('leg2')
   const refused = [leg1, leg2].find(e => e?.status === 'refused')
-  const validTo = live && !leg1 && proposal?.leg1?.validToMs // countdown only matters until leg 1 is sent
+  const submitted = !leg1 && !leg2 && wait.submittedAt // 202 received, no leg in the txlog yet: no second Send button
+  const validTo = live && !leg1 && !submitted && proposal?.leg1?.validToMs // countdown only matters until leg 1 is sent
   const validity = validTo ? h('p', { class: 'hint' }, countdown(validTo, () => rerun())) : null
   const steps = [
     { label: 'Buyer raises the dispute', done: ['Disputed', 'RefundRequested'].includes(row.state) || !!proposal,
@@ -423,13 +429,15 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
     { label: `${cap(conceder)} signs the concession (leg 1)`, done: signed(conceder), waiting: `Waiting for ${conceder}`,
       body: signed(conceder) ? [] : [waitingFor(conceder, ctx), validity] },
     { label: `${cap(conceder)} sends both legs`, done: !!(leg1?.block && leg2?.block), error: refused,
-      waiting: leg1 || leg2 ? 'Waiting for confirmation' : 'Ready to send',
+      waiting: leg1 || leg2 ? 'Waiting for confirmation' : submitted ? 'Submitted' : 'Ready to send',
       body: refused
         ? [h('p', {}, `${cap(refusal(refused))}. Start over on the next bank escrow.`)]
         : leg1 || leg2
           ? [[leg1, leg2].filter(Boolean).map(e => h('p', { class: 'hash' }, `${e.step}: `, h('span', { 'data-cue': e.block && `block ${e.step}` }, outcome(e)), ', ',
               h('span', { 'data-cue': `hash ${e.step}` }, txLink(e.txHash))))]
-          : [sendButton(row, rerun), validity] },
+          : submitted
+            ? [h('p', {}, 'Submitted to the agent. Waiting for the first leg to appear on preprod.')]
+            : [sendButton(row, rerun), validity] },
     { label: 'Balances read back from the second indexer', done: !!leg2?.readback, waiting: 'Waiting for read-back',
       body: leg2?.readback ? [
         h('p', {}, `Read back on ${leg2.readback.provider}: ${leg2.readback.validContract ? 'valid contract' : 'contract not valid'}.`),
@@ -444,13 +452,17 @@ function settleSteps(row, proposal, log, rerun, band, wait) {
   return steps
 }
 
-// One escrow's native quantities (DESIGN §10.1). ADA has 6 decimals; other tokens stay in base units until their decimals are pinned in shared/constants.ts.
+// One escrow's native quantities (DESIGN §10.1), in display units. A token missing here stays in base units.
+const DECIMALS = { lovelace: 6, [USDM]: 6, [TUSDM]: 6 } // = DECIMALS in shared/constants.ts (the browser cannot import it)
+
 function qty(unit, q) {
-  if (unit !== 'lovelace') return q.toLocaleString('en')
-  const sign = q < 0n ? '-' : ''
+  const d = DECIMALS[unit]
+  if (d === undefined) return q.toLocaleString('en')
+  const scale = 10n ** BigInt(d)
   const abs = q < 0n ? -q : q
-  return `${sign}${(abs / 1_000_000n).toLocaleString('en')}.${String(abs % 1_000_000n).padStart(6, '0')}`
+  return `${q < 0n ? '-' : ''}${(abs / scale).toLocaleString('en')}.${String(abs % scale).padStart(d, '0')}`
 }
+const unitLabel = unit => DECIMALS[unit] === undefined ? `${assetName(unit)} (base units)` : assetName(unit)
 
 // Carbon data-table pattern. What leg 2 wrote for each party (Proposal.payout) against what the second indexer reads back
 // (readback.balances, taken as the amount each party received from leg 2): the split landed as signed, or it did not.
@@ -462,7 +474,7 @@ function renderBalances(written, readBack) {
       const cue = col => `amount ${party} ${unit} ${col}`
       return h('tr', {},
         h('td', {}, cap(party)),
-        h('td', {}, unit === 'lovelace' ? 'ADA' : `${assetName(unit)} (base units)`),
+        h('td', {}, unitLabel(unit)),
         h('td', { class: 'num mono', 'data-cue': cue('written') }, qty(unit, w)),
         h('td', { class: 'num mono', 'data-cue': cue('read') }, qty(unit, r)),
         h('td', { class: w === r ? 'match ok' : 'match off' }, w === r ? 'Matches' : 'Differs'))
@@ -542,7 +554,6 @@ async function settleView(row) {
   const panel = h('div', { class: 'settle' })
   const solver = await load('solver', row.ref)
   const band = solver.ref === row.ref ? solver.bands.find(b => b.horizonDays === 30 && b.feasible !== false) : null
-  let sent = [] // the submit response, shown while GET /api/txlog has nothing for this escrow
   let shown = null // label of the step last scrolled into view
   const wait = { label: null, since: Date.now(), busy: false, errors: {} } // elapsed counter, wallet in progress, wallet errors per role
   let timer = 0 // one polling chain per panel, whoever triggers the re-render
@@ -553,10 +564,9 @@ async function settleView(row) {
     if (wait.busy && Date.now() - wait.busySince < 60_000) timer = setTimeout(poll, POLL_MS)
     else rerun().catch(() => { if (panel.isConnected) timer = setTimeout(poll, POLL_MS) }) // a failed read retries next cycle
   }
-  const rerun = async justSent => {
-    if (Array.isArray(justSent)) sent = justSent
-    const [proposal, fetched] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
-    const log = fetched.length ? fetched : sent
+  const rerun = async ({ submitted } = {}) => {
+    if (submitted) wait.submittedAt = Date.now()
+    const [proposal, log] = await Promise.all([load('proposal', row.ref), load('txlog', row.ref)])
     const mine = proposal?.escrowRef === row.ref ? proposal : null
     const steps = settleSteps(row, mine, log, rerun, band, wait)
     const waiting = steps.find(s => !s.done)?.label ?? null
@@ -571,10 +581,11 @@ async function settleView(row) {
     const label = now?.querySelector('.step-label').textContent ?? null
     if (now && label !== shown) requestAnimationFrame(() => now.scrollIntoView({ block: 'nearest' })) // only when the step changes, so polling never yanks the scroll
     shown = label
-    const waitingOnSignature = mine && (!mine.signedBy.includes('buyer') || !mine.signedBy.includes('seller'))
-    const confirming = mine && [mine.leg1, mine.leg2].some(leg => leg && log.some(e => e.txHash === leg.txHash && pending(e)))
+    // Poll until the flow ends: signatures dropped by file, a send made outside the page (the seller's pnpm sign sends both legs),
+    // the background submit, the blocks, the read-back. A refusal or an expired leg 1 stops it.
+    const ended = steps.every(s => s.done) || steps.some(s => s.error)
     clearTimeout(timer)
-    if (live && (waitingOnSignature || confirming)) timer = setTimeout(poll, POLL_MS) // picks up a dropped signature file, then the blocks
+    if (live && mine && !ended) timer = setTimeout(poll, POLL_MS)
   }
   await rerun()
   return panel
@@ -591,7 +602,7 @@ function perAsset(terms, value) {
   return units.map(u => {
     const q = Number(terms[u] ?? 0)
     if (value?.[u]) return q === 0 ? `nothing of the ${assetName(u)}` : `${pct(q / Number(value[u]))} of the ${assetName(u)}`
-    return `${q.toLocaleString('en')} ${u === 'lovelace' ? 'lovelace' : `${assetName(u)} base units`}`
+    return `${qty(u, BigInt(terms[u] ?? 0))} ${unitLabel(u)}`
   }).join(', ')
 }
 

@@ -101,7 +101,7 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 
 | Screen / component | PLAN v3 | Notes |
 |---|---|---|
-| Shell: top bar, mode badge, Reset, provenance footer | MUST M-9 | Reset clears UI state and selects the next unused bank escrow (on-chain state cannot be undone; the bank absorbs takes) |
+| Shell: top bar, mode badge, Reset, provenance footer | MUST M-9 | Reset returns to the start of the demo (the first disputed mainnet escrow). A settled bank escrow is spent and drops out of `GET /api/bank`, so the next unused one is always first in the Preprod bank group |
 | Escrow list grouped by network | MUST M-9 | mainnet disputed (read-only) + preprod bank (6–8) with their status |
 | Escrow header: ref, state, network, datum on demand | MUST M-9 | 16-field datum in a disclosure, not on screen by default |
 | Reachability grid + cell popover | MUST M-3, M-9 | 21 verdicts; popover: deciding guards, output rules, rung |
@@ -141,7 +141,7 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 | Step state | Treatment |
 |---|---|
 | not started | hollow circle, ink-2 label |
-| awaiting signature | tan row, the exact command with a Copy button, "Waiting for the signed file" and a live elapsed time; the UI polls the agent |
+| awaiting signature | tan row, the exact command (`pnpm sign --role <role> out/proposals/<hash>_<index>.json`) with a Copy button, "Waiting for the signed file" and a live elapsed time; the UI polls the agent until the flow ends, so a send made outside the page (the seller's `pnpm sign` sends both legs) is picked up |
 | signed | check, the body hash in mono |
 | proposal locked | from the moment leg 2 is signed, the share, fee and validity bounds are read-only and shown with a lock: any change to leg 1 changes its hash and voids leg 2. Changing the split means "Start over" (new proposal, both signatures again) |
 | leg 1 expiring | live countdown on `leg1.validToMs` (about 20 min after prepare) in the signing and send steps |
@@ -155,7 +155,7 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 
 ## 8. Data contract
 
-`shared/types.ts` lands at M0; these are PLAN v3 §4 shapes, re-checked field by field at M0. In live mode the UI calls the agent's API (`src/agent`, built in the back-end session; the routes below are this side's request to it). In read-only mode the same shapes come from `docs/data/*.json`. Routes take the ref as a query parameter (`?ref=`, URL-encoded) because refs contain `#`. Snapshot mode reads `docs/data/<kind>.json`; mock mode reads `shared/mock/*.mock.json` and needs the repo root served (local only). Every response may be the bare object or wrapped under its kind (`{"grid": …}`), as the mocks are.
+`shared/types.ts` lands at M0; these are PLAN v3 §4 shapes, re-checked field by field at M0. In live mode the UI calls the agent's API (`src/agent`, built in the back-end session; the routes below are this side's request to it). In read-only mode the same shapes come from `docs/data/*.json`. Routes take the ref as a query parameter (`?ref=`, URL-encoded) because refs contain `#`. Errors come back as `{"error": "<one readable sentence>"}` and the UI shows the sentence as is. Snapshot mode reads `docs/data/<kind>.json`; mock mode reads `shared/mock/*.mock.json` and needs the repo root served (local only). Every response may be the bare object or wrapped under its kind (`{"grid": …}`), as the mocks are.
 
 **Datum, 16 fields** (SPEC-TRANSACTIONS §0, in order): `buyer`, `seller` (nested addresses), `reference_key`, `reference_signature`, `seller_nonce`, `buyer_nonce`, `collateral_return_lovelace`, `input_hash`, `result_hash`, `pay_by_time`, `submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, `seller_cooldown_time`, `buyer_cooldown_time`, `state`. Times are milliseconds. The header shows `state`, whether `result_hash` is empty, and the four clocks that gate the grid (`submit_result_time`, `unlock_time`, `external_dispute_unlock_time`, both cooldowns) as relative time ("opened 318 days ago") with the UTC timestamp on hover; the rest sits in the datum disclosure.
 
@@ -167,9 +167,9 @@ Left-aligned throughout. List 340 px, detail fills the rest. The view switch sit
 | Try anyway | `TxLogEntry` from `tryAnyway(escrowRef, redeemer, role)` | `POST /api/try` `{escrowRef, redeemer, role}` → `TxLogEntry`; preprod escrows only, never offered on mainnet |
 | Settle | `Proposal {escrowRef, sellerShare, solverBand, leg1?, leg2?, signatures}` from `prepare` / `sign` | `POST /api/proposal` `{escrowRef, sellerShare}`; `GET /api/proposal/<ref, URL-encoded>` polled every 2 s while a signature is missing (404 = no proposal yet) |
 | Wallet signature (S-3) | witness set from `api.signTx(leg.cborHex, true)` | `POST /api/proposal/<ref>/witness` `{role, leg: 1 | 2, witnessSet}` → `witness(proposal, role, leg, witnessSetCbor)` (stream A, A5): the agent merges and verifies the witness, refuses a wrong key or a changed hash. Who signs which leg follows `proposal.path`: on B the buyer signs leg 2, the seller leg 1 and leg 2 (its funding inputs); A is mirrored |
-| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit`; `GET /api/txlog?ref=<ref>` (requested; 404 = no run yet) |
+| Send + balances | `TxLogEntry[]` from `submit(Proposal)`, `readback` | `POST /api/proposal/<ref>/submit` answers 202 and submits in the background (1–2 min): the step shows "Submitted" with no second Send button; progress comes from `GET /api/txlog?ref=<ref>` → `{txlog}` (404 = no run yet), pending then confirmed |
 | Solver | `SolverOutput` | `GET /api/solver?ref=<ref>` |
-| Preprod bank list | `{ref, state}[]` | `GET /api/bank` (requested; 404 = empty bank) |
+| Preprod bank list | `{ref, state}[]` | `GET /api/bank` → `{bank}` (escrows whose buyer and seller are the DEMO.md wallets; a provider hole is an error, never an empty list) |
 | Job result link | `JobResult` (verdict + split + UI link) | `uiUrl` = `…/?escrow=<ref, URL-encoded>`; the UI also accepts the raw `#<index>` landing in the fragment |
 
 **Interface requests** (to propose in PLAN.md with a §11 entry; not applied here):
