@@ -1,0 +1,53 @@
+[
+  {
+    "step": "lock fixture (ResultSubmitted)",
+    "network": "preprod",
+    "scriptHash": "",
+    "txHash": "e83f32f8aa966dcba1391eb5eac2bef36065a5a26699360c79ebf5c4fe1796a3",
+    "atMs": 1791264657882,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259457,
+      "hash": "4596a2bddeb1cce03b2edbb6633ca9d568edbce3417505dd9ec11936555b7651",
+      "slot": 135581467
+    }
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "555a8acc50c9b40f5f4eef11857359ab44754951ed7260ed984d52cd0c89ce93",
+    "atMs": 1791264723583,
+    "via": "koios",
+    "status": "refused",
+    "stage": "submit",
+    "refusal": {
+      "phase": 1,
+      "ledgerError": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (ScriptIntegrityHashMismatch Mismatch (RelEQ) {supplied: SJust (SafeHash \\\"bf9de46fcbbb8179eb7a36fc101486a02915631ab881eef6ecab3301efc63b01\\\"), expected: SJust (SafeHash \\\"76033b2c9cda481f76e457313368b5cc273b42cf365c83743cbeacb21dc40423\\\")} (SJust \\\"\\\\161\\\\130\\\\NUL\\\\NUL\\\\130\\\\216z\\\\128\\\\130\\\\SUB\\\\NUL\\\\ENQ[B\\\\SUB\\\\b\\\\FS\\\\179]\\\\161\\\\STX\\\\153\\\\SOH^\\\\SUB\\\\NUL\\\\SOH\\\\137\\\\180\\\\EM\\\\SOH\\\\164\\\\SOH\\\\SOH\\\\EM\\\\ETX\\\\232\\\\CAN\\\\173\\\\NUL\\\\SOH\\\\EM\\\\ETX\\\\232\\\\EM\\\\234\\\\&5\\\\EOT\\\\SOH\\\\EM+\\\\175\\\\CAN \\\\SUB\\\\NUL\\\\ETX\\\\DC2Y\\\\EM \\\\164\\\\EOT\\\\EM>\\\\128\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\CANd\\\\CANd\\\\EM>\\\\128\\\\CANd\\\\SUB\\\\NUL\\\\SOHp\\\\167\\\\CAN \\\\SUB\\\\NUL\\\\STX\\\\a\\\\130\\\\CAN \\\\EM\\\\240\\\\SYN\\\\EOT\\\\SUB\\\\NUL\\\\SOH\\\\EMJ\\\\CAN\\\\178\\\\NUL\\\\SOH\\\\EMV\\\\135\\\\CAN \\\\SUB\\\\NUL\\\\SOHd5\\\\EM\\\\ETX\\\\SOH\\\\EOT\\\\STX\\\\SUB\\\\NUL\\\\SOHOX\\\\SUB\\\\NUL\\\\SOH\\\\225C\\\\EM\\\\FS\\\\137\\\\&9\\\\ETX\\\\131\\\\EM\\\\ACK\\\\180\\\\EM\\\\ETX\\\\192\\\\CAN9\\\\SUB\\\\NUL\\\\SOHOX\\\\NUL\\\\SOH\\\\SOH\\\\EM\\\\ETX\\\\232\\\\EM\\\\167\\\\169\\\\EOT\\\\STX\\\\EMw\\\\159\\\\EMpS\\\\CANK\\\\SOH\\\\SUB\\\\NUL\\\\r\\\\180d\\\\EMj\\\\143\\\\SOH\\\\EM\\\\202?\\\\EM\\\\STX.\\\\SOH\\\\EM\\\\153\\\\DLE\\\\EM\\\\ETX\\\\232\\\\EM\\\\236\\\\178\\\\SOH\\\\SUB\\\\NUL\\\\STX*G\\\\CAN \\\\SUB\\\\NUL\\\\SOHD\\\\206\\\\CAN \\\\EM;\\\\195\\\\CAN \\\\SUB\\\\NUL\\\\SOH)\\\\DC1\\\\SOH\\\\EM3q\\\\EOT\\\\EMVT\\\\n\\\\EMqG\\\\CANJ\\\\SOH\\\\EMqG\\\\CANJ\\\\SOH\\\\EM\\\\169\\\\NAK\\\\EM\\\\STX(\\\\SOH\\\\EM\\\\174\\\\205\\\\EM\\\\STX\\\\GS\\\\SOH\\\\EM\\\\132<\\\\CAN \\\\SUB\\\\NUL\\\\SOH\\\\n\\\\150\\\\CAN \\\\SUB\\\\NUL\\\\SOH\\\\SUB\\\\170\\\\CAN \\\\EM"
+    },
+    "error": "{\"contents\":{\"contents\":{\"contents\":{\"era\":\"ShelleyBasedEraConway\",\"error\":[\"ConwayUtxowFailure (ScriptIntegrityHashMismatch Mismatch (RelEQ) {supplied: SJust (SafeHash \\\"bf9de46fcbbb8179eb7a36fc101486a02915631ab881eef6ecab3301efc63b01\\\"), expected: SJust (SafeHash \\\"76033b2c9cda481f76e457313368b5cc273b42cf365c83743cbeacb21dc40423\\\")} (SJust \\\"\\\\161\\\\130\\\\NUL\\\\NUL\\\\130\\\\216z\\\\128\\\\130\\\\SUB\\\\NUL\\\\ENQ[B\\\\SUB\\\\b\\\\FS\\\\179]\\\\161\\\\STX\\\\153\\\\SOH^\\\\SUB\\\\NUL\\\\SOH\\\\137\\\\180\\\\EM\\\\SOH\\\\164\\\\SOH\\\\SOH\\\\EM\\\\ETX\\\\232\\\\CAN\\\\173\\\\NUL\\\\SOH\\\\EM\\\\ETX\\\\232\\\\EM\\\\234\\\\&5\\\\EOT\\\\SOH\\\\EM+\\\\175\\\\CAN \\\\SUB\\\\NUL\\\\ETX\\\\DC2Y",
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  },
+  {
+    "step": "SetRefundRequested (buyer raises)",
+    "network": "preprod",
+    "scriptHash": "bd2adb685621e224aae7571cb6bd8f0beb0fdd31875eb3a27feee6c0",
+    "txHash": "6d3b12d47ea116e9512c3e70b26863fa10cc6d5be858fb4446be7789aadbeca0",
+    "atMs": 1791264856127,
+    "via": "koios",
+    "status": "accepted",
+    "stage": "confirm",
+    "block": {
+      "height": 5259468,
+      "hash": "0a3d9e3aabf6e774100e87bcd0686e2062634ff9dbd14294158a1c9e9f787608",
+      "slot": 135581670
+    },
+    "redeemer": "SetRefundRequested",
+    "role": "buyer",
+    "expected": "accept"
+  }
+]
