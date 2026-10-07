@@ -8,6 +8,8 @@ On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with th
 
 TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
+**Demo video (2:44): [youtu.be/4jEcm7x3p30](https://youtu.be/4jEcm7x3p30).** The mathematical annex: [*The paper*](#the-paper).
+
 Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://trademark-delivery-deposits-weights.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
 
 The objections, including the ones the marketplace's own creator put to us in writing, are answered in [*The questions you are about to ask*](#the-questions-you-are-about-to-ask).
@@ -20,7 +22,7 @@ Give it one escrow. It answers three questions.
 2. **Which splits are worth taking?** Bands and break-evens from the measured arbitration history and a bound on the arbiter's rate. Break-evens, never a recommended split.
 3. **How do the two parties execute one?** A transaction pair in which the buyer signs the exit before the seller concedes, so once the seller has conceded, the buyer can no longer refuse the agreed split. Refusing would mean racing it, which we have not measured.
 
-It is built as a MIP-003 agent for the Masumi marketplace (registered on the preprod registry, not yet visible on Sokosumi) and as a web UI over the same engine.
+It runs as a Sokosumi Coworker, approved in the TOKEN2049 event Workspace and paid per Task in test USDM (three paid Tasks collected by the seller, *Sokosumi Coworker* below), as a MIP-003 agent registered on the preprod Masumi registry, and as a web UI over the same engine.
 
 ## What Brume is not
 
@@ -34,7 +36,21 @@ From a disputed escrow, the seller's own `AuthorizeRefund` empties the result ha
 
 **We never split a `Disputed` escrow.** Only `WithdrawDisputed` does that, and it needs the admin keys. We operate on the state the seller's own concession creates.
 
-The full derivation, both theorems, the fee-incidence result and the quantitative model are in [the annex (PDF, 7 pages)](paper/PAPER.pdf), which GitHub renders in the browser. Its LaTeX source is beside it in `paper/PAPER.tex`.
+The full derivation, both theorems, the fee-incidence result and the quantitative model are in *The paper*, just below.
+
+## The paper
+
+**[Negotiated exit from a deployed eUTxO escrow](paper/PAPER.pdf)** (PDF, 7 pages; GitHub renders it in the browser; LaTeX source in [`paper/PAPER.tex`](paper/PAPER.tex)).
+
+The paper derives the deployed validator's guard table from its source, then checks it against the deployed bytecode by submitting transactions on preprod. What it establishes:
+
+- **Arbitration closure.** Once the seller's deadline to deliver has passed, the seller's concession is irreversible and removes arbitration for good: the buyer is then the only party able to move the escrow, and the only branch that takes value out of the script constrains no output.
+- **Almost no split is self-enforcing,** so almost none is reachable by incentives alone.
+- **Every split is reachable by construction,** through a transaction pair whose second leg is signed before the first is submitted.
+- **Fee incidence depends on the exit path.**
+- **The bargaining set is priced from measured arbitration history,** not from assumption.
+
+It also states what the construction does not do: it removes a refusal, it does not remove a race. Sections: setting and notation, the guard table, arbitration closure, fee incidence, self-enforcement, reachability by construction, the bargaining set, what was executed, limitations.
 
 ## The evidence, up front
 
@@ -53,7 +69,7 @@ Others run 60/40, 70/30 and 25/75 (buyer/seller). Every settlement above runs on
 
 ## Who it is for
 
-Agents on Masumi are paid through its escrow contracts: V1 holds the 61 on mainnet, and which version Sokosumi pays into is still open. The 61 belong to a small, closed set of buyers and sellers. The marketplace itself lists 9 vendors, 12 AI coworkers and 41 marketplace agents ([sokosumi.com/vendors](https://www.sokosumi.com/vendors), read 6 Oct 2026). The step where an exit has to work is enterprises buying agent work directly. Brume is hired per job, like any agent; the business we would build on it is basis points on every escrow at creation, priced like a payment guarantee, not a fee on the rare dispute.
+Agents on Masumi are paid through its escrow contracts: V1 holds the 61 on mainnet, and Sokosumi paid our Tasks through V2 (`Web3CardanoV2`), which Brume's settlements do not touch. The 61 belong to a small, closed set of buyers and sellers. The marketplace itself lists 9 vendors, 12 AI coworkers and 41 marketplace agents ([sokosumi.com/vendors](https://www.sokosumi.com/vendors), read 6 Oct 2026). The step where an exit has to work is enterprises buying agent work directly. Brume is hired per job, like any agent; the business we would build on it is basis points on every escrow at creation, priced like a payment guarantee, not a fee on the rare dispute.
 
 This README states what exists today. The status table says what does not.
 
@@ -67,7 +83,7 @@ This README states what exists today. The status table says what does not.
 | UI (`docs/`): list, escrow, grid, settle flow, solver | built over the live agent; `?source=snapshot` for Pages, `?source=mock` for offline building |
 | Reachability engine, solver, preprod bank, two-leg settlement, try anyway (`src/engine`, `src/solver`, `src/preprod`, stream A) | built and run on preprod: 12 logged settles on path B and 5 race runs, see Transactions sent |
 | Masumi payment leg | built; one test purchase completed and withdrawn on preprod, exported to `fixtures/masumi/test-purchase.json` |
-| Listing on preprod Sokosumi | registered on the preprod Masumi registry (agent identifier `67ab0c92c4ac1610895a1c965ee50aba41a8f1513b15240723b3bd0b10623ce443d4137e7acc0839c20c4ba0c022940ab6de665dea00cc8c16000001`; a metadata update replaced `…cc8c16000000`, the identifier the test purchase used); not yet visible on preprod Sokosumi |
+| Sokosumi | Coworker `Brume` (`01a1128d-de6e-700b-b929-c5b4289c2a05`, vendor BuzzBallz) approved in the TOKEN2049 event Workspace (access GRANTED); three paid Tasks completed and collected by the seller, 1 tUSDM net each (*Sokosumi Coworker* below). Masumi registry: agent `67ab0c92…cc8c16000002`, Dynamic pricing, after two metadata updates (the test purchase used `…cc8c16000000`) |
 | Transactions | listed below with hashes and blocks; the full index, the earlier settles included, is `fixtures/preprod/README.md` |
 
 ## Run it
@@ -150,7 +166,7 @@ A provider that rate-limits or fails (HTTP 429 or 5xx) is answered as a 503 hole
 
 ## Sokosumi Coworker
 
-Brume also runs as a private Sokosumi Coworker on preprod: Vendor `BuzzBallz` (`01a1128d-bfce-72c6-82de-a73ffd028a38`), Coworker `Brume` (`01a1128d-de6e-700b-b929-c5b4289c2a05`). A Task names one escrow in its text (`<64-hex tx hash>#<index>`, and "preprod" for a preprod escrow); the worker answers with the same paragraph and JSON as MIP-003 `/start_job`. No model is involved.
+Brume runs as a Sokosumi Coworker on preprod, approved in the TOKEN2049 event Workspace: Vendor `BuzzBallz` (`01a1128d-bfce-72c6-82de-a73ffd028a38`), Coworker `Brume` (`01a1128d-de6e-700b-b929-c5b4289c2a05`). A Task names one escrow in its text (`<64-hex tx hash>#<index>`, and "preprod" for a preprod escrow); the worker answers with the same paragraph and JSON as MIP-003 `/start_job`. No model is involved.
 
 ```
 COWORKER_ID=01a1128d-de6e-700b-b929-c5b4289c2a05 node src/agent/worker.ts   # needs `sokosumi --preprod auth login` and the Coworker runtime key in the CLI vault
