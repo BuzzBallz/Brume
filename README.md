@@ -10,7 +10,7 @@ TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
 **Demo video (2:44): [youtu.be/4jEcm7x3p30](https://youtu.be/4jEcm7x3p30).** The mathematical annex: [*The paper*](#the-paper).
 
-Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://trademark-delivery-deposits-weights.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
+Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://customise-ion-periodic-tone.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
 
 The objections, including the ones the marketplace's own creator put to us in writing, are answered in [*The questions you are about to ask*](#the-questions-you-are-about-to-ask).
 
