@@ -8,6 +8,12 @@ On Cardano mainnet, **61 escrows** of the V1 contract sit in `Disputed`, with th
 
 TOKEN2049 Origins, Cardano track, team BuzzBallz.
 
+**In short.** 61 disputed escrows sit on Cardano mainnet for a median of 333 days because only an absent arbitrator can split them. Brume lets the two parties settle without one, by pre-signing the buyer's exit before the seller concedes.
+- **Shown on preprod:** 12 two-leg settlements, 24 legs, none carrying an admin key. Mainnet is read-only.
+- **Not claimed:** safety against a front-run. It is not measured.
+- **Read:** [the paper (7 pages)](paper/PAPER.pdf) · [the evidence](#the-evidence-up-front) · [what exists and what does not](#status) · [run it](#run-it) · [the objections](#the-questions-you-are-about-to-ask)
+
+
 **Demo video (2:44): [youtu.be/4jEcm7x3p30](https://youtu.be/4jEcm7x3p30).** The mathematical annex: [*The paper*](#the-paper).
 
 Site: [buzzballz.github.io/Brume](https://buzzballz.github.io/Brume/), a snapshot that stays up. Live and read-only while our host runs: [the agent behind its tunnel](https://retrieve-consequence-duncan-ict.trycloudflare.com/), which refuses every write from outside the machine (HTTP 403); its address changes if the tunnel restarts.
